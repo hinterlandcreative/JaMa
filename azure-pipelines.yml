@@ -9,6 +9,6 @@ jobs:
     steps:
     - task: FlutterInstall@0
     - script: |
-        $FlutterToolPath/flutter pub global activate pubspec_verion
+        $(FlutterToolPath)/flutter pub global activate pubspec_verion
       displayName: Install pubver tool.
   
