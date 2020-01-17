@@ -9,6 +9,7 @@ jobs:
     steps:
     - task: FlutterInstall@0
     - script: |
-        $(FlutterToolPath)/flutter pub global activate pubspec_verion
+        export PATH=$PATH:$(FlutterToolPath):$(FlutterToolPath)cache/dart-sdk/bin
+        flutter pub global activate pubspec_version
       displayName: Install pubver tool.
   
