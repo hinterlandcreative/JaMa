@@ -1,0 +1,22 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'macOS-10.13
+
+jobs:
+  -job: Android
+  steps:
+  - task: FlutterInstall@0
+    inputs:
+      channel: 'stable'
+      version: 'latest'
+  - task: Install Pub Ver
+    - script: flutter pub global activate pubspec_verion
+      displayName: Install pubver tool.
+  
