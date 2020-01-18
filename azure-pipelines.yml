@@ -16,15 +16,14 @@ jobs:
         export PATH=$PATH:$(FlutterToolPath):$(FlutterToolPath)/cache/dart-sdk/bin:$(FlutterToolPath)/../.pub-cache/bin/
         echo $PATH
         flutter pub global activate pubspec_version
-        cd $(projectDirectory)
         pubver bump build
       displayName: Install pubver tool.
     - script: |
         git config --global user.email "tk@hinterlandsupply.co"
         git config --global user.name "Azure DevOps CI"
-        git add $(projectDirectory)/pubspec.yaml
+        git add pubspec.yaml
         git commit -m "Updated Automated Build Number [skip ci]"
         git pull origin master --rebase
-        git push origin HEAD:master https://$(username):$(password)@github.com/hinterlandsupplyco/JaMa.git
+        git push origin HEAD:master https://github.com/hinterlandsupplyco/JaMa.git
       displayName: Push Changes.
   
