@@ -1,0 +1,46 @@
+name: jama
+version: 0.0.1+prerelease.1
+description: A new Flutter project.
+environment: 
+  sdk: '>=2.6.0'
+dependencies: 
+  kiwi: ^0.2.0
+  sembast: ^2.1.2
+  path_provider: ^1.5.1
+  rxdart: ^0.23.1
+  tuple: ^1.0.3
+  google_nav_bar: ^1.0.1
+  provider: ^4.0.1
+  intl: ^0.16.1
+  charts_flutter: ^0.8.1
+  quiver: ^2.0.5
+  slider_button: ^0.4.0
+  flutter_circular_slider: ^2.5.0
+  commons: ^0.5.2
+  auto_size_text: ^2.1.0
+  cupertino_icons: ^0.1.2
+  flutter: 
+    sdk: flutter
+  flutter_speed_dial: 
+    git: https://github.com/hinterlandsupplyco/flutter_speed_dial.git
+  date_picker_timeline: 
+    git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
+dev_dependencies: 
+  mockito: ^4.1.1
+  flutter_test: 
+    sdk: flutter
+flutter: 
+  assets: 
+    - graphics/confetti.png
+    - graphics/diamond.png
+    - graphics/notebook.png
+    - graphics/arrow.png
+  fonts: 
+    - 
+      family: Avenir
+      fonts: 
+        - 
+          asset: fonts/Avenir-Heavy.ttf
+        - 
+          asset: fonts/Avenir-Book.ttf
+  uses-material-design: true
