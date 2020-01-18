@@ -19,4 +19,9 @@ jobs:
         cd $(projectDirectory)
         pubver bump build
       displayName: Install pubver tool.
+    - script: |
+      git add $(projectDirectory)/pubspec.yaml
+      git commit -M "Updated Automated Build Number [skip ci]"
+      git pull origin master --rebase
+      git push origin HEAD:master
   
