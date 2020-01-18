@@ -349,6 +349,7 @@ void main() {
         category: TimeCategory(name: "ministry")
       );
       timeData.id = 0xDEADBEEF;
+      timeData.category.id = 1;
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -372,6 +373,7 @@ void main() {
         category: TimeCategory(name: "ministry")
       );
       timeData.id = -1;
+      timeData.category.id = 1;
 
       var dbCollectionMock = DbCollectionMock();
       when(dbCollectionMock.add(timeData)).thenAnswer((_) async => 0xDEADBEEF);
