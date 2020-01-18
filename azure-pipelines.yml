@@ -20,10 +20,10 @@ jobs:
         pubver bump build
       displayName: Install pubver tool.
     - script: |
-        git add $(projectDirectory)/pubspec.yaml
-        git commit -m "Updated Automated Build Number [skip ci]"
         git config --global user.email "tk@hinterlandsupply.co"
         git config --global user.name "Azure DevOps CI"
+        git add $(projectDirectory)/pubspec.yaml
+        git commit -m "Updated Automated Build Number [skip ci]"
         git pull origin master --rebase
         git push origin HEAD:master https://$(username):$(password)@github.com/hinterlandsupplyco/JaMa.git
       displayName: Push Changes.
