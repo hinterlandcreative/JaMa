@@ -1,3 +1,6 @@
+variables:
+  projectDirectory: jama
+
 trigger:
 - master
 
@@ -13,6 +16,7 @@ jobs:
         export PATH=$PATH:$(FlutterToolPath):$(FlutterToolPath)/cache/dart-sdk/bin:$(FlutterToolPath)/../.pub-cache/bin/
         echo $PATH
         flutter pub global activate pubspec_version
+        cd $(projectDirectory)
         pubver bump build
       displayName: Install pubver tool.
   
