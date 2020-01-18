@@ -17,7 +17,17 @@ jobs:
         echo $PATH
         flutter pub global activate pubspec_version
         pubver bump build
-      displayName: Install pubver tool.
+      displayName: Increment build number.
+    - task: FlutterBuild@0
+      inputs:
+        target: 'apk'
+        projectDirectory: '.'
+      displayName: Build Android App.
+    - task: FlutterTest@0
+      inputs:
+        projectDirectory: '.'
+      displayName: Run Unit Tests.
+  
     - script: |
         git config --global user.email "tk@hinterlandsupply.co"
         git config --global user.name "Azure DevOps CI"
@@ -25,5 +35,5 @@ jobs:
         git commit -m "Updated Automated Build Number [skip ci]"
         git pull origin master --rebase
         git push https://$USERNAME:$PASSWORD@github.com/hinterlandsupplyco/JaMa.git HEAD:master
-      displayName: Push Changes.
+      displayName: Push updated pubspec
   
