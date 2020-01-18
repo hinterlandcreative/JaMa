@@ -24,6 +24,6 @@ jobs:
         git add pubspec.yaml
         git commit -m "Updated Automated Build Number [skip ci]"
         git pull origin master --rebase
-        git push origin HEAD:master https://github.com/hinterlandsupplyco/JaMa.git
+        git push origin HEAD:master
       displayName: Push Changes.
   
