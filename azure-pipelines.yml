@@ -23,6 +23,6 @@ jobs:
         git add $(projectDirectory)/pubspec.yaml
         git commit -m "Updated Automated Build Number [skip ci]"
         git pull origin master --rebase
-        git push origin HEAD:master
+        git push origin HEAD:master https://$(username):$(password)@github.com/hinterlandsupplyco/JaMa.git
       displayName: Push Changes.
   
