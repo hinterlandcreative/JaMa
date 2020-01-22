@@ -11,6 +11,7 @@ class AppStyles {
   static Color get primaryTextColor => Colors.black;
   static Color get secondaryTextColor => Colors.white;
   static Color get shadowColor => HexColor.fromHex("#20000000");
+  static Color get speedDialOverlayColor => HexColor.fromHex("#9F9F9F");
 
   // Text Styles
   static TextStyle get heading1 => TextStyle(

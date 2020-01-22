@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:jama/data/models/time_category_model.dart';
+import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:tuple/tuple.dart';
+
+import 'time/time_category_model.dart';
 
 class HomeModel extends ChangeNotifier {
   TimeService _timeService;
@@ -16,6 +20,8 @@ class HomeModel extends ChangeNotifier {
   int _videos = 0;
   int _returnVisits = 0;
   List<GoalModel> _goals = [];
+
+  StreamSubscription<Time> _subscription;
 
   
   UnmodifiableListView<TimeByCategoryModel> get allHours => UnmodifiableListView(_allHours);
@@ -29,7 +35,7 @@ class HomeModel extends ChangeNotifier {
     final container = kiwi.Container();
     _timeService = timeService ?? container.resolve<TimeService>();
 
-    _timeService.timeUpdatedStream.listen((_) => _loadData());
+    _subscription = _timeService.timeUpdatedStream.listen((_) => _loadData());
 
     _loadData();
   }
@@ -79,11 +85,10 @@ class HomeModel extends ChangeNotifier {
     //   )); 
     notifyListeners();
   }
-}
 
-class TimeByCategoryModel {
-  final TimeCategory category;
-  final double time;
-
-  TimeByCategoryModel(this.category, this.time);
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription.cancel();
+  }
 }

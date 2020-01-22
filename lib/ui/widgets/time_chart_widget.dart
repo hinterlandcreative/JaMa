@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/ui/models/home_model.dart';
+import 'package:jama/ui/models/time/time_category_model.dart';
 import 'package:jama/ui/widgets/donut_chart_widget.dart';
 import 'package:quiver/iterables.dart';
+
+import '../../mixins/duration_mixin.dart';
 
 class TimeChartWidget extends DonutChartWidget {
   TimeChartWidget(List<charts.Series> seriesList,
@@ -34,11 +37,13 @@ class TimeChartWidget extends DonutChartWidget {
           values[i].category.name, values[i].time, values[i].category.color));
     }
 
-    final valuesTotal = values.length > 0 ? values.map((x) => x.time).reduce((a, b) => a + b) : 0;
+    final valuesTotal = values.length > 0
+        ? values.map((x) => x.time).reduce((a, b) => a + b)
+        : 0;
 
     if (goal > 0 && (valuesTotal == 0 || valuesTotal < goal)) {
-      data.add(_HoursPerCategorySeries(
-          "amount left", (goal - valuesTotal).toDouble(), HexColor.fromHex("#CEEDF2")));
+      data.add(_HoursPerCategorySeries("amount left",
+          (goal - valuesTotal).toDouble(), HexColor.fromHex("#CEEDF2")));
     }
 
     var series = [
@@ -51,16 +56,9 @@ class TimeChartWidget extends DonutChartWidget {
               charts.ColorUtil.fromDartColor(series.color))
     ];
 
-    int hours = valuesTotal.toInt();
-    int minutes = ((valuesTotal % 1.0) * 60.0).toInt();
-    String totalText = "${hours}h";
-    if(minutes > 0) {
-      totalText += "${minutes}m";
-    }
-
     return TimeChartWidget(series,
         animate: animate,
-        text: totalText,
+        text: Duration(minutes: (valuesTotal * 60.0).toInt()).toShortString(),
         textStyle: textStyle,
         width: width,
         height: height);

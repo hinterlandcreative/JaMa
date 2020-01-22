@@ -9,13 +9,16 @@ import 'package:provider/provider.dart';
 import '../app_styles.dart';
 
 class TimeScreen extends StatelessWidget {
+  final TimeModel model;
   final _formKey = GlobalKey<FormState>();
+
+  TimeScreen([this.model]);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: ChangeNotifierProvider(
-            create: (_) => TimeModel(),
+            create: (_) => model ?? TimeModel(),
             child: Consumer<TimeModel>(
                 builder: (_, model, __) => Container(
                     color: AppStyles.secondaryBackground,

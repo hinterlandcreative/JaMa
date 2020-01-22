@@ -12,7 +12,7 @@ class TimeService {
   DatabaseService _dbService;
   DbCollection _timeCollection;
 
-  final StreamController<Time> _timeUpdatedController = StreamController<Time>();
+  final StreamController<Time> _timeUpdatedController = StreamController<Time>.broadcast();
   final _timeCollectionName = "time";
   final _categoriesCollectionName = "categories";
   Stream<Time> get timeUpdatedStream => _timeUpdatedController.stream;

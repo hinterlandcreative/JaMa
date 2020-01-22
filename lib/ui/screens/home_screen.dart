@@ -1,12 +1,13 @@
+import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:intl/intl.dart';
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/ui/app_styles.dart';
-import 'package:jama/ui/models/goal_model.dart';
 import 'package:jama/ui/models/home_model.dart';
 import 'package:jama/ui/screens/time_screen.dart';
-import 'package:jama/ui/widgets/time_chart_widget.dart';
+import 'package:jama/ui/widgets/goal_widget.dart';
+import 'package:jama/ui/widgets/time_report_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:slider_button/slider_button.dart';
 
@@ -56,26 +57,22 @@ class HomeScreen extends StatelessWidget {
                     height: AppStyles.headerHeight,
                     color: AppStyles.secondaryBackground,
                   ),
-                  Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: AppStyles.topMargin,
-                            left: AppStyles.leftMargin),
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                              "Home",
-                              style: AppStyles.heading1
-                                  .copyWith(color: Colors.white),
-                            ),
-                            Text(DateFormat("MMMM y").format(DateTime.now()),
-                                style: AppStyles.heading4
-                                    .copyWith(color: Colors.white))
-                          ],
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: AppStyles.topMargin,
+                        left: AppStyles.leftMargin),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          "Home",
+                          style: AppStyles.heading1
+                              .copyWith(color: Colors.white),
                         ),
-                      )
-                    ],
+                        Text(DateFormat("MMMM y").format(DateTime.now()),
+                            style: AppStyles.heading4
+                                .copyWith(color: Colors.white))
+                      ],
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(
@@ -91,51 +88,12 @@ class HomeScreen extends StatelessWidget {
                             (AppStyles.timeHeaderBoxHeight / 2) -
                             MediaQuery.of(context).padding.top,
                         left: AppStyles.leftMargin),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          height: AppStyles.timeHeaderBoxHeight,
-                          width: AppStyles.timeHeaderBoxWidth,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: AppStyles.defaultBoxCorner,
-                              boxShadow: [AppStyles.defaultBoxShadow]),
-                          child: Row(
-                            children: <Widget>[
-                              TimeChartWidget.fromTimeSeries(
-                                  model.allHours, model.goalHours,
-                                  width: AppStyles.defaultChartHeight,
-                                  height: AppStyles.defaultChartWidth,
-                                  textStyle: AppStyles.heading2),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                verticalDirection: VerticalDirection.down,
-                                children: <Widget>[
-                                  Text(model.placements.toString(),
-                                      style: AppStyles.heading2),
-                                  Text(
-                                    "placements",
-                                    style: AppStyles.smallTextStyle,
-                                  ),
-                                  Text(model.videos.toString(),
-                                      style: AppStyles.heading2),
-                                  Text(
-                                    "videos",
-                                    style: AppStyles.smallTextStyle,
-                                  ),
-                                  Text(model.returnVisits.toString(),
-                                      style: AppStyles.heading2),
-                                  Text(
-                                    "return visits",
-                                    style: AppStyles.smallTextStyle,
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
+                    child: TimeReportWidget(
+                      allHours: model.allHours,
+                      goalHours: model.goalHours,
+                      placements: model.placements,
+                      videos: model.videos,
+                      returnVisits: model.returnVisits,
                     ),
                   ),
                   Padding(
@@ -151,6 +109,7 @@ class HomeScreen extends StatelessWidget {
                         SliderButton(
                           backgroundColor: AppStyles.secondaryBackground,
                           shimmer: false,
+                          dismissible: false,
                           buttonColor: Colors.white,
                           highlightedColor: Colors.white,
                           baseColor: Colors.white,
@@ -158,6 +117,7 @@ class HomeScreen extends StatelessWidget {
                               (AppStyles.leftMargin * 2),
                           action: () {
                             // TODO: implement send report
+                            infoDialog(context, "sent message");
                           },
                           label: Text(
                               "Send " +
@@ -188,7 +148,9 @@ class HomeScreen extends StatelessWidget {
                                     style: AppStyles.heading4
                                         .copyWith(color: Colors.black),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    // TODO: how to enable goals?
+                                  },
                                 )),
                         )
                       ],
@@ -197,68 +159,6 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class GoalWidget extends StatelessWidget {
-  const GoalWidget({
-    Key key,
-    @required this.goal,
-  }) : super(key: key);
-
-  final GoalModel goal;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 27),
-      child: Container(
-        height: 95,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: AppStyles.defaultBoxCorner,
-            boxShadow: [AppStyles.defaultBoxShadow]),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 16),
-          child: Stack(
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Image(
-                    width: 26,
-                    height: 26,
-                    fit: BoxFit.contain,
-                    image: AssetImage(goal.iconPath),
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image(
-                        width: 15,
-                        height: 30,
-                        image: AssetImage("graphics/arrow.png"),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 40, right: 32),
-                child: Text(
-                  goal.text,
-                  style: AppStyles.heading4,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              )
-            ],
           ),
         ),
       ),

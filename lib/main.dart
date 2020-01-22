@@ -1,5 +1,6 @@
+import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
-import 'package:jama/ui/screens/home_screen.dart';
+import 'package:jama/ui/screens/tabbed_controller_screen.dart';
 
 import 'ioc/dependency_registrar.dart';
 
@@ -13,10 +14,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'JaMa Ministry',
-      home: HomeScreen(),
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'JaMa Ministry',
+        home: TabbedController(),
+      );
   }
 }
 

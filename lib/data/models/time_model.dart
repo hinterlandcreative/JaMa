@@ -22,6 +22,7 @@ class Time extends DTO {
   int videos;
 
   DateTime get formattedDate => DateTime.fromMillisecondsSinceEpoch(date);
+  Duration get duration => Duration(minutes: totalMinutes);
 
   Time(
       {@required this.date,
