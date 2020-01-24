@@ -8,8 +8,19 @@ pool:
   vmImage: 'macOS-10.13'
 
 jobs:
-  - job: Android
+  - job: Build & Test JaMa
     steps:
+    - task: InstallAppleCertificate@2
+      inputs:
+        certSecureFile: 'Hsco_cert.p12'
+        certPwd: '$(privateKeyPassword)'
+        keychain: 'temp'
+      displayName: Installing iOS Certificate
+    - task: InstallAppleProvisioningProfile@1
+      inputs:
+        provisioningProfileLocation: 'secureFiles'
+        provProfileSecureFile: 'HSCO.mobileprovision'
+      displayName: Installing iOS Mobile Provisioning Profile
     - task: FlutterInstall@0
     - script: |
         echo $(FlutterToolPath)
@@ -20,14 +31,21 @@ jobs:
       displayName: Increment build number.
     - task: FlutterBuild@0
       inputs:
-        target: 'apk'
+        target: 'all'
         projectDirectory: '.'
-      displayName: Build Android App.
+      displayName: Build Android & iOS App.
     - task: FlutterTest@0
       inputs:
         projectDirectory: '.'
       displayName: Run Unit Tests.
-  
+    - task: AppStoreRelease@1
+      inputs:
+        serviceEndpoint: 'Apple Store'
+        appIdentifier: 'com.hsco.jama'
+        appType: 'iOS'
+        ipaPath: '**/*.ipa'
+        releaseTrack: 'TestFlight'
+      displayName: Releasing to Alpha Testers
     - script: |
         git config --global user.email "tk@hinterlandsupply.co"
         git config --global user.name "Azure DevOps CI"
