@@ -1,5 +1,5 @@
 name: jama
-version: 0.0.1+prerelease.7
+version: 0.0.1+prerelease.8
 description: A new Flutter project.
 environment: 
   sdk: '>=2.6.0'
