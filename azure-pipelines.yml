@@ -29,10 +29,7 @@ jobs:
         flutter pub global activate pubspec_version
         pubver bump build
       displayName: Increment build number.
-    - task: FlutterBuild@0
-      inputs:
-        target: 'all'
-        projectDirectory: '.'
+    - script: flutter build ios
       displayName: Build Android & iOS App.
     - task: FlutterTest@0
       inputs:
