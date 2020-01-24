@@ -5,7 +5,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'macOS-10.13'
+  vmImage: 'macOS-latest'
 
 jobs:
   - job: Build_And_Test_JaMa
