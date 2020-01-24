@@ -8,7 +8,7 @@ pool:
   vmImage: 'macOS-10.13'
 
 jobs:
-  - job: Build & Test JaMa
+  - job: Build_And_Test_JaMa
     steps:
     - task: InstallAppleCertificate@2
       inputs:
