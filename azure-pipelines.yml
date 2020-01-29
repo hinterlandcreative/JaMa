@@ -54,26 +54,3 @@ jobs:
         git pull origin master --rebase
         git push https://$USERNAME:$PASSWORD@github.com/hinterlandsupplyco/JaMa.git HEAD:master
       displayName: Push updated pubspec
-    - task: Xcode@5
-      inputs:
-        actions: 'archive'
-        configuration: 'Release'
-        sdk: 'iphoneos'
-        packageApp: true
-        exportPath: '$(Agent.BuildDirectory)/output/iphoneos/Release'
-        exportOptions: 'specify'
-        exportMethod: 'app-store'
-        exportTeamId: '9V95PKTXP5'
-        signingOption: 'auto'
-        teamId: '9V95PKTXP5'
-    - task: CopyFiles@2
-      displayName: 'Copy Release Artifact to Temp'
-      inputs:
-        SourceFolder: '$(Agent.BuildDirectory)/build/ios/iphoneos'
-        Contents: '**/*.ipa'
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'jama-$(Build.BuildNumber)'
-        publishLocation: 'Container'
