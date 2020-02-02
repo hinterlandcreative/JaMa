@@ -38,9 +38,9 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
     Container container = Container();
   
     _timeService = timeService ?? container.resolve<TimeService>();
-    _subscription = _timeService.timeUpdatedStream.listen((time) => {
-      if(time.formattedDate.compareTo(startDate) >= 0 && time.formattedDate.compareTo(endDate) <= 0) {
-        loadChildren()
+    _subscription = _timeService.timeUpdatedStream.listen((time) {
+      if(time == null || (time.formattedDate.compareTo(startDate) >= 0 && time.formattedDate.compareTo(endDate) <= 0)) {
+        loadChildren();
       }
     });
   loadChildren();
@@ -90,5 +90,11 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
   void dispose() {
     super.dispose();
     _subscription.cancel();
+  }
+
+  Future deleteTime(Time time) async {
+    await _timeService.deleteTime(time);
+
+    notifyListeners();
   }
 }

@@ -145,6 +145,8 @@ class TimeService {
 
     final collection = await _getTimeCollection();
     await collection.deleteFromDto(timeData);
+
+    _timeUpdatedController.sink.add(null);
   }
 
 
