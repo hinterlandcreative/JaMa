@@ -1,17 +1,20 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:jama/data/core/db/db_collection.dart';
 import 'package:jama/data/core/db/query_package.dart';
 import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/database_service.dart';
 import 'package:jama/ui/app_styles.dart';
-import 'package:kiwi/kiwi.dart';
+import 'package:kiwi/kiwi.dart' as kiwi;
 
 class TimeService {
   DatabaseService _dbService;
   DbCollection _timeCollection;
 
+  // we are not concerned with disposing of this because TimeService is a singleton that 
+  // lasts the entire lifetime of the app.
   final StreamController<Time> _timeUpdatedController = StreamController<Time>.broadcast();
   final _timeCollectionName = "time";
   final _categoriesCollectionName = "categories";
@@ -19,7 +22,7 @@ class TimeService {
 
 
   TimeService([DatabaseService databaseService]) {
-    Container container = Container();
+    var container = kiwi.Container();
 
     _dbService = databaseService ?? container.resolve<DatabaseService>();
   }
@@ -31,16 +34,34 @@ class TimeService {
     var categories =
         await catCollection.getAll((map) => TimeCategory.fromMap(map));
     if (categories.isEmpty) {
-      var defaultCategory = TimeCategory(
-          name: "ministry",
-          description: "Time spent in the minstry.",
-          color: AppStyles.primaryColor);
-      
-      defaultCategory.id = await catCollection.add(defaultCategory);
-      return [defaultCategory];
+      return await _createDefaultCategories(catCollection);
     }
 
     return categories;
+  }
+
+  Future<List<TimeCategory>> _createDefaultCategories(DbCollection catCollection) async {
+    var defaultCategory = TimeCategory(
+      name: "ministry",
+      description: "Time spent in the minstry.",
+      color: AppStyles.primaryColor);
+
+    var ldcCategory = TimeCategory(
+      name: "local design construction",
+      description: "Time spent in ldc support.",
+      color: Colors.yellow
+    );
+
+    var remoteWorkCategory = TimeCategory(
+      name: "remote work",
+      description: "Time spent as a Bethel remote volunteer.",
+      color: Colors.red
+    );
+    
+    defaultCategory.id = await catCollection.add(defaultCategory);
+    ldcCategory.id = await catCollection.add(ldcCategory);
+    remoteWorkCategory.id = await catCollection.add(remoteWorkCategory);
+    return [defaultCategory, ldcCategory, remoteWorkCategory];
   }
 
   Future<DbCollection> _getTimeCollection() async {

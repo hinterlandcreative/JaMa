@@ -6,15 +6,19 @@ import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
+import '../../../mixins/num_mixin.dart';
+
 class TimeModel extends ChangeNotifier {
   int _currentPlacements = 0;
   int _placementsGoal = 0;
   int _videosGoal = 0;
   int _currentVideos = 0;
+  DateTime baseTime;
   Time time;
   int increment = 15;
   String get placementsGoal => _getGoalText(_placementsGoal, _currentPlacements, time.placements);
   String get videosGoal => _getGoalText(_videosGoal, _currentVideos, time.videos);
+  bool get shouldShowGoals => time != null && time.category.id != 1;
 
   List<TimeCategory> _categories = [];
 
@@ -24,9 +28,11 @@ class TimeModel extends ChangeNotifier {
   TimeService _timeService;
 
   TimeModel({Time timeModel, TimeService timeService}) {
+    var now = DateTime.now();
+    baseTime = timeModel == null ? DateTime(now.year, now.month, now.day, now.hour, now.minute.roundTo(increment)) : timeModel.formattedDate;
     time = timeModel ??
         Time(
-            date: DateTime.now().millisecondsSinceEpoch,
+            date: baseTime.millisecondsSinceEpoch,
             totalMinutes: 15,
             category: null);
     final container = kiwi.Container();
@@ -60,7 +66,8 @@ class TimeModel extends ChangeNotifier {
     }
   }
 
-  void setTime(int totalMinutes) {
+  void setTime(DateTime startTime, int totalMinutes) {
+    time.date = DateTime(time.formattedDate.year, time.formattedDate.month, time.formattedDate.day, startTime.hour, startTime.minute).millisecondsSinceEpoch;
     if (time.totalMinutes != totalMinutes) {
       time.totalMinutes = totalMinutes;
       notifyListeners();

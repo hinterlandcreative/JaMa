@@ -34,8 +34,7 @@ class TimeScreen extends StatelessWidget {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.only(
-                                top: AppStyles.topMargin),
+                            padding: EdgeInsets.only(top: AppStyles.topMargin),
                             child: Row(
                               children: <Widget>[
                                 BackButton(
@@ -57,7 +56,8 @@ class TimeScreen extends StatelessWidget {
                               height: AppStyles.headerHeight,
                               child: DatePickerTimeline(
                                 model.time.formattedDate,
-                                inactiveTextColor: AppStyles.lightGrey.withAlpha(80),
+                                inactiveTextColor:
+                                    AppStyles.lightGrey.withAlpha(80),
                                 selectionColor: Colors.white,
                                 onDateChange: (date) {
                                   model.setDate(date);
@@ -66,169 +66,154 @@ class TimeScreen extends StatelessWidget {
                           Padding(
                             padding:
                                 EdgeInsets.only(top: AppStyles.headerHeight),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          top: 20, left: 20, right: 20),
-                                      child:
-                                          TimeSelectionSlider(model: model),
-                                    ),
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(padding: EdgeInsets.only(top: AppStyles.leftMargin),),
+                                  TimeSelectionSlider(model: model),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: AppStyles.leftMargin),
+                                    child: Text("Category", style: AppStyles.heading4),
+                                  ),
+                                  Padding( 
+                                    padding: EdgeInsets.only(left: AppStyles.leftMargin),
+                                    child: Wrap(
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: model.categories
+                                          .map((category) => ChoiceChip(
+                                                label: Text(
+                                                  category.name,
+                                                  style: AppStyles
+                                                      .smallTextStyle
+                                                      .copyWith(
+                                                          color: AppStyles
+                                                              .secondaryTextColor),
+                                                ),
+                                                backgroundColor: category.color
+                                                    .withAlpha(80),
+                                                selectedColor: category.color,
+                                                selected:
+                                                    model.time.category.id ==
+                                                        category.id,
+                                                onSelected: (selected) {
+                                                  if (selected) {
+                                                    model.setCategory(category);
+                                                  }
+                                                },
+                                              ))
+                                          .toList()),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: AppStyles.leftMargin,
+                                        vertical: 10),
+                                    child: Text("Goals",
+                                        style: AppStyles.heading4),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        left: AppStyles.leftMargin),
+                                    child: Row(
                                       children: <Widget>[
+                                        Selector<TimeModel, int>(
+                                            selector: (_, m) =>
+                                                m.time.placements,
+                                            builder: (_, placements, __) =>
+                                                GoalStepper(
+                                                  initialValue: placements,
+                                                  titleText: "placements",
+                                                  goalText:
+                                                      model.placementsGoal,
+                                                  onChanged: (val) =>
+                                                      model.setPlacements(val),
+                                                )),
                                         Padding(
-                                          padding: const EdgeInsets.only(
-                                              top: 20, bottom: 20),
-                                          child: Text("Category",
-                                              style: AppStyles.heading4),
-                                        ),
-                                        ConstrainedBox(
-                                          constraints: BoxConstraints.expand(height: 100, width: MediaQuery.of(context).size.width - 190),
-                                          child: GridView.count(
-                                              crossAxisSpacing: 4,
-                                              crossAxisCount: 2,
-                                              children: model.categories
-                                                  .map((category) => Container(
-                                                    alignment: Alignment.topLeft,
-                                                    child: ChoiceChip(
-                                                          label: Text(
-                                                            category.name,
-                                                            style: AppStyles
-                                                                .smallTextStyle
-                                                                .copyWith(
-                                                                    color: AppStyles
-                                                                        .secondaryTextColor),
-                                                          ),
-                                                          backgroundColor:
-                                                              category.color
-                                                                  .withAlpha(80),
-                                                          selectedColor:
-                                                              category.color,
-                                                          selected: model.time
-                                                                  .category.id ==
-                                                              category.id,
-                                                          onSelected: (selected) {
-                                                            if (selected) {
-                                                              model.setCategory(category);
-                                                            }
-                                                          },
-                                                        ),
-                                                  ))
-                                                  .toList()),
+                                          padding: EdgeInsets.only(
+                                              left: AppStyles.leftMargin),
+                                          child: Selector<TimeModel, int>(
+                                              selector: (_, m) => m.time.videos,
+                                              builder: (_, videos, __) =>
+                                                  GoalStepper(
+                                                    initialValue: videos,
+                                                    titleText: "videos",
+                                                    goalText: model.videosGoal,
+                                                    onChanged: (val) =>
+                                                        model.setVideos(val),
+                                                  )),
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: AppStyles.leftMargin,
-                                      vertical: 10),
-                                  child: Text("Goals",
-                                      style: AppStyles.heading4),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      left: AppStyles.leftMargin),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Selector<TimeModel, int>(
-                                          selector: (_, m) =>
-                                              m.time.placements,
-                                          builder: (_, placements, __) =>
-                                              GoalStepper(
-                                                initialValue: placements,
-                                                titleText: "placements",
-                                                goalText:
-                                                    model.placementsGoal,
-                                                onChanged: (val) =>
-                                                    model.setPlacements(val),
-                                              )),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: AppStyles.leftMargin),
-                                        child: Selector<TimeModel, int>(
-                                            selector: (_, m) => m.time.videos,
-                                            builder: (_, videos, __) =>
-                                                GoalStepper(
-                                                  initialValue: videos,
-                                                  titleText: "videos",
-                                                  goalText: model.videosGoal,
-                                                  onChanged: (val) =>
-                                                      model.setVideos(val),
-                                                )),
-                                      ),
-                                    ],
                                   ),
-                                ),
-                                Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: AppStyles.leftMargin, vertical: 10),
-                                  child: Text("Notes",
-                                      style: AppStyles.heading4),
-                                ),
-                                Padding(
-                                    padding:
-                                        EdgeInsets.all(AppStyles.leftMargin),
-                                    child: Form(
-                                      key: _formKey,
-                                      child: Column(
-                                        children: <Widget>[
-                                          TextFormField(
-                                            onSaved: (notes) =>
-                                                model.setNotes(notes),
-                                          ),
-                                          Container(
-                                            alignment: Alignment.bottomCenter,
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical:
-                                                      AppStyles.leftMargin,
-                                                  horizontal: 0),
-                                              child: SizedBox(
-                                                height: 40,
-                                                width: double.infinity,
-                                                child: FlatButton(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20)),
-                                                  color: AppStyles.primaryColor,
-                                                  child: Text(
-                                                    "save",
-                                                    style: AppStyles.heading2
-                                                        .copyWith(
-                                                            color: AppStyles
-                                                                .secondaryTextColor),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: AppStyles.leftMargin,
+                                        vertical: 10),
+                                    child: Text("Notes",
+                                        style: AppStyles.heading4),
+                                  ),
+                                  Padding(
+                                      padding:
+                                          EdgeInsets.all(AppStyles.leftMargin),
+                                      child: Form(
+                                        key: _formKey,
+                                        child: Column(
+                                          children: <Widget>[
+                                            TextFormField(
+                                              onSaved: (notes) =>
+                                                  model.setNotes(notes),
+                                            ),
+                                            Container(
+                                              alignment: Alignment.bottomCenter,
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical:
+                                                        AppStyles.leftMargin,
+                                                    horizontal: 0),
+                                                child: SizedBox(
+                                                  height: 40,
+                                                  width: double.infinity,
+                                                  child: FlatButton(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20)),
+                                                    color:
+                                                        AppStyles.primaryColor,
+                                                    child: Text(
+                                                      "save",
+                                                      style: AppStyles.heading2
+                                                          .copyWith(
+                                                              color: AppStyles
+                                                                  .secondaryTextColor),
+                                                    ),
+                                                    onPressed: () {
+                                                      _formKey.currentState
+                                                          .save();
+                                                      if (model.time.category ==
+                                                              null ||
+                                                          model.time.category
+                                                                  .id ==
+                                                              -1) {
+                                                        infoDialog(context,
+                                                            "You must select a category for your new time.");
+                                                        return;
+                                                      }
+                                                      model.saveOrUpdate();
+                                                      Navigator.pop(context);
+                                                    },
                                                   ),
-                                                  onPressed: () {
-                                                    _formKey.currentState
-                                                        .save();
-                                                    if (model.time.category == null || model.time.category.id == -1) {
-                                                      infoDialog(context,
-                                                          "You must select a category for your new time.");
-                                                      return;
-                                                    }
-                                                    model.saveOrUpdate();
-                                                    Navigator.pop(context);
-                                                  },
                                                 ),
                                               ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )),
-                              ],
+                                            )
+                                          ],
+                                        ),
+                                      )),
+                                ],
+                              ),
                             ),
                           )
                         ],
