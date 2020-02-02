@@ -16,7 +16,7 @@ dependencies:
   quiver: ^2.0.5
   slider_button: ^0.4.0
   flutter_circular_slider: ^2.5.0
-  commons: ^0.5.2
+  commons: ^0.6.3
   auto_size_text: ^2.1.0
   cupertino_icons: ^0.1.2
   line_icons: ^0.2.0
