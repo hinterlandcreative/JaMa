@@ -65,86 +65,115 @@ class TimeScreen extends StatelessWidget {
                               )),
                           Padding(
                             padding:
-                                EdgeInsets.only(top: AppStyles.headerHeight),
+                                EdgeInsets.only(top: AppStyles.headerHeight, bottom: 50 + MediaQuery.of(context).padding.bottom),
                             child: SingleChildScrollView(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Padding(padding: EdgeInsets.only(top: AppStyles.leftMargin),),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        top: AppStyles.leftMargin),
+                                  ),
                                   TimeSelectionSlider(model: model),
                                   Padding(
-                                    padding: EdgeInsets.only(left: AppStyles.leftMargin),
-                                    child: Text("Category", style: AppStyles.heading4),
-                                  ),
-                                  Padding( 
-                                    padding: EdgeInsets.only(left: AppStyles.leftMargin),
-                                    child: Wrap(
-                                      spacing: 4,
-                                      runSpacing: 4,
-                                      children: model.categories
-                                          .map((category) => ChoiceChip(
-                                                label: Text(
-                                                  category.name,
-                                                  style: AppStyles
-                                                      .smallTextStyle
-                                                      .copyWith(
-                                                          color: AppStyles
-                                                              .secondaryTextColor),
-                                                ),
-                                                backgroundColor: category.color
-                                                    .withAlpha(80),
-                                                selectedColor: category.color,
-                                                selected:
-                                                    model.time.category.id ==
-                                                        category.id,
-                                                onSelected: (selected) {
-                                                  if (selected) {
-                                                    model.setCategory(category);
-                                                  }
-                                                },
-                                              ))
-                                          .toList()),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: AppStyles.leftMargin,
-                                        vertical: 10),
-                                    child: Text("Goals",
+                                    padding: EdgeInsets.only(
+                                        left: AppStyles.leftMargin),
+                                    child: Text("Category",
                                         style: AppStyles.heading4),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(
                                         left: AppStyles.leftMargin),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Selector<TimeModel, int>(
-                                            selector: (_, m) =>
-                                                m.time.placements,
-                                            builder: (_, placements, __) =>
-                                                GoalStepper(
-                                                  initialValue: placements,
-                                                  titleText: "placements",
-                                                  goalText:
-                                                      model.placementsGoal,
-                                                  onChanged: (val) =>
-                                                      model.setPlacements(val),
-                                                )),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: AppStyles.leftMargin),
-                                          child: Selector<TimeModel, int>(
-                                              selector: (_, m) => m.time.videos,
-                                              builder: (_, videos, __) =>
-                                                  GoalStepper(
-                                                    initialValue: videos,
-                                                    titleText: "videos",
-                                                    goalText: model.videosGoal,
-                                                    onChanged: (val) =>
-                                                        model.setVideos(val),
-                                                  )),
-                                        ),
-                                      ],
-                                    ),
+                                    child: Wrap(
+                                        spacing: 4,
+                                        runSpacing: 4,
+                                        children: model.categories
+                                            .map((category) => ChoiceChip(
+                                                  label: Text(
+                                                    category.name,
+                                                    style: AppStyles
+                                                        .smallTextStyle
+                                                        .copyWith(
+                                                            color: AppStyles
+                                                                .secondaryTextColor),
+                                                  ),
+                                                  backgroundColor: category
+                                                      .color
+                                                      .withAlpha(80),
+                                                  selectedColor: category.color,
+                                                  selected:
+                                                      model.time.category.id ==
+                                                          category.id,
+                                                  onSelected: (selected) {
+                                                    if (selected) {
+                                                      model.setCategory(
+                                                          category);
+                                                    }
+                                                  },
+                                                ))
+                                            .toList()),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: AppStyles.leftMargin,
+                                        vertical: 0),
+                                    child: model.shouldHideGoals
+                                        ? null
+                                        : Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 10, bottom: 10),
+                                                child: Text("Goals",
+                                                    style: AppStyles.heading4),
+                                              ),
+                                              Row(
+                                                children: <Widget>[
+                                                  Selector<TimeModel, int>(
+                                                      selector: (_, m) =>
+                                                          m.time.placements,
+                                                      builder:
+                                                          (_, placements, __) =>
+                                                              GoalStepper(
+                                                                initialValue:
+                                                                    placements,
+                                                                titleText:
+                                                                    "placements",
+                                                                goalText: model
+                                                                    .placementsGoal,
+                                                                onChanged:
+                                                                    (val) => model
+                                                                        .setPlacements(
+                                                                            val),
+                                                              )),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: AppStyles
+                                                            .leftMargin),
+                                                    child: Selector<TimeModel,
+                                                            int>(
+                                                        selector: (_, m) =>
+                                                            m.time.videos,
+                                                        builder:
+                                                            (_, videos, __) =>
+                                                                GoalStepper(
+                                                                  initialValue:
+                                                                      videos,
+                                                                  titleText:
+                                                                      "videos",
+                                                                  goalText: model
+                                                                      .videosGoal,
+                                                                  onChanged: (val) =>
+                                                                      model.setVideos(
+                                                                          val),
+                                                                )),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.symmetric(
@@ -164,58 +193,40 @@ class TimeScreen extends StatelessWidget {
                                               onSaved: (notes) =>
                                                   model.setNotes(notes),
                                             ),
-                                            Container(
-                                              alignment: Alignment.bottomCenter,
-                                              child: Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                    vertical:
-                                                        AppStyles.leftMargin,
-                                                    horizontal: 0),
-                                                child: SizedBox(
-                                                  height: 40,
-                                                  width: double.infinity,
-                                                  child: FlatButton(
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20)),
-                                                    color:
-                                                        AppStyles.primaryColor,
-                                                    child: Text(
-                                                      "save",
-                                                      style: AppStyles.heading2
-                                                          .copyWith(
-                                                              color: AppStyles
-                                                                  .secondaryTextColor),
-                                                    ),
-                                                    onPressed: () {
-                                                      _formKey.currentState
-                                                          .save();
-                                                      if (model.time.category ==
-                                                              null ||
-                                                          model.time.category
-                                                                  .id ==
-                                                              -1) {
-                                                        infoDialog(context,
-                                                            "You must select a category for your new time.");
-                                                        return;
-                                                      }
-                                                      model.saveOrUpdate();
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
-                                            )
                                           ],
                                         ),
                                       )),
                                 ],
                               ),
                             ),
-                          )
+                          ),
+                          Positioned(
+                            left: AppStyles.leftMargin,
+                            bottom: 10 + MediaQuery.of(context).padding.bottom,
+                            height: 40,
+                            width: MediaQuery.of(context).size.width - (AppStyles.leftMargin * 2),
+                            child: FlatButton(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                              color: AppStyles.primaryColor,
+                              child: Text(
+                                "save",
+                                style: AppStyles.heading2.copyWith(
+                                    color: AppStyles.secondaryTextColor),
+                              ),
+                              onPressed: () {
+                                _formKey.currentState.save();
+                                if (model.time.category == null ||
+                                    model.time.category.id == -1) {
+                                  infoDialog(context,
+                                      "You must select a category for your new time.");
+                                  return;
+                                }
+                                model.saveOrUpdate();
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     )))));

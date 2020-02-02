@@ -18,7 +18,7 @@ class TimeModel extends ChangeNotifier {
   int increment = 15;
   String get placementsGoal => _getGoalText(_placementsGoal, _currentPlacements, time.placements);
   String get videosGoal => _getGoalText(_videosGoal, _currentVideos, time.videos);
-  bool get shouldShowGoals => time != null && time.category.id != 1;
+  bool get shouldHideGoals => time == null || time.category.id != 1;
 
   List<TimeCategory> _categories = [];
 
@@ -48,7 +48,6 @@ class TimeModel extends ChangeNotifier {
 
   Future _loadData() async {
     _categories = await _timeService.getCategories();
-    _categories.add(TimeCategory(name: "local design construction", color: Colors.yellow));
     if(time.category == null) {
       time.category = _categories[0];
     }
