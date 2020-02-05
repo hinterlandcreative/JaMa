@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:jama/mixins/color_mixin.dart';
-import 'package:jama/ui/models/home_model.dart';
 import 'package:jama/ui/models/time/time_category_model.dart';
 import 'package:jama/ui/widgets/donut_chart_widget.dart';
 import 'package:quiver/iterables.dart';

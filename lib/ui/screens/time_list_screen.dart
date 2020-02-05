@@ -4,7 +4,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_tableview/flutter_tableview.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/ui/models/time/time_collection.dart';
 import 'package:jama/ui/models/time/time_model.dart';

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/semantics.dart';
 import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/collection_base_model.dart';
