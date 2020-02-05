@@ -111,18 +111,13 @@ class TimeScreen extends StatelessWidget {
                                         runSpacing: 4,
                                         children: model.categories
                                             .map((category) => ChoiceChip(
+                                                  avatar: CircleAvatar(backgroundColor: category.color,),
                                                   label: Text(
                                                     category.name,
                                                     style: AppStyles
-                                                        .smallTextStyle
-                                                        .copyWith(
-                                                            color: AppStyles
-                                                                .secondaryTextColor),
-                                                  ),
-                                                  backgroundColor: category
-                                                      .color
-                                                      .withAlpha(80),
-                                                  selectedColor: category.color,
+                                                        .smallTextStyle),
+                                                  backgroundColor: AppStyles.primaryBackground,
+                                                  selectedColor: AppStyles.lightGrey,
                                                   selected:
                                                       model.time.category.id ==
                                                           category.id,
