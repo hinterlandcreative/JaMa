@@ -46,6 +46,8 @@ jobs:
       inputs:
         projectDirectory: '.'
       displayName: Run Unit Tests.
+    - script: /usr/bin/xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphoneos -archivePath build/ios/iphoneos/JamaRelease.xcarchive -configuration Release archive
+      displayName: Archive iOS App
     - script: |
         git config --global user.email "tk@hinterlandsupply.co"
         git config --global user.name "Azure DevOps CI"
