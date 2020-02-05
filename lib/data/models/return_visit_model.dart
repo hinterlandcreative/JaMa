@@ -22,6 +22,7 @@ class ReturnVisit extends DTO {
 
   @override
   ReturnVisit.fromMap(Map<String, dynamic> map) {
+      id = map['id'];
       address = map['address'];
       name = map['name'];
       gender = map['gender'];
@@ -33,6 +34,7 @@ class ReturnVisit extends DTO {
 
   Map<String, dynamic> toMap() {
     return {
+      'id' : id,
       'address' : address,
       'name' : name,
       'gender' : gender,
@@ -40,6 +42,10 @@ class ReturnVisit extends DTO {
       'created' : created,
       'lastVisit' : lastVisit
     };
+  }
+
+  ReturnVisit copy() {
+    return ReturnVisit.fromMap(this.toMap());
   }
 }
 

@@ -6,4 +6,6 @@ abstract class DTO {
   DTO.fromMap(Map<String, dynamic> map);
 
   Map<String, dynamic> toMap();
+
+  DTO copy();
 }

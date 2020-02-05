@@ -40,4 +40,8 @@ class Address extends DTO {
       'state' : state
     };
   }
+
+  Address copy() {
+    return Address.fromMap(this.toMap());
+  }
 }

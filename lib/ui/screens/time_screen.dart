@@ -1,9 +1,10 @@
 import 'package:commons/commons.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/ui/widgets/goal_stepper_widget.dart';
-import 'package:jama/ui/widgets/time_selection_slider.dart';
+import 'package:jama/ui/widgets/time_selection_slider_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../app_styles.dart';
@@ -13,7 +14,15 @@ class TimeScreen extends StatelessWidget {
   final TimeModel model;
   final _formKey = GlobalKey<FormState>();
 
-  TimeScreen([this.model]);
+  TimeScreen._([this.model]);
+
+  factory TimeScreen(TimeModel model) {
+    return TimeScreen._(TimeModel(timeModel: model.time));
+  }
+
+  factory TimeScreen.createNew() {
+    return TimeScreen._();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +88,15 @@ class TimeScreen extends StatelessWidget {
                                     padding: EdgeInsets.only(
                                         top: AppStyles.leftMargin),
                                   ),
-                                  TimeSelectionSlider(model: model),
+                                  Selector<TimeModel, Time>(
+                                    selector: (_, m) => m.time,
+                                    shouldRebuild: (a, b) => (a.date != b.date) || (a.totalMinutes != b.totalMinutes),
+                                    builder: (BuildContext context, value, Widget child) {
+                                    return TimeSelectionSlider(
+                                      startTime: model.time.formattedDate, 
+                                      duration: model.time.duration,
+                                      onTimeChanged: (newTime, newDuration) => model.setTime(newTime, newDuration.inMinutes),);
+                                  },),
                                   Padding(
                                     padding: EdgeInsets.only(
                                         left: AppStyles.leftMargin),

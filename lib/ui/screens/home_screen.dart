@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
                 labelStyle: AppStyles.heading4,
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => TimeScreen()));
+                      MaterialPageRoute(builder: (context) => TimeScreen.createNew()));
                 }),
             SpeedDialChild(
                 child: Icon(Icons.access_alarms),

@@ -4,12 +4,12 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_tableview/flutter_tableview.dart';
 import 'package:intl/intl.dart';
+import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/ui/models/time/time_collection.dart';
 import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/ui/screens/base_screen.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../app_styles.dart';
@@ -42,7 +42,7 @@ class TimeListScreen extends StatelessWidget {
                 labelStyle: AppStyles.heading4,
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => TimeScreen()));
+                      MaterialPageRoute(builder: (context) => TimeScreen.createNew()));
                 }),
             SpeedDialChild(
                 child: Icon(Icons.clear_all),
@@ -160,7 +160,7 @@ class TimeListScreen extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    TimeScreen(TimeModel(timeModel: item.time))));
+                    TimeScreen(TimeModel(timeModel: item.time.copy()))));
       },
       child: Slidable(
         closeOnScroll: true,
@@ -202,7 +202,7 @@ class TimeListScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "9:30 AM - 12:30 PM",
+                          "${DateFormat.jm().format(item.time.formattedDate)} - ${DateFormat.jm().format(item.time.formattedDate.add(item.time.duration))}",
                           style: AppStyles.heading2,
                         ),
                         Text(

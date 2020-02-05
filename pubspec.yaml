@@ -15,7 +15,8 @@ dependencies:
   charts_flutter: ^0.8.1
   quiver: ^2.0.5
   slider_button: ^0.4.0
-  flutter_circular_slider: ^2.5.0
+  flutter_xlider: ^3.1.0
+  flutter_time_picker_spinner: ^1.0.6
   commons: ^0.6.3
   auto_size_text: ^2.1.0
   cupertino_icons: ^0.1.2

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 import 'package:jama/data/core/db/dto.dart';
 import 'package:jama/mixins/color_mixin.dart';
@@ -32,5 +33,9 @@ class TimeCategory extends DTO {
        'description' : description,
        'color' : color.toHex()
      };
+  }
+
+  TimeCategory copy() {
+    return TimeCategory.fromMap(this.toMap());
   }
 }

@@ -5,8 +5,8 @@ class BaseScreen extends StatelessWidget {
 
   final Widget body;
   final Color _defaultTopBarColor = AppStyles.secondaryBackground;
-  Widget floatingActionButton;
-  Color topBarColor; 
+  final Widget floatingActionButton;
+  final Color topBarColor; 
 
   BaseScreen({Key key, @required this.body, this.topBarColor, this.floatingActionButton}) : super(key: key);
 

@@ -54,4 +54,8 @@ class Time extends DTO {
       'videos': videos
     };
   }
+  
+  Time copy() {
+    return Time.fromMap(this.toMap());
+  }
 }
