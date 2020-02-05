@@ -241,6 +241,10 @@ class TimeScreen extends StatelessWidget {
                         ),
                         onPressed: () {
                           _formKey.currentState.save();
+                          if(model.time.totalMinutes <= 0) {
+                            infoDialog(context, "You must add time before saving.");
+                            return;
+                          }
                           if (model.time.category == null ||
                               model.time.category.id == -1) {
                             infoDialog(context,
