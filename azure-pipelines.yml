@@ -50,6 +50,16 @@ jobs:
       displayName: Archive iOS App
     - script: /usr/bin/xcodebuild -exportArchive -archivePath build/ios/iphoneos/JamaRelease.xcarchive -exportPath build/ios/iphoneos/ -exportOptionsPlist ios/ExportOptions.plist
       displayName: Export iOS App
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: 'build/ios/iphoneos'
+        Contents: '*.ipa'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: '$(Build.BuildNumber)'
+        publishLocation: 'pipeline'
     - script: |
         git config --global user.email "tk@hinterlandsupply.co"
         git config --global user.name "Azure DevOps CI"
