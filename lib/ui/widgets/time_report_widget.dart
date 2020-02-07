@@ -29,7 +29,6 @@ class TimeReportWidget extends StatelessWidget {
               textStyle: AppStyles.heading2),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            verticalDirection: VerticalDirection.down,
             children: <Widget>[
               Text(placements.toString(),
                   style: AppStyles.heading2),
