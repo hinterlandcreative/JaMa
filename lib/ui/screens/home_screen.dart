@@ -107,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                               (AppStyles.leftMargin * 2),
                           action: () {
                             // TODO: implement send report
-                            infoDialog(context, "sent message");
+                            infoDialog(context, "not yet implemented.");
                           },
                           label: Text(
                               "Send " +

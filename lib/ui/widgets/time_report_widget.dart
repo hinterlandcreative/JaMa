@@ -27,29 +27,32 @@ class TimeReportWidget extends StatelessWidget {
               width: AppStyles.defaultChartHeight,
               height: AppStyles.defaultChartWidth,
               textStyle: AppStyles.heading2),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            verticalDirection: VerticalDirection.down,
-            children: <Widget>[
-              Text(placements.toString(),
-                  style: AppStyles.heading2),
-              Text(
-                "placements",
-                style: AppStyles.smallTextStyle,
-              ),
-              Text(videos.toString(),
-                  style: AppStyles.heading2),
-              Text(
-                "videos",
-                style: AppStyles.smallTextStyle,
-              ),
-              Text(returnVisits.toString(),
-                  style: AppStyles.heading2),
-              Text(
-                "return visits",
-                style: AppStyles.smallTextStyle,
-              )
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 11.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text(placements.toString(),
+                    style: AppStyles.heading2),
+                Text(
+                  "placements",
+                  style: AppStyles.smallTextStyle,
+                ),
+                Text(videos.toString(),
+                    style: AppStyles.heading2),
+                Text(
+                  "videos",
+                  style: AppStyles.smallTextStyle,
+                ),
+                Text(returnVisits.toString(),
+                    style: AppStyles.heading2),
+                Text(
+                  "return visits",
+                  style: AppStyles.smallTextStyle,
+                )
+              ],
+            ),
           )
         ],
       ),

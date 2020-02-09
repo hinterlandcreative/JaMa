@@ -31,6 +31,7 @@ class DonutChartWidget extends StatelessWidget {
               padding: const EdgeInsets.all(30.0),
               child: AutoSizeText(
                 text,
+                minFontSize: 1,
                 style: textStyle,
                 maxLines: 1,
               ),

@@ -5,6 +5,7 @@ import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:quiver/time.dart';
 
 import '../../../mixins/num_mixin.dart';
 
@@ -13,7 +14,6 @@ class TimeModel extends ChangeNotifier {
   int _placementsGoal = 0;
   int _videosGoal = 0;
   int _currentVideos = 0;
-  DateTime baseTime;
   Time time;
   int increment = 15;
   String get placementsGoal => _getGoalText(_placementsGoal, _currentPlacements, time.placements);
@@ -29,11 +29,10 @@ class TimeModel extends ChangeNotifier {
 
   TimeModel({Time timeModel, TimeService timeService}) {
     var now = DateTime.now();
-    baseTime = timeModel == null ? DateTime(now.year, now.month, now.day, now.hour, now.minute.roundTo(increment)) : timeModel.formattedDate;
     time = timeModel ??
         Time(
-            date: baseTime.millisecondsSinceEpoch,
-            totalMinutes: 15,
+            date: DateTime.now().subtract(anHour).millisecondsSinceEpoch,
+            totalMinutes: anHour.inMinutes,
             category: null);
     final container = kiwi.Container();
     _timeService = timeService ?? container.resolve<TimeService>();
