@@ -1,9 +1,9 @@
 name: jama
-version: 0.0.1+prerelease.19
+version: 0.0.1+prerelease.20
 description: A new Flutter project.
-environment:
-  sdk: ">=2.6.0"
-dependencies:
+environment: 
+  sdk: '>=2.6.0'
+dependencies: 
   kiwi: ^0.2.0
   sembast: ^2.1.2
   path_provider: ^1.5.1
@@ -24,28 +24,31 @@ dependencies:
   flutter_tableview: ^1.0.1
   duration: ^2.0.8
   flutter_slidable: ^0.5.4
-  flutter_datetime_picker:
-    git: https://github.com/Realank/flutter_datetime_picker.git
-  flutter:
-    sdk: flutter
-  flutter_speed_dial:
-    git: https://github.com/hinterlandsupplyco/flutter_speed_dial.git
-  date_picker_timeline:
-    git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
   flutter_widgets: ^0.1.10
-dev_dependencies:
-  mockito: ^4.1.1
-  flutter_test:
+  flutter_datetime_picker: 
+    git: https://github.com/Realank/flutter_datetime_picker.git
+  flutter: 
     sdk: flutter
-flutter:
-  assets:
+  flutter_speed_dial: 
+    git: https://github.com/hinterlandsupplyco/flutter_speed_dial.git
+  date_picker_timeline: 
+    git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
+dev_dependencies: 
+  mockito: ^4.1.1
+  flutter_test: 
+    sdk: flutter
+flutter: 
+  assets: 
     - graphics/confetti.png
     - graphics/diamond.png
     - graphics/notebook.png
     - graphics/arrow.png
-  fonts:
-    - family: Avenir
-      fonts:
-        - asset: fonts/Avenir-Heavy.ttf
-        - asset: fonts/Avenir-Book.ttf
+  fonts: 
+    - 
+      family: Avenir
+      fonts: 
+        - 
+          asset: fonts/Avenir-Heavy.ttf
+        - 
+          asset: fonts/Avenir-Book.ttf
   uses-material-design: true
