@@ -123,7 +123,7 @@ class TimeScreen extends StatelessWidget {
                                         padding: EdgeInsets.only(left: AppStyles.leftMargin),
                                         scrollDirection: Axis.horizontal,
                                         itemCount: model.categories.length,
-                                        initialScrollIndex: model.categories.indexOf(model.time.category),
+                                        initialScrollIndex: model.categories.length <= 0 ? 0 : model.categories.indexWhere((category) => category.id == model.time.category.id),
                                         itemBuilder: (_, index) {
                                           var category =
                                               model.categories[index];
