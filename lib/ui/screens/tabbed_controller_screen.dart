@@ -91,29 +91,24 @@ class _TabbedControllerState extends State<TabbedController> {
         ),
         // backgroundColor: Colors.green,
         // body: Container(color: Colors.red,),
-        bottomNavigationBar: SafeArea(
-          bottom: false,
-          child: Container(
-            decoration: BoxDecoration(color: Colors.white, boxShadow: [
-              BoxShadow(
-                  spreadRadius: -10,
-                  blurRadius: 60,
-                  color: Colors.black.withOpacity(.20),
-                  offset: Offset(0, 15))
-            ]),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-              child: GNav(
-                  tabs: tabs,
-                  selectedIndex: selectedIndex,
-                  onTabChange: (index) {
-                    print(index);
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                    controller.jumpToPage(index);
-                  }),
+        bottomNavigationBar: Container(
+          color: Colors.white,
+          child: SafeArea(
+            child: Container(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                child: GNav(
+                    tabs: tabs,
+                    selectedIndex: selectedIndex,
+                    onTabChange: (index) {
+                      print(index);
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                      controller.jumpToPage(index);
+                    }),
+              ),
             ),
           ),
         ),
