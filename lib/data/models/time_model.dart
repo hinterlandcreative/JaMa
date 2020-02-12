@@ -25,12 +25,13 @@ class Time extends DTO {
   Duration get duration => Duration(minutes: totalMinutes);
 
   Time(
-      {@required this.date,
+      {int id,
+      @required this.date,
       @required this.totalMinutes,
       @required this.category,
       this.notes = "",
       this.placements = 0,
-      this.videos = 0});
+      this.videos = 0}) : super(id: id ?? -1);
 
   @override
   Time.fromMap(Map<String, dynamic> map) {

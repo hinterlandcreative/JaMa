@@ -1,15 +1,18 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_tableview/flutter_tableview.dart';
 import 'package:intl/intl.dart';
+import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/ui/models/time/time_collection.dart';
 import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/ui/screens/scrollable_base_screen.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 import '../app_styles.dart';
 import '../../mixins/duration_mixin.dart';
@@ -25,194 +28,115 @@ class TimeListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TimeCollectionModel>(
-      create: (_) => TimeCollectionModel(startDate, endDate),
-      child: Consumer<TimeCollectionModel>(
-        builder: (_, model, __) => ScrollableBaseWidget(
-          speedDialIcon: AnimatedIcons.menu_close,
-          speedDialActions: [
-            SpeedDialChild(
-              child: Icon(Icons.add),
-              label: "add time",
-              labelStyle: AppStyles.heading4,
-              onTap: () {
-                Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => TimeScreen.createNew()));
-              }),
-            SpeedDialChild(
-              child: Icon(Icons.clear_all),
-              label: "add bulk time",
-              labelStyle: AppStyles.heading4),
-            SpeedDialChild(
-              child: Icon(Icons.access_alarms),
-              label: "record time",
-              labelStyle: AppStyles.heading4),
-          ],
-        header: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Your Time",
-              style: AppStyles.heading1.copyWith(color: Colors.white),
-            ),
-            Text(
-                DateFormat("MMMM y").format(DateTime.now()),
-                style: AppStyles.heading4.copyWith(color: Colors.white))
-          ],
-        ),
-        floatingWidgetHeight: AppStyles.timeHeaderBoxHeight,
-        floatingWidget: TimeReportWidget(
-          allHours: model.allHours,
-          goalHours: model.goalHours,
-          placements: model.placements,
-          videos: model.videos,
-          returnVisits: model.returnVisits,
-        ),
-        body: model.items.length <= 0
-          ? Container()
-          : Padding(
-            padding: EdgeInsets.only(top: (AppStyles.timeHeaderBoxHeight / 2)),
-            child: ListView.builder(
-              itemCount: model.items.length,
-              itemBuilder: (context, index) {
-                var section = model.items[index];
-                List<Widget> children = [_createCollectionHeader(section)];
-                children.addAll(section.items.map((item) => _createCollectionCell(context, item, model, item == section.items.last)));
-                return Column(children: children);}
-          ))
-      )));
-
-
-    // return BaseScreen(
-    //     floatingActionButton: SpeedDial(
-    //       foregroundColor: AppStyles.secondaryBackground,
-    //       backgroundColor: Colors.white,
-    //       animatedIcon: AnimatedIcons.menu_close,
-    //       marginBottom:
-    //           MediaQuery.of(context).size.height - AppStyles.headerHeight - 28,
-    //       overlayColor: AppStyles.speedDialOverlayColor,
-    //       overlayOpacity: 0.7,
-    //       orientation: SpeedDialOrientation.Down,
-    //       children: [
-    //         SpeedDialChild(
-    //             child: Icon(Icons.add),
-    //             label: "add time",
-    //             labelStyle: AppStyles.heading4,
-    //             onTap: () {
-    //               Navigator.push(context,
-    //                   MaterialPageRoute(builder: (context) => TimeScreen.createNew()));
-    //             }),
-    //         SpeedDialChild(
-    //             child: Icon(Icons.clear_all),
-    //             label: "add bulk time",
-    //             labelStyle: AppStyles.heading4),
-    //         SpeedDialChild(
-    //             child: Icon(Icons.access_alarms),
-    //             label: "record time",
-    //             labelStyle: AppStyles.heading4),
-    //       ],
-    //     ),
-    //     body: ChangeNotifierProvider<TimeCollectionModel>(
-    //         create: (_) => TimeCollectionModel(startDate, endDate),
-    //         child: Consumer<TimeCollectionModel>(
-    //             builder: (_, model, __) => Stack(
-    //                 children: <Widget>[
-    //                   // body - background color fill
-    //                   Positioned.fill(
-    //                     top: AppStyles.headerHeight -
-    //                         MediaQuery.of(context).padding.top,
-    //                     child: Container(
-    //                       color: AppStyles.primaryBackground,
-    //                     ),
-    //                   ),
-
-    //                   // header
-    //                   Positioned(
-    //                     top: AppStyles.topMargin,
-    //                     width: MediaQuery.of(context).size.width,
-    //                     height: AppStyles.headerHeight,
-    //                     child: Padding(
-    //                       padding:
-    //                           EdgeInsets.only(left: AppStyles.leftMargin),
-    //                       child: Column(
-    //                         crossAxisAlignment: CrossAxisAlignment.start,
-    //                         children: <Widget>[
-    //                           Text(
-    //                             "Your Time",
-    //                             style: AppStyles.heading1
-    //                                 .copyWith(color: Colors.white),
-    //                           ),
-    //                           Text(
-    //                               DateFormat("MMMM y")
-    //                                   .format(DateTime.now()),
-    //                               style: AppStyles.heading4
-    //                                   .copyWith(color: Colors.white))
-    //                         ],
-    //                       ))),
-
-    //                   // body
-    //                   Positioned.fill(
-    //                     top: AppStyles.headerHeight / 2,
-    //                     child: Column(
-    //                       crossAxisAlignment: CrossAxisAlignment.start,
-    //                       children: <Widget>[
-    //                         Padding(
-    //                           padding: EdgeInsets.only(
-    //                             left: AppStyles.leftMargin),
-    //                           child: TimeReportWidget(
-    //                             allHours: model.allHours,
-    //                             goalHours: model.goalHours,
-    //                             placements: model.placements,
-    //                             videos: model.videos,
-    //                             returnVisits: model.returnVisits,
-    //                           ),
-    //                         ),
-    //                         Padding(
-    //                             padding: EdgeInsets.only(
-    //                                 top: AppStyles.topMargin)),
-    //                         Expanded(
-    //                           child: model.items.length <= 0
-    //                             ? Container()
-    //                             : FlutterTableView(
-    //                                 sectionCount: model.items.length,
-    //                                 rowCountAtSection: (section) =>
-    //                                     model.items[section].items
-    //                                         .length,
-    //                                 cellHeight:
-    //                                     (context, section, row) => 91,
-    //                                 sectionHeaderHeight:
-    //                                     (context, section) => 35,
-    //                                 sectionHeaderBuilder:
-    //                                     (context, sectionIndex) {
-    //                                   var section =
-    //                                       model.items[sectionIndex];
-    //                                   return _createCollectionHeader(
-    //                                       section);
-    //                                 },
-    //                                 cellBuilder:
-    //                                     (context, section, row) {
-    //                                   var item = model
-    //                                       .items[section].items[row];
-    //                                   bool shouldAddBottomBorder =
-    //                                       item ==
-    //                                           model.items[section]
-    //                                               .items.last;
-
-    //                                   return _createCollectionCell(
-    //                                       context,
-    //                                       item,
-    //                                       model,
-    //                                       shouldAddBottomBorder);
-    //                                 },
-    //                             ))
-    //                       ]))
-    //                 ],
-    //               ))));
+        create: (_) => TimeCollectionModel(startDate, endDate),
+        child: Consumer<TimeCollectionModel>(
+            builder: (_, model, __) => ScrollableBaseScreen(
+                speedDialIcon: AnimatedIcons.menu_close,
+                speedDialActions: [
+                  SpeedDialChild(
+                      child: Icon(Icons.add),
+                      label: "add time",
+                      labelStyle: AppStyles.heading4,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TimeScreen.createNew()));
+                      }),
+                  SpeedDialChild(
+                      child: Icon(Icons.clear_all),
+                      label: "add bulk time",
+                      labelStyle: AppStyles.heading4),
+                  SpeedDialChild(
+                      child: Icon(Icons.access_alarms),
+                      label: "record time",
+                      labelStyle: AppStyles.heading4),
+                  SpeedDialChild(
+                      child: Icon(Icons.show_chart),
+                      label: "last month's report",
+                      labelStyle: AppStyles.heading4,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Scaffold(
+                                      body: ChangeNotifierProvider<TimeCollectionModel>(
+                                          create: (_) {
+                                            var now = DateTime.now();
+                                            DateTime startDate = DateTime(
+                                                now.year, now.month - 1, 1);
+                                            DateTime endDate = DateTime(
+                                                    now.year, now.month, 1)
+                                                .subtract(
+                                                    Duration(milliseconds: 1));
+                                            return TimeCollectionModel(
+                                                startDate, endDate);
+                                          },
+                                          child: Consumer<TimeCollectionModel>(
+                                              builder: (_, model, __) =>
+                                                  TimeCardCollection(
+                                                    items: model.items,
+                                                    onItemDeleted: (t) =>
+                                                        model.deleteTime(t),
+                                                  ))),
+                                    )));
+                      }),
+                ],
+                headerWidget: PreferredSize(
+                  preferredSize: Size.fromHeight(66.0),
+                  child: Padding(
+                      padding: EdgeInsets.only(
+                        top: AppStyles.topMargin,
+                        left: AppStyles.leftMargin),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "Your Time",
+                          style: AppStyles.heading1.copyWith(color: Colors.white),
+                        ),
+                        Text(DateFormat("MMMM y").format(DateTime.now()),
+                            style: AppStyles.heading4.copyWith(color: Colors.white))
+                      ],
+                    ),
+                  ),
+                ),
+                hideFloatingWidgetOnScroll: true,
+                floatingWidget: PreferredSize(
+                  preferredSize: Size(MediaQuery.of(context).size.width, AppStyles.timeHeaderBoxHeight),
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: AppStyles.leftMargin, 
+                        right: MediaQuery.of(context).size.width - 211.0 - AppStyles.leftMargin),
+                      child: TimeReportWidget(
+                      allHours: model.allHours,
+                      goalHours: model.goalHours,
+                      placements: model.placements,
+                      videos: model.videos,
+                      returnVisits: model.returnVisits,
+                    ),
+                  ),
+                ),
+                body: Padding(
+                  padding: EdgeInsets.only(top: 17.0),
+                  child: TimeCardCollection(
+                        items: model.items,
+                        onItemDeleted: (t) => model.deleteTime(t),
+                      ),
+                ))));
   }
+}
 
+class TimeCardCollection extends StatelessWidget {
+  final UnmodifiableListView<TimeByDateModel> items;
+  final Function(Time) onItemDeleted;
 
+  const TimeCardCollection(
+      {Key key, @required this.items, @required this.onItemDeleted})
+      : super(key: key);
 
-  Widget _createCollectionCell(BuildContext context, TimeModel item,
-      TimeCollectionModel model, bool shouldAddBottomBorder) {
+  Widget _createCollectionCell(
+      BuildContext context, TimeModel item, bool shouldAddBottomBorder) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -230,7 +154,7 @@ class TimeListScreen extends StatelessWidget {
             icon: Icons.delete_outline,
             color: Colors.red,
             caption: "delete",
-            onTap: () => model.deleteTime(item.time),
+            onTap: () => onItemDeleted(item.time),
           )
         ],
         child: Column(
@@ -312,5 +236,20 @@ class TimeListScreen extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var children = <Widget>[];
+    for(var section in items) {
+      children.add(StickyHeader(
+        header: _createCollectionHeader(section),
+        content: Column(children: section.items
+        .map((item) => _createCollectionCell(
+          context, 
+          item, 
+          item == section.items.last)).toList()),));
+    }
+    return Column(children: children);
   }
 }

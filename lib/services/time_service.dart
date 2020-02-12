@@ -13,7 +13,7 @@ class TimeService {
   DatabaseService _dbService;
   DbCollection _timeCollection;
 
-  // we are not concerned with disposing of this because TimeService is a singleton that 
+  // we are not concerned with disposing of this because TimeService is registered as a singleton that 
   // lasts the entire lifetime of the app.
   final StreamController<Time> _timeUpdatedController = StreamController<Time>.broadcast();
   final _timeCollectionName = "time";

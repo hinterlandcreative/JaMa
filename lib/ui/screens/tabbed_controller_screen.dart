@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:jama/ui/app_styles.dart';
+import 'package:jama/ui/screens/all_return_visits_screen.dart';
 import 'package:jama/ui/screens/home_screen.dart';
 import 'package:line_icons/line_icons.dart';
-
 import 'time_list_screen.dart';
 
 class TabbedController extends StatefulWidget {
@@ -26,8 +26,8 @@ class _TabbedControllerState extends State<TabbedController> {
     TimeListScreen(
       startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
       endDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 1)
-          .subtract(Duration(milliseconds: 1)),
-    )
+          .subtract(Duration(milliseconds: 1))),
+    AllReturnVisitsScreen()
   ];
 
   @override
@@ -51,7 +51,6 @@ class _TabbedControllerState extends State<TabbedController> {
       iconSize: iconSize,
       padding: padding,
       icon: LineIcons.home,
-      // textStyle: t.textStyle,
       text: 'Home',
     ));
 
@@ -64,8 +63,19 @@ class _TabbedControllerState extends State<TabbedController> {
       iconSize: iconSize,
       padding: padding,
       icon: LineIcons.clock_o,
-      // textStyle: t.textStyle,
       text: 'Time',
+    ));
+
+    tabs.add(GButton(
+      gap: gap,
+      iconActiveColor: iconInactiveColor,
+      iconColor: iconColor,
+      textColor: textColor,
+      color: color,
+      iconSize: iconSize,
+      padding: padding,
+      icon: LineIcons.map_marker,
+      text: "Return Visits"
     ));
   }
 

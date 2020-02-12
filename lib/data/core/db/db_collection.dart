@@ -20,6 +20,9 @@ abstract class DbCollection {
 
   /// get all the items in this collection.
   Future<List<T>> getAll<T extends DTO>(T Function(Map<String, dynamic>) itemCreator);
+
+  /// Search all records for a specified [query] string
+  Future<List<T>> search<T extends DTO>(String query, T Function(Map<String, dynamic>) itemCreator);
 }
 
 enum FilterType {

@@ -8,8 +8,12 @@ class TimeReportWidget extends StatelessWidget {
   final List<TimeByCategoryModel> allHours;
   final int goalHours, placements, videos, returnVisits;
   const TimeReportWidget({
-    Key key, this.allHours, this.goalHours, this.placements, this.videos, this.returnVisits,
-  }) : super(key: key);
+    Key key, 
+    this.allHours, 
+    this.goalHours, 
+    this.placements, 
+    this.videos, 
+    this.returnVisits}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

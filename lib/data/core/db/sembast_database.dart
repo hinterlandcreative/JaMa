@@ -135,6 +135,25 @@ class SembastStore extends DbCollection {
       .toList();
   }
 
+  @override
+  Future<List<T>> search<T extends DTO>(String query, T Function(Map<String, dynamic>) itemCreator) async {
+    var finder = Finder(filter: Filter.matches("searchString", ".*$query.*"));
+    var store = intMapStoreFactory.store(_storeName);
+
+    List<RecordSnapshot<int, Map<String, dynamic>>> records;
+    await _db.transaction((txn) async {
+      records = await store.find(txn, finder: finder);
+    });
+
+    return records
+      .map((r) {
+        T record = itemCreator(r.value);
+        record.id = r.key;
+        return record;
+      })
+      .toList();
+  }
+
   Filter _getFilter(QueryPackage query) {
     final field = query.key;
     final value = query.value;

@@ -7,8 +7,6 @@ import 'package:jama/services/time_service.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:quiver/time.dart';
 
-import '../../../mixins/num_mixin.dart';
-
 class TimeModel extends ChangeNotifier {
   int _currentPlacements = 0;
   int _placementsGoal = 0;
@@ -28,7 +26,6 @@ class TimeModel extends ChangeNotifier {
   TimeService _timeService;
 
   TimeModel({Time timeModel, TimeService timeService}) {
-    var now = DateTime.now();
     time = timeModel ??
         Time(
             date: DateTime.now().subtract(anHour).millisecondsSinceEpoch,
