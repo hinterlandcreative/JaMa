@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -38,7 +39,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   LatLng get mapPosition => _getPosition();
 
-  String get nameOrDescription => _returnVisit.name.isNotEmpty ? _returnVisit.name : Translation.genderToString[_returnVisit.gender];
+  String get nameOrDescription => _returnVisit.name.isNotEmpty ? _returnVisit.name : Translation.genderToNounString[_returnVisit.gender];
 
   String get lastVisitString => _lastVisitString;
 
@@ -190,11 +191,11 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   }
 
   @override
-  String get gender => Translation.genderToString[_returnVisit.gender];
+  Gender get gender => _returnVisit.gender;
   @override
-  set gender(String gender) {
-    if(Translation.genderToString[_returnVisit.gender] != gender) {
-      _returnVisit.gender = gender == Translation.genderToString[Gender.Male] ? Gender.Male : Gender.Female;
+  set gender(Gender gender) {
+    if(_returnVisit.gender != gender) {
+      _returnVisit.gender = gender;
       notifyListeners();
     }
 
@@ -269,9 +270,9 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   }
 
   @override
-  List<int> get image => [];
+  Uint8List get image => Uint8List.fromList([]);
   @override
-  set image(List<int> imagePath) {
+  set image(Uint8List imagePath) {
     // TODO: implement once maps support screenshots.
   }
 

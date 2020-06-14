@@ -23,9 +23,14 @@ class Translation {
     PlacementType.Other: "Other",
   };
 
-  static Map<Gender, String> genderToString = {
+  static Map<Gender, String> genderToNounString = {
     Gender.Male : "Man",
     Gender.Female : "Woman"
+  };
+
+  static Map<String, Gender> nounToGenderType = {
+    "Man" : Gender.Male,
+    "Woman" : Gender.Female
   };
 
   static Map<int, String> daysOfTheWeek = {

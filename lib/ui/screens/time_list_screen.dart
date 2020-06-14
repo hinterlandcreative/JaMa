@@ -10,6 +10,7 @@ import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/ui/models/time/time_collection.dart';
 import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/ui/screens/scrollable_base_screen.dart';
+import 'package:jama/ui/widgets/time_card.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:sticky_headers/sticky_headers.dart';
@@ -157,67 +158,7 @@ class TimeCardCollection extends StatelessWidget {
             onTap: () => onItemDeleted(item.time),
           )
         ],
-        child: Column(
-          children: <Widget>[
-            Container(
-              alignment: Alignment.topLeft,
-              height: 80,
-              padding: EdgeInsets.only(
-                  left: AppStyles.leftMargin, top: AppStyles.leftMargin),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 4.0),
-                    child: Container(
-                      height: 18,
-                      width: 18,
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              width: 1, color: AppStyles.captionText),
-                          color: item.time.category.color),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "${DateFormat.jm().format(item.time.formattedDate)} - ${DateFormat.jm().format(item.time.formattedDate.add(item.time.duration))}",
-                          style: AppStyles.heading2,
-                        ),
-                        Text(
-                          item.time.category.name,
-                          style: AppStyles.smallTextStyle,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(child: Container()),
-                  Padding(
-                    padding: EdgeInsets.only(right: AppStyles.leftMargin),
-                    child: Text(
-                      item.time.duration.toShortString(),
-                      style: AppStyles.heading2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 35.0, right: 35.0, top: 10),
-              child: Container(
-                  decoration: BoxDecoration(
-                      border: shouldAddBottomBorder
-                          ? null
-                          : Border(
-                              bottom: BorderSide(
-                                  width: 1, color: Colors.grey[300])))),
-            )
-          ],
-        ),
+        child: TimeCard(item: item, isLast: shouldAddBottomBorder,),
       ),
     );
   }

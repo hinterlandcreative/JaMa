@@ -1,24 +1,33 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
+
 import 'package:jama/data/core/db/db_collection.dart';
 import 'package:jama/data/core/db/query_package.dart';
 import 'package:jama/data/models/placement_model.dart';
 import 'package:jama/data/models/return_visit_model.dart';
 import 'package:jama/data/models/visit_model.dart';
 import 'package:jama/services/database_service.dart';
+import 'package:jama/services/image_service.dart';
+
 import 'package:kiwi/kiwi.dart';
 
 class ReturnVisitService {
+  ImageService _imageService;
+
   final String _returnVisitDatabaseName = "returnvisits";
   final String _visitsDatabaseName = "visits";
-  Completer<DbCollection> _returnVisitCollection = Completer();
-  Completer<DbCollection> _visitsCollection = Completer();
+  final Completer<DbCollection> _returnVisitCollection = Completer();
+  final Completer<DbCollection> _visitsCollection = Completer();
+  final StreamController<void> _returnVisitsUpdated = StreamController.broadcast();
 
-  ReturnVisitService([DatabaseService databaseService]) {
+  /// Get the stream of events indicating the return visits have changed.
+  Stream get returnVisitUpdates => _returnVisitsUpdated.stream;
+
+  ReturnVisitService([ImageService imageService, DatabaseService databaseService]) {
     var container = Container();
 
     var dbService = databaseService ?? container.resolve<DatabaseService>();
+    _imageService = imageService ?? container.resolve<ImageService>();
 
     var getReturnVisitCollection = () async {
       final db = await dbService.getMainStorage();
@@ -70,6 +79,7 @@ class ReturnVisitService {
 
     await returnVisitDb.update(rv);
 
+    _returnVisitsUpdated.add(null);
     return rv;
   }
 
@@ -100,6 +110,13 @@ class ReturnVisitService {
     for(var visit in visits) {
       await visitsDb.deleteFromDto(visit);
     }
+
+    if(rv.imagePath.isNotEmpty) {
+      var imageFile = await _imageService.getImageFile(rv.imagePath);
+      await imageFile.delete();
+    }
+
+    _returnVisitsUpdated.add(null);
   }
 
   Future updateReturnVisit(ReturnVisit rv) async {
@@ -110,5 +127,7 @@ class ReturnVisitService {
 
     var returnVisitsDb = await _returnVisitCollection.future;
     await returnVisitsDb.update(rv);
+
+    _returnVisitsUpdated.add(null);
   }
 }

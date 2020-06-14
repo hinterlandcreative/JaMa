@@ -1,23 +1,25 @@
 import 'dart:collection';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:jama/data/models/address_model.dart';
 import 'package:jama/data/models/placement_model.dart';
 import 'package:jama/data/models/return_visit_model.dart';
 import 'package:jama/data/models/visit_model.dart';
+import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/controllers/address_controller.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
 
-  ReturnVisitService _returnVisitService;
   AddressController _addressController = AddressController();
 
+  ReturnVisitService _returnVisitService;
+  ImageService _imageService;
   LocationService _locationService;
+
   String _name = "";
   Gender _gender;
   String _street = "";
@@ -33,7 +35,8 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   List<Placement> _initialCallPlacements = [];
   String _initialCallNotes = "";
   String _initialCallNextTopic = "";
-  List<int> _image;
+  Uint8List _image;
+
 
   AddressController get addressController => _addressController;
 
@@ -55,10 +58,9 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
     }
   }
 
-  String get gender => _gender == null ? Gender.Male.toString().split('.').last : _gender.toString().split('.').last;
+  Gender get gender => _gender == null ? Gender.Male : _gender;
 
-  set gender(String gender) {
-    var value = Gender.values.firstWhere((e) => e.toString() == 'Gender.' + gender);
+  set gender(Gender value) {
     if(_gender != value) {
       _gender = value;
       notifyListeners();
@@ -126,11 +128,11 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
     }
   }
 
-  List<int> get image => _image ?? [];
+  Uint8List get image => _image ?? [];
 
-  set image(List<int> imagePath) {
-    if(_image != imagePath) {
-      _image = imagePath;
+  set image(Uint8List value) {
+    if(_image != value) {
+      _image = value;
       notifyListeners();
     }
   }
@@ -184,11 +186,12 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
     }
   }
 
-  AddReturnVisitModel([LocationService locationService, ReturnVisitService rvService]) {
+  AddReturnVisitModel([LocationService locationService, ReturnVisitService rvService, ImageService imageService]) {
     var container = kiwi.Container();
 
     _locationService = locationService ?? container.resolve<LocationService>();
     _returnVisitService = rvService ?? container.resolve<ReturnVisitService>();
+    _imageService = imageService ?? container.resolve<ImageService>();
   }
 
   /// Add a new placement by indicating the [count] of the placement [type] and include a [description] as needed.
@@ -203,7 +206,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
       return false;
     }
 
-    if(gender.isEmpty) {
+    if(gender == null) {
       return false;
     }
 
@@ -264,17 +267,16 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
     if(validate()) {
       String imagePath;
       if(image != null && image.isNotEmpty) {
-        final directory = (await getApplicationDocumentsDirectory()).path;
-        final path = "$directory/${Uuid().v4()}.png";  
-        final file = File(path);
-        await file.writeAsBytes(image);
-        imagePath = path;
+        imagePath = await _imageService.saveToFile(
+          image,
+          path: "images/",
+        );
       }
 
       var rv = ReturnVisit(
         address: address,
         name: name,
-        gender: gender == "Male" ? Gender.Male : Gender.Female,
+        gender: gender,
         notes: notes,
         imagePath: imagePath,
         pinned: pinned

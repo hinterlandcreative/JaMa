@@ -96,12 +96,12 @@ class _ReturnVisitPersonalInfoFormState
             Text(
               "Gender",
               style: AppStyles.smallTextStyle.copyWith(color: Colors.black54)),
-            Selector<EdittableReturnVisitBaseModel, String>(
+            Selector<EdittableReturnVisitBaseModel, Gender>(
               selector: (_, m) => m.gender,
               builder: (_, gender, __) => RadioButtonGroup(
-                picked: gender,
+                picked: Translation.genderToNounString[gender],
                 orientation: GroupedButtonsOrientation.HORIZONTAL,
-                labels: [Translation.genderToString[Gender.Male], Translation.genderToString[Gender.Female]],
+                labels: [Translation.genderToNounString[Gender.Male], Translation.genderToNounString[Gender.Female]],
                 activeColor: AppStyles.primaryColor,
                 labelStyle: AppStyles.heading4,
                 itemBuilder: (radio, text, i) => Padding(
@@ -113,7 +113,7 @@ class _ReturnVisitPersonalInfoFormState
                   ),
                 ),
                 onSelected: (s) {
-                  model.gender = s;
+                  model.gender = Translation.nounToGenderType[s];
                 },
               ),
             ),

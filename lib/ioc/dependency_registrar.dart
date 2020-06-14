@@ -4,6 +4,7 @@ import 'package:jama/data/core/db/local_database_factory.dart';
 import 'package:jama/data/core/db/remote_database_factory.dart';
 import 'package:jama/services/app_settings_service.dart';
 import 'package:jama/services/database_service.dart';
+import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/services/time_service.dart';
@@ -21,5 +22,6 @@ class DependencyRegistrar {
     container.registerSingleton((c) => ReturnVisitService());
     container.registerSingleton((c) => AppSettingsService());
     container.registerInstance(LocationService());
+    container.registerSingleton((container) => ImageService());
   }
 }

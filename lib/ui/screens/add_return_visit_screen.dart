@@ -1,5 +1,6 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/controllers/address_image_controller.dart';
 import 'package:jama/ui/models/return_visits/add_return_visit_model.dart';
@@ -38,123 +39,125 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: AppStyles.primaryColor,
-        child: SafeArea(
-          top: false,
-          child: ChangeNotifierProvider(
-            create: (context) => AddReturnVisitModel(),
-            child: Consumer<AddReturnVisitModel>(
-              builder: (_, model, __) {
-                return Container(
-                  color: AppStyles.primaryBackground,
-                                  child: Stack(children: <Widget>[
-                    Positioned.fill(
-                      bottom: 86,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(
-                              height: 227 + MediaQuery.of(context).padding.top,
-                              width: MediaQuery.of(context).size.width,
-                              child: Stack(
-                                children: <Widget>[
-                                  Positioned.fill(
-                                      top: 0,
-                                      child: AddressMapper(
-                                        addressImageController:
-                                            _addressImageController,
-                                        addressController:
-                                            model.addressController,
-                                        onUseAddressSelected: (address) {
-                                          FocusScope.of(context).unfocus();
-                                          model.address = address;
-                                        },
-                                        findCurrentAddress: true,
-                                      )),
-                                  Positioned(
-                                    bottom: 0,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: new Container(
-                                      height: 38.00,
-                                      decoration: BoxDecoration(
-                                        color: AppStyles.primaryBackground,
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(30.00),
-                                          topRight: Radius.circular(30.00),
+    return FocusWatcher(
+      child: Scaffold(
+        body: Container(
+          color: AppStyles.primaryColor,
+          child: SafeArea(
+            top: false,
+            child: ChangeNotifierProvider(
+              create: (context) => AddReturnVisitModel(),
+              child: Consumer<AddReturnVisitModel>(
+                builder: (_, model, __) {
+                  return Container(
+                    color: AppStyles.primaryBackground,
+                                    child: Stack(children: <Widget>[
+                      Positioned.fill(
+                        bottom: 86,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                height: 227 + MediaQuery.of(context).padding.top,
+                                width: MediaQuery.of(context).size.width,
+                                child: Stack(
+                                  children: <Widget>[
+                                    Positioned.fill(
+                                        top: 0,
+                                        child: AddressMapper(
+                                          addressImageController:
+                                              _addressImageController,
+                                          addressController:
+                                              model.addressController,
+                                          onUseAddressSelected: (address) {
+                                            FocusScope.of(context).unfocus();
+                                            model.address = address;
+                                          },
+                                          findCurrentAddress: true,
+                                        )),
+                                    Positioned(
+                                      bottom: 0,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: new Container(
+                                        height: 38.00,
+                                        decoration: BoxDecoration(
+                                          color: AppStyles.primaryBackground,
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(30.00),
+                                            topRight: Radius.circular(30.00),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    top: MediaQuery.of(context).padding.top + AppStyles.leftMargin,
-                                    left: AppStyles.leftMargin,
-                                    child: ClipOval(
-                                      child: Material(
-                                        color: Colors.white, // button color
-                                        child: InkWell( // inkwell color
-                                          child: SizedBox(width: 38.0, height: 38.0, child: Center(child: Icon(Icons.arrow_back_ios, size: 17.0,))),
-                                          onTap: () => Navigator.of(context).pop(),
+                                    Positioned(
+                                      top: MediaQuery.of(context).padding.top + AppStyles.leftMargin,
+                                      left: AppStyles.leftMargin,
+                                      child: ClipOval(
+                                        child: Material(
+                                          color: Colors.white, // button color
+                                          child: InkWell( // inkwell color
+                                            child: SizedBox(width: 38.0, height: 38.0, child: Center(child: Icon(Icons.arrow_back_ios, size: 17.0,))),
+                                            onTap: () => Navigator.of(context).pop(),
+                                          ),
                                         ),
-                                      ),
-                                    ))
-                                ],
-                              ),
-                            ),
-                            Container(
-                              color: AppStyles.primaryBackground,
-                              child: _buildFormWidget(context, model)
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      width: MediaQuery.of(context).size.width,
-                      height: 86,
-                      child: Container(
-                        color: AppStyles.secondaryBackground,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              height: 38.00,
-                              width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                color: AppStyles.primaryBackground,
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(30.00),
-                                  bottomRight: Radius.circular(30.00),
+                                      ))
+                                  ],
                                 ),
                               ),
-                            ),
-                            FlatButton(
-                              onPressed: () async {
-                                model.image = _addressImageController.value;
-                                if (_formKey.currentState.validate()) {
-                                  _formKey.currentState.save();
-                                  model.save();
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              child: Center(
-                                child: Text("save",
-                                    style: AppStyles.heading2.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                          ],
+                              Container(
+                                color: AppStyles.primaryBackground,
+                                child: _buildFormWidget(context, model)
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ]),
-                );
-                
-              },
+                      Positioned(
+                        bottom: 0,
+                        width: MediaQuery.of(context).size.width,
+                        height: 86,
+                        child: Container(
+                          color: AppStyles.secondaryBackground,
+                          child: Column(
+                            children: <Widget>[
+                              Container(
+                                height: 38.00,
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  color: AppStyles.primaryBackground,
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(30.00),
+                                    bottomRight: Radius.circular(30.00),
+                                  ),
+                                ),
+                              ),
+                              FlatButton(
+                                onPressed: () async {
+                                  model.image = _addressImageController.value;
+                                  if (_formKey.currentState.validate()) {
+                                    _formKey.currentState.save();
+                                    model.save();
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: Center(
+                                  child: Text("save",
+                                      style: AppStyles.heading2.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ]),
+                  );
+                  
+                },
+              ),
             ),
           ),
         ),

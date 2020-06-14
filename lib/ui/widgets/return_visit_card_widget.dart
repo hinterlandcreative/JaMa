@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -62,19 +64,20 @@ class ReturnVisitCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                // returnVisit.imagePath.isNotEmpty
-                //  ? Container(
-                //   height: 69.00,
-                //   width: 69.00,
-                //   decoration: BoxDecoration(
-                //     image: DecorationImage(
-                //       image: AssetImage(
-                //           returnVisit.imagePath),
-                //     ),
-                //     borderRadius:
-                //         BorderRadius.circular(15.00),
-                //   ),
-                // ) :
+                returnVisit.imagePath.isNotEmpty
+                 ? Container(
+                  height: 69.00,
+                  width: 69.00,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.fitHeight,
+                      image: FileImage(
+                          File(returnVisit.imagePath)),
+                    ),
+                    borderRadius:
+                        BorderRadius.circular(15.00),
+                  ),
+                ) :
                 Container(
                   height: 69,
                   width: 69,

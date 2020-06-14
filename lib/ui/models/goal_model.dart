@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class GoalModel {
   final String text;
-  final Widget navigationWidget;
+  final Widget Function() navigationWidget;
   final String iconPath;
 
-  GoalModel(this.text, this.navigationWidget, this.iconPath);
+  GoalModel({@required this.text, this.navigationWidget, @required this.iconPath});
 }

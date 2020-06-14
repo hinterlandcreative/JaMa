@@ -1,18 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:image/image.dart';
 import 'package:jama/data/models/address_model.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/ui/controllers/address_controller.dart';
 import 'package:jama/ui/controllers/address_image_controller.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
-import 'package:path_provider/path_provider.dart';
-import 'package:screenshot/screenshot.dart';
-import '../app_styles.dart';
+import 'package:jama/ui/app_styles.dart';
+import 'package:latlong/latlong.dart' as LatLong;
 
 class AddressMapper extends StatefulWidget {
   /// the height to constrain the widget to.
@@ -83,40 +80,25 @@ class _AddressMapperState extends State<AddressMapper> {
 
   Address _foundAddress;
 
-  Completer<String> _defaultMapScreenshotPath;
-
   Address get foundAddress => _foundAddress;
 
   set foundAddress(Address address) {
+    var old = _foundAddress;
     _foundAddress = address;
-    if(widget.addressImageController != null) {
-      _defaultMapScreenshotPath.future.then((path) {
-        var defaultFile = File(path);
-        if(defaultFile.existsSync()) {
-          defaultFile.deleteSync();
-        }
 
-        _mapImageController.capture(path: path).then((originalImage) {
-          originalImage.readAsBytes().then((bytes) {
-            var image = decodeImage(bytes);
-
-            var x = ((image.width / 2) - 50).toInt();
-            var y = ((image.height / 2) - 50).toInt();
-            var croppedImage = copyCrop(
-              image, 
-              x < 0 ? 0 : x, 
-              y < 0 ? 0 : y, 
-              100, 
-              100);
-
-            widget.addressImageController.value = encodePng(croppedImage);
-          });
-        });
-      });
+    if((old == null || _locationServices
+      .getDistanceBetweenCoordinates(
+        old.latitude, 
+        old.longitude, 
+        address.latitude, 
+        address.longitude, 
+        LatLong.LengthUnit.Meter) > 10) && widget.addressImageController != null) {
+        _mapController.future.then((controller) => 
+          controller.takeSnapshot().then((value) => 
+            widget.addressImageController.value = value)
+        );
     }
   }
-
-  ScreenshotController _mapImageController;
 
   bool get _showFoundAddressWidget =>
       foundAddress != null && widget.address == null;
@@ -124,13 +106,6 @@ class _AddressMapperState extends State<AddressMapper> {
   @override
   void initState() {
     super.initState();
-    _mapImageController = ScreenshotController();
-
-    _defaultMapScreenshotPath = Completer();
-    getApplicationDocumentsDirectory().then((directory) {
-      _defaultMapScreenshotPath.complete("${directory.path}/defaultAddressImage.png");
-    });
-
 
     _mapController = Completer();
     _mapPosition = widget.initialPosition != null
@@ -165,7 +140,7 @@ class _AddressMapperState extends State<AddressMapper> {
                     target: LatLng(
                         _mapPosition.latitude -
                             (widget.findCurrentAddress && foundAddress != null
-                                ? 0.0015
+                                ? 0.0025
                                 : 0.0),
                         _mapPosition.longitude),
                     zoom: _defaultZoom)));
@@ -188,13 +163,6 @@ class _AddressMapperState extends State<AddressMapper> {
       widget.addressController.removeListener(_onAddressControllerChanged);
       widget.addressController.dispose();
     }
-
-    if(_defaultMapScreenshotPath.isCompleted) {
-      _defaultMapScreenshotPath.future.then((path) {
-        File(path).deleteSync();
-      });
-    }
-
     super.dispose();
   }
 
@@ -213,35 +181,32 @@ class _AddressMapperState extends State<AddressMapper> {
             child: widget.emptyState,
           )),
           Positioned.fill(
-            child: Screenshot(
-              controller: _mapImageController,
-              child: GoogleMap(
-                rotateGesturesEnabled: false,
-                scrollGesturesEnabled: false,
-                tiltGesturesEnabled: false,
-                zoomGesturesEnabled: false,
-                myLocationButtonEnabled: false,
-                buildingsEnabled: false,
-                mapToolbarEnabled: false,
-                circles: Set.from([
-                  Circle(
-                    circleId: CircleId("main location"),
-                    center: _mapPosition,
-                    radius: 25,
-                    fillColor: AppStyles.primaryColor,
-                    strokeColor: Colors.transparent,
-                  )
-                ]),
-                onMapCreated: (controller) {
-                  _mapController.complete(controller);
-                },
-                initialCameraPosition: CameraPosition(
-                  bearing: 360.0,
-                  target: _mapPosition,
-                  zoom: _defaultZoom,
-                ),
+            child: GoogleMap(
+              rotateGesturesEnabled: false,
+              scrollGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              zoomGesturesEnabled: false,
+              myLocationButtonEnabled: false,
+              buildingsEnabled: false,
+              mapToolbarEnabled: false,
+              circles: Set.from([
+                Circle(
+                  circleId: CircleId("main location"),
+                  center: _mapPosition,
+                  radius: 25,
+                  fillColor: AppStyles.primaryColor,
+                  strokeColor: Colors.transparent,
+                )
+              ]),
+              onMapCreated: (controller) {
+                _mapController.complete(controller);
+              },
+              initialCameraPosition: CameraPosition(
+                bearing: 360.0,
+                target: _mapPosition,
+                zoom: _defaultZoom,
               ),
-          )),
+            )),
           AnimatedPositioned(
               duration: Duration(milliseconds: 300),
               top: _showFoundAddressWidget

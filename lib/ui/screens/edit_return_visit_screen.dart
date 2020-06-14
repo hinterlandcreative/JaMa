@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jama/data/models/visit_model.dart';
@@ -48,148 +49,150 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<EditReturnVisitModel>.value(
       value: widget.returnVisit,
-      child: Scaffold(
-        floatingActionButton: SpeedDial(
-          marginBottom: MediaQuery.of(context).size.height - 200 - MediaQuery.of(context).padding.top - 28,
-          animatedIcon: AnimatedIcons.add_event,
-          foregroundColor: AppStyles.primaryColor,
-          backgroundColor: Colors.white,
-          orientation: SpeedDialOrientation.Down,
-          overlayColor: HexColor.fromHex("#9F9F9F"),
-          overlayOpacity: 0.7,
-          children: [
-            SpeedDialChild(
-                child: Icon(Icons.thumb_up),
-                label: "add visit",
-                labelStyle: AppStyles.heading4,
-                onTap: () {}),
-            SpeedDialChild(
-                child: Icon(Icons.library_books),
-                label: "add study",
-                labelStyle: AppStyles.heading4,
-                onTap: () {}),
-            SpeedDialChild(
-                child: Icon(Icons.not_interested),
-                label: "add not at home",
-                labelStyle: AppStyles.heading4,
-                onTap: () {}),
-          ],
-        ),
-        body: Stack(
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).padding.top + 227.0,
-              child: widget.returnVisit.mapPosition == null
-                ? Container(color: AppStyles.primaryBackground,)
-                : GoogleMap(
-                  rotateGesturesEnabled: false,
-                  scrollGesturesEnabled: false,
-                  tiltGesturesEnabled: false,
-                  zoomGesturesEnabled: false,
-                  myLocationButtonEnabled: false,
-                  buildingsEnabled: false,
-                  mapToolbarEnabled: false,
-                  circles: Set.from([
-                    Circle(
-                      circleId: CircleId("main location"),
-                      center: widget.returnVisit.mapPosition,
-                      radius: 25,
-                      fillColor: AppStyles.primaryColor,
-                      strokeColor: Colors.transparent,
-                    )
-                  ]),
-                  initialCameraPosition: CameraPosition(
-                    bearing: 360.0,
-                    target: widget.returnVisit.mapPosition.addOffset(latitudeOffset: -0.0012),
-                    zoom: _defaultZoom,
+      child: FocusWatcher(
+        child: Scaffold(
+          floatingActionButton: SpeedDial(
+            marginBottom: MediaQuery.of(context).size.height - 200 - MediaQuery.of(context).padding.top - 28,
+            animatedIcon: AnimatedIcons.add_event,
+            foregroundColor: AppStyles.primaryColor,
+            backgroundColor: Colors.white,
+            orientation: SpeedDialOrientation.Down,
+            overlayColor: HexColor.fromHex("#9F9F9F"),
+            overlayOpacity: 0.7,
+            children: [
+              SpeedDialChild(
+                  child: Icon(Icons.thumb_up),
+                  label: "add visit",
+                  labelStyle: AppStyles.heading4,
+                  onTap: () {}),
+              SpeedDialChild(
+                  child: Icon(Icons.library_books),
+                  label: "add study",
+                  labelStyle: AppStyles.heading4,
+                  onTap: () {}),
+              SpeedDialChild(
+                  child: Icon(Icons.not_interested),
+                  label: "add not at home",
+                  labelStyle: AppStyles.heading4,
+                  onTap: () {}),
+            ],
+          ),
+          body: Stack(
+            children: <Widget>[
+              Positioned(
+                top: 0,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).padding.top + 227.0,
+                child: widget.returnVisit.mapPosition == null
+                  ? Container(color: AppStyles.primaryBackground,)
+                  : GoogleMap(
+                    rotateGesturesEnabled: false,
+                    scrollGesturesEnabled: false,
+                    tiltGesturesEnabled: false,
+                    zoomGesturesEnabled: false,
+                    myLocationButtonEnabled: false,
+                    buildingsEnabled: false,
+                    mapToolbarEnabled: false,
+                    circles: Set.from([
+                      Circle(
+                        circleId: CircleId("main location"),
+                        center: widget.returnVisit.mapPosition,
+                        radius: 25,
+                        fillColor: AppStyles.primaryColor,
+                        strokeColor: Colors.transparent,
+                      )
+                    ]),
+                    initialCameraPosition: CameraPosition(
+                      bearing: 360.0,
+                      target: widget.returnVisit.mapPosition.addOffset(latitudeOffset: -0.0012),
+                      zoom: _defaultZoom,
+                    ),
+                  ),
+              ),
+
+              Positioned(
+                top: MediaQuery.of(context).padding.top + AppStyles.topMargin,
+                width: MediaQuery.of(context).size.width,
+                child: Row(children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  Selector<EditReturnVisitModel, String>(
+                    selector: (_, rv) => rv.nameOrDescription,
+                    builder: (_, nameOrDescription, __) => Text(nameOrDescription, style: AppStyles.heading1))
+                ],),),
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 10.0,
+                right: 10.0,
+                child: Selector<EditReturnVisitModel, bool>(
+                  selector: (_, rv) => rv.pinned,
+                  builder: (_, pinned, __) => PinnedToggle(
+                    pinned: pinned,
+                    onChanged: (b) => widget.returnVisit.pinned = b,)),),
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 130.0,
+                width: MediaQuery.of(context).size.width,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppStyles.secondaryBackground,
+                    boxShadow: [
+                      BoxShadow(
+                        offset: Offset(1.00,-1.00),
+                        color: AppStyles.primaryBackground,
+                        blurRadius: 15,),], 
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30.00), 
+                      topRight: Radius.circular(30.00),),),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 35.0),
+                    child: TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      labelColor: Colors.black,
+                      unselectedLabelColor: Colors.white,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelPadding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 20.0),
+                      indicator: BoxDecoration(
+                        color: AppStyles.primaryBackground,
+                        boxShadow: [AppStyles.defaultBoxShadow],
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.00), 
+                          topRight: Radius.circular(20.00),),),
+                      tabs: [
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("personal", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      Tab(
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text("visits", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                    ]),
                   ),
                 ),
-            ),
-
-            Positioned(
-              top: MediaQuery.of(context).padding.top + AppStyles.topMargin,
-              width: MediaQuery.of(context).size.width,
-              child: Row(children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                Selector<EditReturnVisitModel, String>(
-                  selector: (_, rv) => rv.nameOrDescription,
-                  builder: (_, nameOrDescription, __) => Text(nameOrDescription, style: AppStyles.heading1))
-              ],),),
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10.0,
-              right: 10.0,
-              child: Selector<EditReturnVisitModel, bool>(
-                selector: (_, rv) => rv.pinned,
-                builder: (_, pinned, __) => PinnedToggle(
-                  pinned: pinned,
-                  onChanged: (b) => widget.returnVisit.pinned = b,)),),
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 130.0,
-              width: MediaQuery.of(context).size.width,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppStyles.secondaryBackground,
-                  boxShadow: [
-                    BoxShadow(
-                      offset: Offset(1.00,-1.00),
-                      color: AppStyles.primaryBackground,
-                      blurRadius: 15,),], 
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30.00), 
-                    topRight: Radius.circular(30.00),),),
-                child: Padding(
-                  padding: EdgeInsets.only(top: 35.0),
-                  child: TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    labelColor: Colors.black,
-                    unselectedLabelColor: Colors.white,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelPadding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 20.0),
-                    indicator: BoxDecoration(
-                      color: AppStyles.primaryBackground,
-                      boxShadow: [AppStyles.defaultBoxShadow],
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.00), 
-                        topRight: Radius.circular(20.00),),),
-                    tabs: [
-                    Tab(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text("personal", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
-                      ),
-                    ),
-                    Tab(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Text("visits", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
-                      ),
-                    ),
-                  ]),
-                ),
               ),
-            ),
-            Positioned.fill(
-              top: MediaQuery.of(context).padding.top + 200.0,
-              child: Container(
-                color: AppStyles.primaryBackground,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: <Widget>[
-                    _buildPersonalTab(context),
-                    Selector<EditReturnVisitModel, UnmodifiableListView<VisitCardModel>>(
-                      selector: (_, rv) => rv.visits,
-                      builder: (_, visits, __) => visits.isEmpty
-                        ? Container()
-                        : _buildVisitsTab(context, visits))
-                  ],),
-              )),
-          ],),
+              Positioned.fill(
+                top: MediaQuery.of(context).padding.top + 200.0,
+                child: Container(
+                  color: AppStyles.primaryBackground,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: <Widget>[
+                      _buildPersonalTab(context),
+                      Selector<EditReturnVisitModel, UnmodifiableListView<VisitCardModel>>(
+                        selector: (_, rv) => rv.visits,
+                        builder: (_, visits, __) => visits.isEmpty
+                          ? Container()
+                          : _buildVisitsTab(context, visits))
+                    ],),
+                )),
+            ],),
+        ),
       ),
     );
   }

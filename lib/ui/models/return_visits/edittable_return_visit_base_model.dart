@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:jama/data/models/address_model.dart';
+import 'package:jama/data/models/return_visit_model.dart';
 
 abstract class EdittableReturnVisitBaseModel extends ChangeNotifier {
   bool get pinned => null;
@@ -8,8 +11,8 @@ abstract class EdittableReturnVisitBaseModel extends ChangeNotifier {
   String get name => null;
   set name(String name);
 
-  String get gender => null;
-  set gender(String gender);
+  Gender get gender => null;
+  set gender(Gender gender);
 
   Address get address => null;
   set address(Address address);
@@ -32,8 +35,8 @@ abstract class EdittableReturnVisitBaseModel extends ChangeNotifier {
   String get notes => null;
   set notes(String notes);
 
-  List<int> get image => null;
-  set image(List<int> imagePath);
+  Uint8List get image => null;
+  set image(Uint8List imagePath);
 
   double get latitude => null;
   set latitude(double lat);

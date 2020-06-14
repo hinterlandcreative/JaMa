@@ -1,12 +1,14 @@
 import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
 import 'package:jama/data/models/return_visit_model.dart';
+import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
 import 'package:jama/ui/screens/edit_return_visit_screen.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:latlong/latlong.dart';
+import 'package:path/path.dart' as path;
 
 class ReturnVisitListItemModel {
   final ReturnVisit _returnVisit;
@@ -14,15 +16,20 @@ class ReturnVisitListItemModel {
   final Color timeSinceColor;
   final String timeSinceString;
   final ReturnVisitService _rvService;
+  final ImageService _imageService;
+  String _basePath;
 
   ReturnVisitListItemModel._(
     this._returnVisit, 
     this.distanceFromCurrentLocation, 
     this.timeSinceColor, 
     this.timeSinceString, 
-    this._rvService);
+    this._rvService, 
+    this._imageService) {
+      _imageService.documentsDirectory.then((value) => _basePath = value.path);
+    }
   
-  factory ReturnVisitListItemModel({@required ReturnVisit returnVisit, @required double currentLatitude, @required double currentLongitude, LocationService locationService, ReturnVisitService returnVisitService}) {
+  factory ReturnVisitListItemModel({@required ReturnVisit returnVisit, @required double currentLatitude, @required double currentLongitude, LocationService locationService, ReturnVisitService returnVisitService, ImageService imageService}) {
     assert(returnVisit != null);
     assert(returnVisit.id >= 0);
     assert(currentLatitude != null);
@@ -30,7 +37,7 @@ class ReturnVisitListItemModel {
 
     var container = kiwi.Container();
     locationService = locationService ?? container.resolve<LocationService>();
-    var rvService = returnVisitService ?? container.resolve<ReturnVisitService>();
+    
 
     var distance = "";
     Color timeSinceColor = Colors.green;
@@ -65,11 +72,12 @@ class ReturnVisitListItemModel {
     }
     
     return ReturnVisitListItemModel._(
-      returnVisit, 
-      distance, 
-      timeSinceColor, 
+      returnVisit,
+      distance,
+      timeSinceColor,
       timeSinceString,
-      rvService);
+      returnVisitService ?? container.resolve<ReturnVisitService>(),
+      imageService ?? container.resolve<ImageService>());
   }
 
   Future delete() async {
@@ -84,7 +92,7 @@ class ReturnVisitListItemModel {
   
   String get formattedAddress => _returnVisit.address.toFormattedString(true, false, false);
 
-  String get imagePath => _returnVisit.imagePath ?? "";
+  String get imagePath => _returnVisit.imagePath.isNotEmpty ? path.join(_basePath, _returnVisit.imagePath) : "";
 
   String get searchString => _returnVisit.createSearchString();
 

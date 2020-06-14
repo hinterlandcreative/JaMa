@@ -52,20 +52,20 @@ class ReturnVisit extends DTO {
       };
   }
       
-        ReturnVisit copy() {
-          return ReturnVisit.fromMap(this.toMap());
-        }
+  ReturnVisit copy() {
+    return ReturnVisit.fromMap(this.toMap());
+  }
       
-    String createSearchString() {
-      var s = "";
-      if(name.isNotEmpty) {
-        s += name;
-      } else {
-        s += gender.toString().split('.').last;
-      }
-      s += ' ' + address.toFormattedString();
-      return s;
+  String createSearchString() {
+    var s = "";
+    if(name.isNotEmpty) {
+      s += name;
+    } else {
+      s += gender.toString().split('.').last;
     }
+    s += ' ' + address.toFormattedString();
+    return s;
+  }
 }
 
 enum  Gender {

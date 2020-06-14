@@ -35,7 +35,7 @@ class DonutChartWidget extends StatelessWidget {
             defaultRenderer: new charts.ArcRendererConfig(arcWidth: 8)),
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(25.0),
               child: AutoSizeText(
                 text,
                 minFontSize: 1,

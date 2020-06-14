@@ -17,7 +17,7 @@ dependencies:
   slider_button: ^0.4.0
   flutter_xlider: ^3.1.0
   flutter_time_picker_spinner: ^1.0.6
-  commons: ^0.6.3
+  commons: ^0.7.8+1
   auto_size_text: ^2.1.0
   cupertino_icons: ^0.1.2
   line_icons: ^0.2.0
@@ -33,7 +33,7 @@ dependencies:
     git: https://github.com/hinterlandsupplyco/flutter_speed_dial.git
   date_picker_timeline:
     git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
-  google_maps_flutter: ^0.5.22+3
+  google_maps_flutter: ^0.5.28+1
   geolocator: ^5.2.1
   grouped_buttons: ^1.0.4
   icon_shadow: ^1.0.1
@@ -49,6 +49,7 @@ dependencies:
   popup_menu: ^1.0.5
   toggle_switch: ^0.1.4
   typicons_flutter: ^0.3.1
+  flutter_focus_watcher: ^0.0.1
 dev_dependencies:
   mockito: ^4.1.1
   flutter_test:

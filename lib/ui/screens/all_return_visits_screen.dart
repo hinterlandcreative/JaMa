@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/return_visits/all_return_visits_list_model.dart';
@@ -15,42 +16,35 @@ import 'package:search_widget/search_widget.dart';
 import 'add_return_visit_screen.dart';
 
 class AllReturnVisitsScreen extends StatelessWidget {
-  Function() _releaseSearchFocus;
 
   AllReturnVisitsScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {if(_releaseSearchFocus != null) {
-        _releaseSearchFocus();
-        FocusScope.of(context).requestFocus(new FocusNode());
-      }},
-      child: ChangeNotifierProvider(
-        create: (_) => AllReturnVisitsListModel(),
-        child: Consumer<AllReturnVisitsListModel>(
-          builder: (context, model, _) => ScrollableBaseScreen(
-            speedDialIcon: AnimatedIcons.menu_close,
-            speedDialActions: [
-              SpeedDialChild(
-                  child: Icon(Icons.group_add),
-                  label: "add return visit",
-                  labelStyle: AppStyles.heading4,
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AddReturnVisitScreen()));
-                  }),
-            ],
-            headerWidget: _buildHeaderWidget(),
-            headerBottomWidget: model.pinnedReturnVisits.length > 0 
-              ? _buildPinnedReturnVisitsWidget(context, items: model.pinnedReturnVisits) 
-              : null,
-            floatingWidget: _buildSearchWidget(context),
-            hideFloatingWidgetOnScroll: false,
-            body: _buildBody(),
-          ),
+    return ChangeNotifierProvider(
+      create: (_) => AllReturnVisitsListModel(),
+      child: Consumer<AllReturnVisitsListModel>(
+        builder: (context, model, _) => ScrollableBaseScreen(
+          speedDialIcon: AnimatedIcons.menu_close,
+          speedDialActions: [
+            SpeedDialChild(
+                child: Icon(Icons.group_add),
+                label: "add return visit",
+                labelStyle: AppStyles.heading4,
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddReturnVisitScreen()));
+                }),
+          ],
+          headerWidget: _buildHeaderWidget(),
+          headerBottomWidget: model.pinnedReturnVisits.length > 0 
+            ? _buildPinnedReturnVisitsWidget(context, items: model.pinnedReturnVisits) 
+            : null,
+          floatingWidget: _buildSearchWidget(context),
+          hideFloatingWidgetOnScroll: false,
+          body: _buildBody(),
         ),
       ),
     );
@@ -80,7 +74,6 @@ class AllReturnVisitsScreen extends StatelessWidget {
       builder: (context, model, __) => SearchWidget<ReturnVisitListItemModel>(
         dataList: model.returnVisits,
         textFieldBuilder: (controller, focusNode) {
-          _releaseSearchFocus = () => focusNode.unfocus();
           return Container(
           height: 48.0,
           decoration: BoxDecoration(
@@ -94,14 +87,16 @@ class AllReturnVisitsScreen extends StatelessWidget {
               ),
             ], borderRadius: BorderRadius.circular(10.00), 
           ), 
-          child: TextField(
-            controller: controller,
-            focusNode: focusNode,
-            decoration: InputDecoration(
-              hintText: "Search...",
-              hintStyle: AppStyles.heading4,
-              contentPadding: EdgeInsets.symmetric(horizontal: 15.0),
-              border: InputBorder.none),
+          child: ForceFocusWatcher(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                hintText: "Search...",
+                hintStyle: AppStyles.heading4,
+                contentPadding: EdgeInsets.symmetric(horizontal: 15.0),
+                border: InputBorder.none),
+            ),
           ),
         );
         },
@@ -155,7 +150,7 @@ class AllReturnVisitsScreen extends StatelessWidget {
                       ),
                     ),
                     Positioned.fill(
-                        top: 34.0,
+                        top: 37.0,
                         left: 22.0,
                         right: 22.0,
                         child: Container(
