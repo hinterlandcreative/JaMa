@@ -5,7 +5,7 @@ import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
-import 'package:jama/ui/screens/edit_return_visit_screen.dart';
+import 'package:jama/ui/screens/return_visits/edit_return_visit_screen.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:latlong/latlong.dart';
 import 'package:path/path.dart' as path;

@@ -7,7 +7,7 @@ import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
-import 'package:jama/ui/screens/time_report_list_screen.dart';
+import 'package:jama/ui/screens/reports/time_report_screen.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:tuple/tuple.dart';
 
@@ -69,11 +69,12 @@ class HomeModel extends ChangeNotifier {
     }
     _returnVisits = 0;
 
+    _goals.clear();
     _goals.add(
       GoalModel(
-        text: "See how your ministry went in ${DateFormat.MMM().format(DateTime(now.year, now.month - 1))}.",
+        text: "${DateFormat.MMM().format(DateTime(now.year, now.month - 1))} was a great month! Let's look at how your ministry went.",
         iconPath: "graphics/confetti.png",
-        navigationWidget: () => TimeReportListScreen(
+        navigationWidget: () => TimeReportScreen(
           start: DateTime(now.year, now.month -1, 1),
           end: DateTime(now.year, now.month, 1).subtract(Duration(milliseconds: 1))
         )

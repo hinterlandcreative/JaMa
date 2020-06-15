@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:popup_menu/popup_menu.dart';
+import 'package:provider/provider.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:tuple/tuple.dart';
+
 import 'package:jama/data/models/visit_model.dart';
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
@@ -13,12 +18,7 @@ import 'package:jama/ui/widgets/pinned_toggle.dart';
 import 'package:jama/ui/widgets/return_visit_personal_info_form.dart';
 import 'package:jama/ui/widgets/timeline_card.dart';
 import 'package:jama/ui/widgets/timeline_title.dart';
-import 'package:popup_menu/popup_menu.dart';
-import 'package:provider/provider.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:tuple/tuple.dart';
-
-import '../app_styles.dart';
+import 'package:jama/ui/app_styles.dart';
 
 class EditReturnVisitScreen extends StatefulWidget {
   final EditReturnVisitModel returnVisit;

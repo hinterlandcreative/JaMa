@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:jama/ui/app_styles.dart';
-import 'package:jama/ui/screens/all_return_visits_screen.dart';
-import 'package:jama/ui/screens/home_screen.dart';
 import 'package:line_icons/line_icons.dart';
-import 'time_list_screen.dart';
+
+import 'package:jama/ui/app_styles.dart';
+import 'package:jama/ui/screens/return_visits/all_return_visits_screen.dart';
+import 'package:jama/ui/screens/home_screen.dart';
+import 'package:jama/ui/screens/time/root_time_screen.dart';
 
 class TabbedController extends StatefulWidget {
   TabbedController({Key key, this.title}) : super(key: key);

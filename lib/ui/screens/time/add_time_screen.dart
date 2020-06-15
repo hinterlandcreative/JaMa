@@ -2,14 +2,14 @@ import 'package:commons/commons.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
+import 'package:provider/provider.dart';
+
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/ui/widgets/goal_stepper_widget.dart';
 import 'package:jama/ui/widgets/time_selection_slider_widget.dart';
-import 'package:provider/provider.dart';
-
-import '../app_styles.dart';
-import 'base_screen.dart';
+import 'package:jama/ui/app_styles.dart';
+import 'package:jama/ui/screens/base_screen.dart';
 
 class TimeScreen extends StatelessWidget {
   final TimeModel model;

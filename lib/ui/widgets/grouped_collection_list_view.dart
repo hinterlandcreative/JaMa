@@ -27,29 +27,35 @@ class GroupedCollectionListView<T> extends StatelessWidget {
     return Container(
       child: groups == null || groups.isEmpty
         ? Container()
-        : _buildGroups(),
+        : _buildGroups(context),
     );
   }
 
-  Widget _buildGroups() {
-    return ListView.builder(
-      itemCount: groups.length,
-      itemBuilder: (context, index) => Column(children: useStickyHeaders
-        ? _buildStickyGroup(
+  Widget _buildGroups(BuildContext context) {
+    var children = <Column>[];
+    for(var index in List<int>.generate(groups.length - 1, (i) => i + 1)) {
+      children.add(Column(children: _buildChildren(context, index)));
+    }
+    return ListView(
+      children: children
+    );
+  }
+
+  List<Widget> _buildChildren(BuildContext context, int index) {
+    return useStickyHeaders
+      ? _buildStickyGroup(
+        context, 
+        groups[index], 
+        index == groups.length - 1, 
+        index == 0)
+      : <Widget>[
+        headerBuilder(
           context, 
-          groups[index], 
+          groups[index].header, 
           index == groups.length - 1, 
           index == 0)
-        : <Widget>[
-          headerBuilder(
-            context, 
-            groups[index].header, 
-            index == groups.length - 1, 
-            index == 0)
-        ] +
-          _buildItemListForGroup(groups[index].items, context)
-      ),
-    );
+      ] +
+        _buildItemListForGroup(groups[index].items, context);
   }
 
   List<Widget> _buildItemListForGroup(UnmodifiableListView<T> items, BuildContext context) {

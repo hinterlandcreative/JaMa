@@ -8,12 +8,12 @@ import 'package:jama/ui/widgets/add_placement_dialog.dart';
 import 'package:jama/ui/widgets/address_mapper_widget.dart';
 import 'package:jama/ui/widgets/pinned_toggle.dart';
 import 'package:jama/ui/widgets/return_visit_personal_info_form.dart';
-import '../../mixins/date_mixin.dart';
-import '../../mixins/color_mixin.dart';
+import 'package:jama/mixins/date_mixin.dart';
+import 'package:jama/mixins/color_mixin.dart';
 import 'package:provider/provider.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
-import '../translation.dart';
+import 'package:jama/ui/translation.dart';
 
 class AddReturnVisitScreen extends StatefulWidget {
   AddReturnVisitScreen({Key key}) : super(key: key);
