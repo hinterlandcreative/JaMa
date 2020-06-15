@@ -11,4 +11,13 @@ extension DateTimeMixins on DateTime {
   
   /// Finds the first day of this month and returns the earliest possible time.
   DateTime toFirstDayOfMonth() => DateTime(this.year, this.month, 1);
+
+  DateTime toNearestIncrement({int increment = 15}) {
+    if(increment > 60) {
+      increment = 60;
+    } else if(increment == 0) {
+      return this;
+    }
+    return DateTime(this.year, this.month, this.day, this.hour, (this.minute / increment).round() * increment, this.second, this.millisecond, this.microsecond);
+  }
 }
