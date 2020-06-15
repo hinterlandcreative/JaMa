@@ -11,18 +11,18 @@ import 'package:jama/ui/widgets/time_selection_slider_widget.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/screens/base_screen.dart';
 
-class TimeScreen extends StatelessWidget {
+class AddEditTimeScreen extends StatelessWidget {
   final TimeModel model;
   final _formKey = GlobalKey<FormState>();
 
-  TimeScreen._([this.model]);
+  AddEditTimeScreen._([this.model]);
 
-  factory TimeScreen(TimeModel model) {
-    return TimeScreen._(TimeModel(timeModel: model.time));
+  factory AddEditTimeScreen(TimeModel model) {
+    return AddEditTimeScreen._(TimeModel(timeModel: model.time));
   }
 
-  factory TimeScreen.createNew() {
-    return TimeScreen._();
+  factory AddEditTimeScreen.createNew() {
+    return AddEditTimeScreen._();
   }
 
   @override

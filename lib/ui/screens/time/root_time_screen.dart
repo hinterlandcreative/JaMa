@@ -2,7 +2,6 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:intl/intl.dart';
 import 'package:sticky_headers/sticky_headers.dart';
@@ -16,7 +15,7 @@ import 'package:jama/ui/widgets/time_card.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:jama/ui/app_styles.dart';
-import 'package:jama/ui/screens/time/add_time_screen.dart';
+import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
 
 class TimeListScreen extends StatelessWidget {
   final DateTime startDate;
@@ -41,7 +40,7 @@ class TimeListScreen extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => TimeScreen.createNew()));
+                                builder: (context) => AddEditTimeScreen.createNew()));
                       }),
                   SpeedDialChild(
                       child: Icon(Icons.clear_all),

@@ -6,7 +6,7 @@ import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/mixins/duration_mixin.dart';
-import 'package:jama/ui/screens/time/add_time_screen.dart';
+import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
 
 class TimeCard extends StatelessWidget {
   final TimeModel item;
@@ -39,7 +39,7 @@ class TimeCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      TimeScreen(TimeModel(timeModel: item.time.copy())))),
+                      AddEditTimeScreen(TimeModel(timeModel: item.time.copy())))),
         child: Column(
           children: <Widget>[
             Container(

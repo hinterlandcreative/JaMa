@@ -7,7 +7,7 @@ import 'package:jama/ui/models/home_model.dart';
 import 'package:jama/ui/models/reports/send_current_report_model.dart';
 import 'package:jama/ui/screens/return_visits/add_return_visit_screen.dart';
 import 'package:jama/ui/screens/scrollable_base_screen.dart';
-import 'package:jama/ui/screens/time/add_time_screen.dart';
+import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
 import 'package:jama/ui/widgets/goal_widget.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      TimeScreen.createNew()));
+                                      AddEditTimeScreen.createNew()));
                         }),
                     SpeedDialChild(
                         child: Icon(Icons.access_alarms),
