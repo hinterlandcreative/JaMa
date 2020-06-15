@@ -8,8 +8,8 @@ class TimeByDateModel extends GroupedCollection<TimeModel> {
 
   final List<TimeModel> _items;
   final DateTime date;
-
-  TimeByDateModel(this._items, this.date) : super(DateFormat.yMMMMd(Intl.defaultLocale).format(date), UnmodifiableListView(_items));
+  
+  TimeByDateModel(this._items, this.date) : super(DateFormat.MMMMEEEEd(Intl.defaultLocale).format(date), UnmodifiableListView(_items));
 
   @override
   UnmodifiableListView<TimeModel> get items => UnmodifiableListView(_items);

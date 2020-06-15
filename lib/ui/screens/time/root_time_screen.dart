@@ -137,29 +137,10 @@ class TimeCardCollection extends StatelessWidget {
 
   Widget _createCollectionCell(
       BuildContext context, TimeModel item, bool shouldAddBottomBorder) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    TimeScreen(TimeModel(timeModel: item.time.copy()))));
-      },
-      child: Slidable(
-        closeOnScroll: true,
-        actionPane: SlidableDrawerActionPane(),
-        actionExtentRatio: 0.25,
-        secondaryActions: <Widget>[
-          IconSlideAction(
-            icon: Icons.delete_outline,
-            color: Colors.red,
-            caption: "delete",
-            onTap: () => onItemDeleted(item.time),
-          )
-        ],
-        child: TimeCard(item: item, isLast: shouldAddBottomBorder,),
-      ),
-    );
+    return TimeCard(
+      item: item, 
+      isLast: shouldAddBottomBorder,
+      onItemDeleted: onItemDeleted);
   }
 
   Widget _createCollectionHeader(TimeByDateModel section) {

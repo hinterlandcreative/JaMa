@@ -40,7 +40,10 @@ class TimeReportScreen extends StatelessWidget {
           builder: (context, model, _) => GroupedCollectionListView<TimeModel>(
             groups: model.items,
             headerBuilder: (_, header, __, ___) => _createCollectionHeader(header),
-            itemBuilder: (_, item, isLast, __) => TimeCard(item: item, isLast: isLast),
+            itemBuilder: (_, item, isLast, __) => TimeCard(
+              item: item, 
+              isLast: isLast,
+              onItemDeleted: (_) => model.onItemDeleted(item),),
           )
         )
       ),
@@ -69,17 +72,19 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
 
   StreamSubscription<Time> _subscription;
 
-  TimeGroupedByDateCollectionModel({@required DateTime start, @required DateTime end, TimeService timeService}) {
-    timeService = timeService ?? kiwi.Container().resolve<TimeService>();
-    _loadData(start, end, timeService);
+  TimeService _timeService;
 
-    _subscription = timeService.timeUpdatedStream.listen((_) => _loadData(start, end, timeService));
+  TimeGroupedByDateCollectionModel({@required DateTime start, @required DateTime end, TimeService timeService}) {
+    _timeService = timeService ?? kiwi.Container().resolve<TimeService>();
+    _loadData(start, end);
+
+    _subscription = _timeService.timeUpdatedStream.listen((_) => _loadData(start, end));
   }
 
   List<TimeByDateModel> get items => _items;
 
-  Future _loadData(DateTime start, DateTime end, TimeService timeService) async {
-    var timeEntries = await timeService.getTimeEntriesByDate(
+  Future _loadData(DateTime start, DateTime end) async {
+    var timeEntries = await _timeService.getTimeEntriesByDate(
       startTime: start, 
       endTime: end);
 
@@ -101,5 +106,9 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
   void dispose() {
     _subscription.cancel();
     super.dispose();
+  }
+
+  Future onItemDeleted(TimeModel item) async {
+    await _timeService.deleteTime(item.time);
   }
 }
