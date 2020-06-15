@@ -61,7 +61,8 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
         .where((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime() == date)
         .map((t) => TimeModel(timeModel: t))
         .toList(), 
-      date)).toList();
+      date)
+    ).toList();
     
     var categories = await _timeService.getCategories();
 
@@ -78,8 +79,10 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
     _goalHours = 0;
 
-    _videos = timeEntries.map((t) => t.videos).reduce((a, b) => a + b);
-    _placements = timeEntries.map((t) => t.placements).reduce((a, b) => a + b);
+    if(timeEntries.isNotEmpty) {
+      _videos = timeEntries.map((t) => t.videos).reduce((a, b) => a + b);
+      _placements = timeEntries.map((t) => t.placements).reduce((a, b) => a + b);
+    }
     _returnVisits = 0;
 
     notifyListeners();
