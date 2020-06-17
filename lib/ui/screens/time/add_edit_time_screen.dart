@@ -11,9 +11,8 @@ import 'package:jama/ui/widgets/time_selection_slider_widget.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/screens/base_screen.dart';
 
-class AddEditTimeScreen extends StatelessWidget {
+class AddEditTimeScreen extends StatefulWidget {
   final TimeModel model;
-  final _formKey = GlobalKey<FormState>();
 
   AddEditTimeScreen._([this.model]);
 
@@ -26,11 +25,23 @@ class AddEditTimeScreen extends StatelessWidget {
   }
 
   @override
+  _AddEditTimeScreenState createState() => _AddEditTimeScreenState();
+}
+
+class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final categoryScrollListController = ItemScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var categoryScrollListController = ItemScrollController();
     return BaseScreen(
         body: ChangeNotifierProvider(
-            create: (_) => model ?? TimeModel(),
+            create: (_) => widget.model ?? TimeModel(),
             child: Consumer<TimeModel>(
                 builder: (_, model, __) => Stack(children: <Widget>[
                       // header
@@ -120,38 +131,45 @@ class AddEditTimeScreen extends StatelessWidget {
                                     width: MediaQuery.of(context).size.width,
                                     child: ScrollablePositionedList.builder(
                                         itemScrollController: categoryScrollListController,
-                                        padding: EdgeInsets.only(left: AppStyles.leftMargin),
                                         scrollDirection: Axis.horizontal,
                                         itemCount: model.categories.length,
                                         initialScrollIndex: model.categories.length <= 0 ? 0 : model.categories.indexWhere((category) => category.id == model.time.category.id),
                                         itemBuilder: (_, index) {
                                           var category =
                                               model.categories[index];
+                                          bool isFirst = index == 0;
+                                          bool isLast = index + 1 == model.categories.length;
                                           return ChipTheme(
                                             data: ChipTheme.of(context).copyWith(
                                               secondaryLabelStyle: AppStyles.smallTextStyle.copyWith(color: Colors.black)
                                             ),
-                                            child: ChoiceChip(
-                                              avatar: Padding(
-                                                padding: const EdgeInsets.only(bottom: 2),
-                                                child: CircleAvatar(
-                                                  backgroundColor: category.color,
+                                            child: Padding(
+                                              padding: EdgeInsets.only(
+                                                left: isFirst ? AppStyles.leftMargin : 0.0,
+                                                right: isLast ? AppStyles.leftMargin : 0.0),
+                                              child: ChoiceChip(
+                                                avatar: Padding(
+                                                  padding: const EdgeInsets.only(bottom: 2),
+                                                  child: CircleAvatar(
+                                                    backgroundColor: category.color,
+                                                  ),
                                                 ),
+                                                label: Text(
+                                                  category.name,
+                                                  style: AppStyles.smallTextStyle),
+                                                backgroundColor:
+                                                    AppStyles.primaryBackground,
+                                                selectedColor:
+                                                    AppStyles.lightGrey,
+                                                selected:
+                                                    model.time.category.id == category.id,
+                                                onSelected: (selected) {
+                                                  if (selected) {
+                                                    categoryScrollListController.scrollTo(index: index, duration: Duration(milliseconds: 300));
+                                                    model.setCategory(category);
+                                                  }
+                                                },
                                               ),
-                                              label: Text(
-                                                category.name,
-                                                style: AppStyles.smallTextStyle),
-                                              backgroundColor:
-                                                  AppStyles.primaryBackground,
-                                              selectedColor:
-                                                  AppStyles.lightGrey,
-                                              selected:
-                                                  model.time.category.id == category.id,
-                                              onSelected: (selected) {
-                                                if (selected) {
-                                                  model.setCategory(category);
-                                                }
-                                              },
                                             ),
                                           );
                                         },
