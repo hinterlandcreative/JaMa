@@ -13,7 +13,9 @@ jobs:
         secureFile: 'ApiConstants.swift'
       displayName: Download API Constants
     - script: |
-        cp $(ioApiConstants.secureFilePath) ios/Runner/ApiConstants.swift
+        pwd
+        echo $(ioApiConstants.secureFilePath)
+        cp $(ioApiConstants.secureFilePath) ios/Runner/
       displayName: Copy API Constants Files
     - task: InstallAppleCertificate@2
       inputs:
