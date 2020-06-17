@@ -213,19 +213,23 @@ class AddEditTimeScreen extends StatelessWidget {
                                   ),
                                   Padding(
                                     padding: EdgeInsets.symmetric(
-                                        horizontal: AppStyles.leftMargin,
-                                        vertical: 10),
+                                        horizontal: AppStyles.leftMargin).add(
+                                          EdgeInsets.only(top: 10.0)
+                                        ),
                                     child: Text("Notes",
                                         style: AppStyles.heading4),
                                   ),
                                   Padding(
                                       padding:
-                                          EdgeInsets.all(AppStyles.leftMargin),
+                                          EdgeInsets.only(left: AppStyles.leftMargin, right: AppStyles.leftMargin, bottom: AppStyles.leftMargin),
                                       child: Form(
                                         key: _formKey,
                                         child: Column(
                                           children: <Widget>[
                                             TextFormField(
+                                              keyboardType: TextInputType.multiline,
+                                              minLines: 1,
+                                              maxLines: 5,
                                               onSaved: (notes) =>
                                                   model.setNotes(notes),
                                             ),
