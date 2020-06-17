@@ -127,24 +127,32 @@ class AddEditTimeScreen extends StatelessWidget {
                                         itemBuilder: (_, index) {
                                           var category =
                                               model.categories[index];
-                                          return ChoiceChip(
-                                            avatar: CircleAvatar(
-                                              backgroundColor: category.color,
+                                          return ChipTheme(
+                                            data: ChipTheme.of(context).copyWith(
+                                              secondaryLabelStyle: AppStyles.smallTextStyle.copyWith(color: Colors.black)
                                             ),
-                                            label: Text(
-                                              category.name,
-                                              style: AppStyles.smallTextStyle),
-                                            backgroundColor:
-                                                AppStyles.primaryBackground,
-                                            selectedColor:
-                                                AppStyles.lightGrey,
-                                            selected:
-                                                model.time.category.id == category.id,
-                                            onSelected: (selected) {
-                                              if (selected) {
-                                                model.setCategory(category);
-                                              }
-                                            },
+                                            child: ChoiceChip(
+                                              avatar: Padding(
+                                                padding: const EdgeInsets.only(bottom: 2),
+                                                child: CircleAvatar(
+                                                  backgroundColor: category.color,
+                                                ),
+                                              ),
+                                              label: Text(
+                                                category.name,
+                                                style: AppStyles.smallTextStyle),
+                                              backgroundColor:
+                                                  AppStyles.primaryBackground,
+                                              selectedColor:
+                                                  AppStyles.lightGrey,
+                                              selected:
+                                                  model.time.category.id == category.id,
+                                              onSelected: (selected) {
+                                                if (selected) {
+                                                  model.setCategory(category);
+                                                }
+                                              },
+                                            ),
                                           );
                                         },
                                         ),
