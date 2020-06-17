@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:jama/ui/app_styles.dart';
 
 class BaseScreen extends StatelessWidget {
@@ -12,16 +13,18 @@ class BaseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppStyles.primaryBackground,
-      floatingActionButton: floatingActionButton,
-      body: Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-        child: Container(
-          color: topBarColor ?? _defaultTopBarColor,
-          child: SafeArea(
-            bottom: false,
-            child: body),
+    return FocusWatcher(
+      child: Scaffold(
+        backgroundColor: AppStyles.primaryBackground,
+        floatingActionButton: floatingActionButton,
+        body: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+          child: Container(
+            color: topBarColor ?? _defaultTopBarColor,
+            child: SafeArea(
+              bottom: false,
+              child: body),
+          ),
         ),
       ),
     );

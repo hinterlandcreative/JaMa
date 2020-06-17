@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
+import 'package:jama/ui/screens/reports/time_report_screen.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:tuple/tuple.dart';
 
@@ -61,16 +63,22 @@ class HomeModel extends ChangeNotifier {
 
     _goalHours = 0;
 
-    _videos = timeEntries.map((t) => t.videos).reduce((a, b) => a + b);
-    _placements = timeEntries.map((t) => t.placements).reduce((a, b) => a + b);
+    if(timeEntries.isNotEmpty) {
+      _videos = timeEntries.map((t) => t.videos).reduce((a, b) => a + b);
+      _placements = timeEntries.map((t) => t.placements).reduce((a, b) => a + b);
+    }
     _returnVisits = 0;
 
-    // _goals.add(
-    //   GoalModel(
-    //     "You have 5 return visits that you haven’t gotten home in over 4 weeks.",
-    //     null,
-    //     "graphics/notebook.png"
-    //   )); 
+    _goals.clear();
+    _goals.add(
+      GoalModel(
+        text: "${DateFormat.MMM().format(DateTime(now.year, now.month - 1))} was a great month! Let's look at how your ministry went.",
+        iconPath: "graphics/confetti.png",
+        navigationWidget: () => TimeReportScreen(
+          start: DateTime(now.year, now.month -1, 1),
+          end: DateTime(now.year, now.month, 1).subtract(Duration(milliseconds: 1))
+        )
+      )); 
     // _goals.add(
     //   GoalModel(
     //     "You’ve averaged 14 ministry days per month, 4 hours per day and 72 hours per month.",

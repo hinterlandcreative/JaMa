@@ -5,9 +5,8 @@ import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:jama/mixins/date_mixin.dart';
 import 'package:quiver/time.dart';
-
-import '../../../mixins/num_mixin.dart';
 
 class TimeModel extends ChangeNotifier {
   int _currentPlacements = 0;
@@ -29,9 +28,10 @@ class TimeModel extends ChangeNotifier {
 
   TimeModel({Time timeModel, TimeService timeService}) {
     var now = DateTime.now();
+
     time = timeModel ??
         Time(
-            date: DateTime.now().subtract(anHour).millisecondsSinceEpoch,
+            date: DateTime.now().toNearestIncrement().subtract(anHour).millisecondsSinceEpoch,
             totalMinutes: anHour.inMinutes,
             category: null);
     final container = kiwi.Container();

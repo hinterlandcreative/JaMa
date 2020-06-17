@@ -14,7 +14,7 @@ class TimeCategory extends DTO {
   Color color;
 
   /// Instantiated a new instance of TimeCategory with the specified [name] (required), [description] and [color].
-  TimeCategory({@required this.name, this.description, this.color});
+  TimeCategory({int id, @required this.name, this.description, this.color}) : super(id: id ?? -1);
 
   @override
   TimeCategory.fromMap(Map<String, dynamic> map) {

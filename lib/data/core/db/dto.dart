@@ -1,11 +1,7 @@
-abstract class DTO {
+import 'package:jama/data/core/mappable.dart';
+
+abstract class DTO extends Mappable {
   int id = -1;
 
-  DTO();
-  
-  DTO.fromMap(Map<String, dynamic> map);
-
-  Map<String, dynamic> toMap();
-
-  DTO copy();
+  DTO({this.id});
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jama/data/models/visit_model.dart';
 import 'package:jama/mixins/color_mixin.dart';
 
 class AppStyles {
@@ -40,4 +41,11 @@ class AppStyles {
   // charts
   static double get defaultChartHeight => 100.0;
   static double get defaultChartWidth => 100.0;
+
+  // other
+  static Map<VisitType, Color> visitTypeToColor = {
+    VisitType.ReturnVisit : AppStyles.primaryColor,
+    VisitType.NotAtHome : Colors.redAccent,
+    VisitType.Study : Colors.deepPurpleAccent,
+  };
 }
