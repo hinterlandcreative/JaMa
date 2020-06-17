@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:jama/data/core/mappable.dart';
 import 'package:jama/data/models/visit_model.dart';
+import 'package:quiver/core.dart';
 
 class Placement extends Mappable {
   int count;
@@ -30,4 +31,17 @@ class Placement extends Mappable {
     };
   }
 
+  @override
+  int get hashCode => hash3(count, type, notes);
+
+  @override
+  operator ==(other) {
+    if(other is Placement) {
+      return other.count == count 
+        && other.notes == notes
+        && other.type == type;
+    }
+
+    return false;
+  }
 }
