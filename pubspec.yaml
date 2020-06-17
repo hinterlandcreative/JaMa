@@ -44,7 +44,7 @@ dependencies:
   image: ^2.1.4
   random_color: ^1.0.3
   shared_preferences: ^0.5.6+2
-  flutter_sms: ^2.0.0+2
+  flutter_sms: 2.0.0+2
   search_widget: ^1.0.2
   popup_menu: ^1.0.5
   toggle_switch: ^0.1.4
