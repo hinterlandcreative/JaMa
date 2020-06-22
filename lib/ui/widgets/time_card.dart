@@ -22,24 +22,24 @@ class TimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    AddEditTimeScreen(TimeModel(timeModel: item.time.copy())))),
+      child: Slidable(
         closeOnScroll: true,
         actionPane: SlidableDrawerActionPane(),
         actionExtentRatio: 0.25,
         secondaryActions: <Widget>[
-          IconSlideAction(
-            icon: Icons.delete_outline,
-            color: Colors.red,
-            caption: "delete",
-            onTap: () => onItemDeleted(item.time),
-          )
-        ],
-        child:  GestureDetector(
-        onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      AddEditTimeScreen(TimeModel(timeModel: item.time.copy())))),
+            IconSlideAction(
+              icon: Icons.delete_outline,
+              color: Colors.red,
+              caption: "delete",
+              onTap: () => onItemDeleted(item.time),
+            )
+          ],
         child: Column(
           children: <Widget>[
             Container(
