@@ -18,7 +18,7 @@ class PinnedToggle extends StatelessWidget {
       minWidth: 50,
       activeBgColor: AppStyles.primaryColor,
       activeTextColor: Colors.white,
-      inactiveBgColor: Colors.grey,
+      inactiveBgColor: Colors.grey.withAlpha(70),
       inactiveTextColor: Colors.white,
       labels: ['', ''],
       icons: [Typicons.pin_outline, Typicons.pin],
