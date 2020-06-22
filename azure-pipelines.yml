@@ -20,7 +20,6 @@ jobs:
     - task: InstallAppleCertificate@2
       inputs:
         certSecureFile: 'Hsco_cert.p12'
-        certPwd: '$(privateKeyPassword)'
       displayName: Installing iOS Dev Certificate
     - task: InstallAppleProvisioningProfile@1
       inputs:
