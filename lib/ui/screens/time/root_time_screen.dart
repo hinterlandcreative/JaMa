@@ -54,32 +54,7 @@ class TimeListScreen extends StatelessWidget {
                       child: Icon(Icons.show_chart),
                       label: "last month's report",
                       labelStyle: AppStyles.heading4,
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Scaffold(
-                                      body: ChangeNotifierProvider<TimeCollectionModel>(
-                                          create: (_) {
-                                            var now = DateTime.now();
-                                            DateTime startDate = DateTime(
-                                                now.year, now.month - 1, 1);
-                                            DateTime endDate = DateTime(
-                                                    now.year, now.month, 1)
-                                                .subtract(
-                                                    Duration(milliseconds: 1));
-                                            return TimeCollectionModel(
-                                                startDate, endDate);
-                                          },
-                                          child: Consumer<TimeCollectionModel>(
-                                              builder: (_, model, __) =>
-                                                  TimeCardCollection(
-                                                    items: model.items,
-                                                    onItemDeleted: (t) =>
-                                                        model.deleteTime(t),
-                                                  ))),
-                                    )));
-                      }),
+                      onTap: () => model.navigateToLastMonthsReport(context)),
                 ],
                 headerWidget: PreferredSize(
                   preferredSize: Size.fromHeight(66.0),

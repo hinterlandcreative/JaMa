@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/material.dart';
 import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/collection_base_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/time/time_category_model.dart';
-import 'package:kiwi/kiwi.dart';
+import 'package:jama/ui/screens/reports/time_report_screen.dart';
+import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:tuple/tuple.dart';
 
 import 'time_by_date_model.dart';
@@ -34,7 +36,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
   int get returnVisits => _returnVisits;
 
   TimeCollectionModel(this.startDate, this.endDate, [TimeService timeService]) {
-    Container container = Container();
+    var container = kiwi.Container();
   
     _timeService = timeService ?? container.resolve<TimeService>();
     _subscription = _timeService.timeUpdatedStream.listen((time) {
@@ -98,5 +100,13 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
     await _timeService.deleteTime(time);
 
     notifyListeners();
+  }
+
+  Future navigateToLastMonthsReport(BuildContext context) async {
+    var now = DateTime.now();
+    await Navigator.of(context).push(MaterialPageRoute(builder: (c) => TimeReportScreen(
+          start: DateTime(now.year, now.month -1, 1),
+          end: DateTime(now.year, now.month, 1).subtract(Duration(milliseconds: 1))
+        )));
   }
 }
