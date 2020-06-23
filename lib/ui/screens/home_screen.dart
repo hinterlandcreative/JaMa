@@ -31,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      AddEditTimeScreen.createNew()));
+                                      AddEditTimeScreen.create()));
                         }),
                     SpeedDialChild(
                         child: Icon(Icons.access_alarms),

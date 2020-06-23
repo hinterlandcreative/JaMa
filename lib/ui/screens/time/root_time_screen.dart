@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:intl/intl.dart';
+import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/ui/models/time/time_collection.dart';
-import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/ui/screens/scrollable_base_screen.dart';
 import 'package:jama/ui/widgets/time_card.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
@@ -40,7 +40,7 @@ class TimeListScreen extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => AddEditTimeScreen.createNew()));
+                                builder: (context) => AddEditTimeScreen.create()));
                       }),
                   SpeedDialChild(
                       child: Icon(Icons.clear_all),
@@ -95,7 +95,7 @@ class TimeListScreen extends StatelessWidget {
                   padding: EdgeInsets.only(top: 17.0),
                   child: TimeCardCollection(
                         items: model.items,
-                        onItemDeleted: (t) => model.deleteTime(t),
+                        onItemDeleted: (t) => t.delete(),
                       ),
                 ))));
   }
@@ -103,18 +103,18 @@ class TimeListScreen extends StatelessWidget {
 
 class TimeCardCollection extends StatelessWidget {
   final UnmodifiableListView<TimeByDateModel> items;
-  final Function(Time) onItemDeleted;
+  final Function(TimeModificationModel) onItemDeleted;
 
   const TimeCardCollection(
       {Key key, @required this.items, @required this.onItemDeleted})
       : super(key: key);
 
   Widget _createCollectionCell(
-      BuildContext context, TimeModel item, bool shouldAddBottomBorder) {
+      BuildContext context, TimeModificationModel item, bool shouldAddBottomBorder) {
     return TimeCard(
       item: item, 
       isLast: shouldAddBottomBorder,
-      onItemDeleted: onItemDeleted);
+      onItemDeleted: () => onItemDeleted(item));
   }
 
   Widget _createCollectionHeader(TimeByDateModel section) {

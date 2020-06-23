@@ -4,14 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:jama/data/models/time_model.dart';
 
 import 'package:jama/ui/app_styles.dart';
-import 'package:jama/ui/models/time/time_model.dart';
 import 'package:jama/mixins/duration_mixin.dart';
+import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
 
 class TimeCard extends StatelessWidget {
-  final TimeModel item;
+  final TimeModificationModel item;
   final bool isLast;
-  final Function(Time) onItemDeleted;
+  final Function() onItemDeleted;
   
   const TimeCard({
     Key key, 
@@ -27,7 +27,7 @@ class TimeCard extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    AddEditTimeScreen(TimeModel(timeModel: item.time.copy())))),
+                    AddEditTimeScreen.edit(item))),
       child: Slidable(
         closeOnScroll: true,
         actionPane: SlidableDrawerActionPane(),
@@ -37,7 +37,7 @@ class TimeCard extends StatelessWidget {
               icon: Icons.delete_outline,
               color: Colors.red,
               caption: "delete",
-              onTap: () => onItemDeleted(item.time),
+              onTap: () => onItemDeleted(),
             )
           ],
         child: Column(
@@ -58,7 +58,7 @@ class TimeCard extends StatelessWidget {
                       decoration: BoxDecoration(
                           border: Border.all(
                               width: 1, color: AppStyles.captionText),
-                          color: item.time.category.color),
+                          color: item.category.color),
                     ),
                   ),
                   Padding(
@@ -68,11 +68,11 @@ class TimeCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "${DateFormat.jm().format(item.time.formattedDate)} - ${DateFormat.jm().format(item.time.formattedDate.add(item.time.duration))}",
+                          "${DateFormat.jm().format(item.date)} - ${DateFormat.jm().format(item.date.add(item.duration))}",
                           style: AppStyles.heading2,
                         ),
                         Text(
-                          item.time.category.name,
+                          item.category.name,
                           style: AppStyles.smallTextStyle,
                         ),
                       ],
@@ -82,7 +82,7 @@ class TimeCard extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.only(right: AppStyles.leftMargin),
                     child: Text(
-                      item.time.duration.toShortString(),
+                      item.duration.toShortString(),
                       style: AppStyles.heading2,
                     ),
                   ),
