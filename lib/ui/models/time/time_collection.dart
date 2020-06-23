@@ -2,18 +2,19 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:jama/ui/models/time/time_modification_model.dart';
+import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:tuple/tuple.dart';
+
 import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/collection_base_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/time/time_category_model.dart';
 import 'package:jama/ui/screens/reports/time_report_screen.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
-import 'package:tuple/tuple.dart';
 
-import 'time_by_date_model.dart';
-import 'time_model.dart';
-import '../../../mixins/date_mixin.dart';
+import 'package:jama/ui/models/time/time_by_date_model.dart';
+import 'package:jama/mixins/date_mixin.dart';
 
 class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
   final DateTime startDate;
@@ -61,7 +62,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
     _items = dates.map((date) => TimeByDateModel(
       timeEntries
         .where((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime() == date)
-        .map((t) => TimeModel(timeModel: t))
+        .map((t) => TimeModificationModel.edit(time: t))
         .toList(), 
       date)
     ).toList();

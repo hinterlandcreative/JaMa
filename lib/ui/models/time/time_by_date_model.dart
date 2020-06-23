@@ -2,17 +2,17 @@ import 'dart:collection';
 
 import 'package:intl/intl.dart';
 import 'package:jama/ui/models/grouped_collection_base_model.dart';
-import 'package:jama/ui/models/time/time_model.dart';
+import 'package:jama/ui/models/time/time_modification_model.dart';
 
-class TimeByDateModel extends GroupedCollection<TimeModel> {
+class TimeByDateModel extends GroupedCollection<TimeModificationModel> {
 
-  final List<TimeModel> _items;
+  final List<TimeModificationModel> _items;
   final DateTime date;
   
   TimeByDateModel(this._items, this.date) : super(DateFormat.MMMMEEEEd(Intl.defaultLocale).format(date), UnmodifiableListView(_items));
 
   @override
-  UnmodifiableListView<TimeModel> get items => UnmodifiableListView(_items);
+  UnmodifiableListView<TimeModificationModel> get items => UnmodifiableListView(_items);
 
   @override
   Future loadChildren() {

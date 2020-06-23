@@ -10,7 +10,7 @@ import 'package:jama/services/time_service.dart';
 import 'package:jama/mixins/date_mixin.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/time/time_by_date_model.dart';
-import 'package:jama/ui/models/time/time_model.dart';
+import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:jama/ui/widgets/grouped_collection_list_view.dart';
 import 'package:jama/ui/widgets/time_card.dart';
 
@@ -37,13 +37,13 @@ class TimeReportScreen extends StatelessWidget {
       body: ChangeNotifierProvider<TimeGroupedByDateCollectionModel>(
         create: (_) => TimeGroupedByDateCollectionModel(start:start, end:end),
         child: Consumer<TimeGroupedByDateCollectionModel>(
-          builder: (context, model, _) => GroupedCollectionListView<TimeModel>(
+          builder: (context, model, _) => GroupedCollectionListView<TimeModificationModel>(
             groups: model.items,
             headerBuilder: (_, header, __, ___) => _createCollectionHeader(header),
             itemBuilder: (_, item, isLast, __) => TimeCard(
               item: item, 
               isLast: isLast,
-              onItemDeleted: (_) => model.onItemDeleted(item),),
+              onItemDeleted: () => model.onItemDeleted(item),),
           )
         )
       ),
@@ -94,7 +94,7 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
     _items = dates.map((date) => TimeByDateModel(
       timeEntries
         .where((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime() == date)
-        .map((t) => TimeModel(timeModel: t))
+        .map((t) => TimeModificationModel.edit(time: t))
         .toList(),
       date)
     ).toList();
@@ -108,7 +108,7 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
     super.dispose();
   }
 
-  Future onItemDeleted(TimeModel item) async {
-    await _timeService.deleteTime(item.time);
+  Future onItemDeleted(TimeModificationModel item) async {
+    await item.delete();
   }
 }
