@@ -17,10 +17,10 @@ jobs:
         echo $(iosApiConstants.secureFilePath)
         cp $(iosApiConstants.secureFilePath) ios/Runner/
       displayName: Copy API Constants Files
-    - task: InstallAppleCertificate@2
-      inputs:
-        certSecureFile: 'Hsco_cert.p12'
-      displayName: Installing iOS Dev Certificate
+#    - task: InstallAppleCertificate@2
+#      inputs:
+#        certSecureFile: 'Hsco_cert.p12'
+#      displayName: Installing iOS Dev Certificate
     - task: InstallAppleProvisioningProfile@1
       inputs:
         provisioningProfileLocation: 'secureFiles'
