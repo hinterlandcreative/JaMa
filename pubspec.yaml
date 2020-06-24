@@ -42,7 +42,7 @@ dependencies:
   toggle_switch: ^0.1.4
   typicons_flutter: ^0.3.1
   flutter_focus_watcher: ^0.0.1
-  flutter_fluid_slider: ^1.0.3
+  gradual_stepper: ^1.0.0
   modal_bottom_sheet: ^0.1.6+1
   font_awesome_flutter: ^8.8.1
   calendar_strip: ^1.0.6
