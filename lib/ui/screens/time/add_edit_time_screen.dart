@@ -1,9 +1,9 @@
 import 'package:calendar_strip/calendar_strip.dart';
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_fluid_slider/flutter_fluid_slider.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gradual_stepper/gradual_stepper.dart';
 import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:jama/ui/widgets/goal_display_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -13,6 +13,7 @@ import 'package:jama/ui/widgets/time_selection_slider_widget.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/screens/base_screen.dart';
 import 'package:tuple/tuple.dart';
+import 'package:uuid/uuid.dart';
 
 class AddEditTimeScreen extends StatefulWidget {
   final TimeModificationModel model;
@@ -129,31 +130,36 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
               height: 40,
               width: MediaQuery.of(context).size.width -
                   (AppStyles.leftMargin * 2),
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                color: AppStyles.primaryColor,
-                child: Text(
-                  "save",
-                  style: AppStyles.heading2
-                      .copyWith(color: AppStyles.secondaryTextColor),
+              child: SlideFadeTransition(
+                id: "save_button",
+                delay: 30,
+                curve: Curves.ease,
+                child: FlatButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  color: AppStyles.primaryColor,
+                  child: Text(
+                    "save",
+                    style: AppStyles.heading2
+                        .copyWith(color: AppStyles.secondaryTextColor),
+                  ),
+                  onPressed: () {
+                    _formKey.currentState.save();
+                    if (model.duration <= Duration.zero) {
+                      infoDialog(
+                          context, "You must add time before saving.");
+                      return;
+                    }
+                    if (model.category == null ||
+                        model.category.id == -1) {
+                      infoDialog(context,
+                          "You must select a category for your new time.");
+                      return;
+                    }
+                    model.save();
+                    Navigator.pop(context);
+                  },
                 ),
-                onPressed: () {
-                  _formKey.currentState.save();
-                  if (model.duration <= Duration.zero) {
-                    infoDialog(
-                        context, "You must add time before saving.");
-                    return;
-                  }
-                  if (model.category == null ||
-                      model.category.id == -1) {
-                    infoDialog(context,
-                        "You must select a category for your new time.");
-                    return;
-                  }
-                  model.save();
-                  Navigator.pop(context);
-                },
               ),
             ),
           ]
@@ -213,8 +219,13 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                 child: ChoiceChip(
                   avatar: Padding(
                     padding: const EdgeInsets.only(bottom: 2),
-                    child: CircleAvatar(
-                      backgroundColor: category.color,
+                    child: SlideFadeTransition(
+                      id: "cc_circle_${category.id}",
+                      delay: 30 + (index * 30),
+                      curve: Curves.bounceIn,
+                      child: CircleAvatar(
+                        backgroundColor: category.color,
+                      ),
                     ),
                   ),
                   label: Text(
@@ -298,7 +309,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                               padding: const EdgeInsets.all(22.0),
                               child: _EditGoalModal(
                                 title: "Placements",
-                                message: "You have ${model.goalsPlacements - (model.placements + model.previousPlacements)} left to meet your monthly goal of ${model.goalsPlacements} placements.",
+                                message: model.placementsGoalMessage,
                                 value: model.placements,
                                 onSave: (x) => model.placements = x,
                               ),
@@ -326,7 +337,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                               padding: const EdgeInsets.all(22.0),
                               child: _EditGoalModal(
                                 title: "Videos",
-                                message: "You have ${model.goalsVideos - (model.videos + model.previousVideos)} left to meet your monthly goal of ${model.goalsVideos} videos.",
+                                message: model.videosGoalMessage,
                                 value: model.videos,
                                 onSave: (x) => model.videos = x,
                               ),
@@ -407,11 +418,12 @@ class _EditGoalModal extends StatefulWidget {
 }
 
 class __EditGoalModalState extends State<_EditGoalModal> {
-  double value;
+  int value;
+
 
   @override
   void initState() {
-    value = widget.value.toDouble();
+    value = widget.value;
     super.initState();
   }
 
@@ -425,26 +437,38 @@ class __EditGoalModalState extends State<_EditGoalModal> {
       Container(height: 15),
       Text(widget.message),
       Container(height: 50),
-      FluidSlider(
-        value: value,
-        onChanged: (double newValue) => setState(() => value = newValue),
-        sliderColor: AppStyles.primaryColor,
-        min: 0.0,
-        max: 50.0,
+      GradualStepper(
+        initialValue: value,
+        backgroundColor: AppStyles.primaryColor,
+        counterBackgroundColor: Colors.grey[200],
+        buttonsColor: Colors.white,
+        elevation: 2,
+        onChanged: (newValue) => setState(() => value = newValue),
+        minimumValue: 0,
         ),
         Container(height: 50),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            IconButton(
-              icon: FaIcon(FontAwesomeIcons.check, color: Colors.green,),
-              onPressed: () {
-                widget.onSave(value.toInt());
-                Navigator.of(context).pop();
-              },),
-            IconButton(
-              icon: Icon(Icons.close, color: Colors.red, size: 35),
-              onPressed: () => Navigator.of(context).pop(),
+            SlideFadeTransition(
+              id: "placements_ok",
+              delay: 300,
+              curve: Curves.ease,
+              child: IconButton(
+                icon: FaIcon(FontAwesomeIcons.check, color: Colors.green,),
+                onPressed: () {
+                  widget.onSave(value.toInt());
+                  Navigator.of(context).pop();
+                },),
+            ),
+            SlideFadeTransition(
+              id: "placements_back",
+              delay: 400,
+              curve: Curves.ease,
+              child: IconButton(
+                icon: Icon(Icons.close, color: Colors.red, size: 35),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             )
           ],
         ),

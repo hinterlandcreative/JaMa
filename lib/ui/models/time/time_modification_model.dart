@@ -80,6 +80,14 @@ class TimeModificationModel extends ChangeNotifier {
   /// The goals value for monthly videos.
   int get goalsVideos => _goalVideos;
 
+  String get placementsGoalMessage => _time.placements + _currentPlacements < _goalPlacements
+    ? "You have ${_goalPlacements - (_time.placements + _currentPlacements)} left to meet your monthly goal of $_goalPlacements placements."
+    : "Congratulations! You have already met your monthly goal of $_goalPlacements placements.";
+
+  get videosGoalMessage => _time.videos + _currentVideos < _goalVideos
+    ? "You have ${_goalVideos - (_time.videos + _currentVideos)} left to meet your monthly goal of $_goalVideos videos."
+    : "Congratulations! You have already met your monthly goal of $_goalVideos videos shown.";
+
   /// The [date] of the curent time entry.
   set date(DateTime value) {
     if (_time.date != value.millisecondsSinceEpoch) {
