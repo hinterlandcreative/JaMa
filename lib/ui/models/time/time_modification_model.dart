@@ -20,6 +20,8 @@ class TimeModificationModel extends ChangeNotifier {
 
   List<TimeCategory> _categories = [];
 
+  List<Time> _entriesForMonth;
+
   TimeModificationModel._(this._time, this._timeService) {
     _loadData();
   }
@@ -148,6 +150,21 @@ class TimeModificationModel extends ChangeNotifier {
     if(_time.category == null) {
       _time.category = _categories[0];
     }
+
+
+    _entriesForMonth = await _timeService.getTimeEntriesByDate(
+      startTime: DateTime.now().toFirstDayOfMonth(),
+      endTime: DateTime.now().toLastDayOfMonth()
+    );
+
     notifyListeners();
+  }
+
+  List<TimeCategory> isDateMarkedForPreviousEntry(DateTime date) {
+    return _entriesForMonth
+      .where((time) => time.formattedDate.isSameDayAs(date))
+      .map((e) => e.category)
+      .toSet()
+      .toList();
   }
 }

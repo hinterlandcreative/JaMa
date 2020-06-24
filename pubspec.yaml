@@ -51,6 +51,7 @@ dependencies:
     sdk: flutter
   flutter_speed_dial: 
     git: https://github.com/hinterlandsupplyco/flutter_speed_dial.git
+  calendar_strip: ^1.0.6
   date_picker_timeline: 
     git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
 dev_dependencies: 

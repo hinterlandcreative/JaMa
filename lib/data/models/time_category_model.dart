@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:jama/data/core/db/dto.dart';
 import 'package:jama/mixins/color_mixin.dart';
+import 'package:quiver/core.dart';
 
 class TimeCategory extends DTO {
   /// the name of the category. (REQUIRED)
@@ -37,4 +38,15 @@ class TimeCategory extends DTO {
   TimeCategory copy() {
     return TimeCategory.fromMap(this.toMap());
   }
+
+  @override
+  operator ==(other) => 
+    other is TimeCategory 
+    && this.name == other.name 
+    && this.description == other.description 
+    && this.color == other.color;
+
+  @override
+  int get hashCode => hash3(name, description, color);
+
 }

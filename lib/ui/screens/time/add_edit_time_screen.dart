@@ -1,5 +1,5 @@
+import 'package:calendar_strip/calendar_strip.dart';
 import 'package:commons/commons.dart';
-import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fluid_slider/flutter_fluid_slider.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
@@ -77,12 +77,15 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                           ),
                         ],
                       ),
-                      DatePickerTimeline(
-                        model.date,
-                        inactiveTextColor:
-                            AppStyles.lightGrey.withAlpha(80),
-                        selectionColor: Colors.white,
-                        onDateChange: (date) => model.date = date,
+                      CalendarStrip(
+                        startDate: DateTime(0),
+                        endDate: DateTime(9999),
+                        selectedDate: model.date,
+                        addSwipeGesture: true,
+                        onDateSelected: (date) => model.date = date,
+                        monthNameWidget: (_) => Container(),
+                        iconColor: AppStyles.lightGrey,
+                        dateTileBuilder: (date, selectedDate, _, __, ___, ____) => dateTileBuilder(model, date, selectedDate),
                       )
                     ],
                   ),
@@ -337,6 +340,52 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
               ],
             ),
     );
+
+  Widget dateTileBuilder(TimeModificationModel model, DateTime date, DateTime selectedDate,) {
+    final marks = model.isDateMarkedForPreviousEntry(date);
+    final isSelected = date.compareTo(selectedDate) == 0;
+    var style = isSelected 
+      ? AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold) 
+      : AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold, color: AppStyles.lightGrey);
+    
+    var dateWidget = Column(children: <Widget>[
+      Text(DateFormat.MMM().format(date).toUpperCase(), style: style),
+      Text(date.day.toString(), style: style.copyWith(fontSize: 22)),
+      Text(DateFormat.E().format(date).toUpperCase().substring(0,3), style: style),
+      marks.isNotEmpty 
+        ? Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: marks
+            .take(3)
+            .map((category) => Container(
+              width: 7.0,
+              height: 7.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: category.id == 1 && !isSelected ? Colors.white : category.color,
+                ),
+              )
+            ).toList(),
+          )
+        : Container(height: 7.0,)
+    ],);
+
+    if(isSelected) {
+      return Container(
+        padding: EdgeInsets.all(5.0),
+        child: dateWidget,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0)
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: dateWidget,
+      );
+    }
+  }
 }
 
 class _EditGoalModal extends StatefulWidget {
