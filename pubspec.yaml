@@ -1,5 +1,5 @@
 name: jama
-version: 0.1.6+20200624.1
+version: 0.1.7+20200624.3
 description: A new Flutter project.
 environment: 
   sdk: '>=2.6.0'
@@ -45,13 +45,13 @@ dependencies:
   flutter_fluid_slider: ^1.0.3
   modal_bottom_sheet: ^0.1.6+1
   font_awesome_flutter: ^8.8.1
+  calendar_strip: ^1.0.6
   flutter_datetime_picker: 
     git: https://github.com/Realank/flutter_datetime_picker.git
   flutter: 
     sdk: flutter
   flutter_speed_dial: 
     git: https://github.com/hinterlandsupplyco/flutter_speed_dial.git
-  calendar_strip: ^1.0.6
   date_picker_timeline: 
     git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
 dev_dependencies: 
