@@ -381,7 +381,7 @@ class __EditGoalModalState extends State<_EditGoalModal> {
         onChanged: (double newValue) => setState(() => value = newValue),
         sliderColor: AppStyles.primaryColor,
         min: 0.0,
-        max: 100.0,
+        max: 50.0,
         ),
         Container(height: 50),
         Row(
@@ -398,7 +398,8 @@ class __EditGoalModalState extends State<_EditGoalModal> {
               onPressed: () => Navigator.of(context).pop(),
             )
           ],
-        )
+        ),
+        Container(height: MediaQuery.of(context).padding.bottom,)
     ],);
   }
 }
