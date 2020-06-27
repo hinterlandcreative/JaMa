@@ -10,6 +10,7 @@ import 'package:jama/services/database_service.dart';
 import 'package:jama/services/image_service.dart';
 
 import 'package:kiwi/kiwi.dart';
+import 'package:supercharged/supercharged.dart';
 
 class ReturnVisitService {
   ImageService _imageService;
@@ -18,10 +19,10 @@ class ReturnVisitService {
   final String _visitsDatabaseName = "visits";
   final Completer<DbCollection> _returnVisitCollection = Completer();
   final Completer<DbCollection> _visitsCollection = Completer();
-  final StreamController<void> _returnVisitsUpdated = StreamController.broadcast();
+  final StreamController<ReturnVisit> _returnVisitsUpdated = StreamController.broadcast();
 
   /// Get the stream of events indicating the return visits have changed.
-  Stream get returnVisitUpdates => _returnVisitsUpdated.stream;
+  Stream<ReturnVisit> get returnVisitUpdates => _returnVisitsUpdated.stream;
 
   ReturnVisitService([ImageService imageService, DatabaseService databaseService]) {
     var container = Container();
@@ -79,7 +80,7 @@ class ReturnVisitService {
 
     await returnVisitDb.update(rv);
 
-    _returnVisitsUpdated.add(null);
+    _returnVisitsUpdated.add(rv);
     return rv;
   }
 
@@ -116,7 +117,7 @@ class ReturnVisitService {
       await imageFile.delete();
     }
 
-    _returnVisitsUpdated.add(null);
+    _returnVisitsUpdated.add(rv);
   }
 
   Future updateReturnVisit(ReturnVisit rv) async {
@@ -128,6 +129,57 @@ class ReturnVisitService {
     var returnVisitsDb = await _returnVisitCollection.future;
     await returnVisitsDb.update(rv);
 
-    _returnVisitsUpdated.add(null);
+    _returnVisitsUpdated.add(rv);
+  }
+
+  Future addVisit(Visit visit) async {
+
+    assert(visit.parentRvId >= 0);
+    assert(visit.date != null);
+
+    var rvDb = await _returnVisitCollection.future;
+    var rv = await rvDb.getOne(
+      visit.parentRvId, 
+      itemCreator: (map) => ReturnVisit.fromMap(map));
+
+    assert(rv != null);
+
+    var visitsDb = await _visitsCollection.future;
+
+    var id = await visitsDb.add(visit);
+    visit.id = id;
+
+    if(visit.type != VisitType.NotAtHome && visit.date > rv.lastVisitDate) {
+      rv.lastVisitDate = visit.date;
+      rv.lastVisitId = id;
+      await updateReturnVisit(rv);
+      _returnVisitsUpdated.add(rv);
+    }
+  }
+
+  Future deleteVisit(Visit visit) async {
+    assert(visit.parentRvId >= 0);
+    assert(visit.date != null);
+
+    var rvDb = await _returnVisitCollection.future;
+    var rv = await rvDb.getOne(
+      visit.parentRvId, 
+      itemCreator: (map) => ReturnVisit.fromMap(map));
+
+    assert(rv != null);
+
+    var visitsDb = await _visitsCollection.future;
+
+    await visitsDb.deleteFromId(visit.id);
+
+    if(rv.lastVisitId == visit.id) {
+      var visits = await getAllVisitsForRv(rv);
+      var last = visits.where((v) => v.type != VisitType.NotAtHome).maxBy((a, b) => a.date.compareTo(b.date));
+      rv.lastVisitDate = last.date;
+      rv.lastVisitId = last.id;
+
+      await updateReturnVisit(rv);
+      _returnVisitsUpdated.add(rv);
+    }
   }
 }

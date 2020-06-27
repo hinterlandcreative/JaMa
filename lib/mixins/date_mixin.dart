@@ -5,6 +5,9 @@ extension DateTimeMixins on DateTime {
   /// Determines if two [DateTime] objects are on the same date.
   bool isSameDayAs(DateTime other) => this.dropTime() == other.dropTime();
 
+  /// Creates a new [DateTime] with the date from [this] and the time from [other].
+  DateTime replaceTimeFrom(DateTime other) => DateTime(this.year, this.month, this.day, other.hour, other.minute, other.millisecond, other.microsecond);
+
   /// Finds the last day of the month for this DateTime. If [goToLastMillisecondOfLastDay] is true it will represent the latest possible time on the last day. 
   /// Otherwise the time portion of the DateTime will be 00:00:00:0000.
   DateTime toLastDayOfMonth([bool goToLastMillisecondOfLastDay = true]) => DateTime(this.year, this.month+1, 1).subtract(goToLastMillisecondOfLastDay ? Duration(milliseconds: 1) : Duration(days: 1));

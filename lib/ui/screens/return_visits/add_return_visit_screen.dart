@@ -1,10 +1,11 @@
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
+import 'package:jama/ui/widgets/add_placement_call.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/controllers/address_image_controller.dart';
 import 'package:jama/ui/models/return_visits/add_return_visit_model.dart';
-import 'package:jama/ui/widgets/add_placement_dialog.dart';
 import 'package:jama/ui/widgets/address_mapper_widget.dart';
 import 'package:jama/ui/widgets/pinned_toggle.dart';
 import 'package:jama/ui/widgets/return_visit_personal_info_form.dart';
@@ -286,18 +287,10 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                           FlatButton.icon(
                             icon: Icon(Icons.add),
                             label: Text("add"),
-                            onPressed: () => showDialog(
-                              context: context,
-                              builder: (_) =>
-                                  AddPlacementDialog(
-                                onPlacementAdded: (count,
-                                        type, notes) =>
-                                    model.addPlacement(
-                                        count,
-                                        type,
-                                        notes),
-                              ),
-                            ),
+                            onPressed: () => showAddSinglePlacementModal(
+                              context,
+                              (count, type, description) => model.addPlacement(count, type, description)
+                            ) 
                           )
                         ],
                       ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
 
@@ -10,14 +11,15 @@ import 'package:jama/data/models/visit_model.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
-import 'package:jama/ui/models/return_visits/visit_card_model.dart';
 import 'package:jama/ui/translation.dart';
+import 'package:jama/ui/widgets/add_placement_call.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tuple/tuple.dart';
+import 'package:supercharged/supercharged.dart';
 
 class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
-  final ReturnVisit _returnVisit;
+  ReturnVisit _returnVisit;
   final ReturnVisitService _rvService;
   final List<Color> colors = [AppStyles.primaryColor, Colors.red, Colors.yellow];
 
@@ -28,13 +30,30 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   List<VisitCardModel> _visits = [];
   List<charts.Series> _visitsByTypeSeries = [];
 
+  StreamSubscription<ReturnVisit> _rvUpdatedSubscription;
+
+  var _lastVisitNotes;
+
   EditReturnVisitModel._(this._returnVisit, this._rvService) {
+    _rvUpdatedSubscription = _rvService.returnVisitUpdates
+      .listen((ReturnVisit rv) {
+        if(rv.id == _returnVisit.id) {
+          _returnVisit = rv;
+          notifyListeners();
+        }
+      });
     _loadData();
   }
 
   factory EditReturnVisitModel(ReturnVisit returnVisit, [ReturnVisitService rvService]) {
     var container = kiwi.Container();
     return EditReturnVisitModel._(returnVisit, rvService ?? container.resolve<ReturnVisitService>());
+  }
+
+  @override
+  void dispose() { 
+    _rvUpdatedSubscription.cancel();
+    super.dispose();
   }
 
   LatLng get mapPosition => _getPosition();
@@ -59,10 +78,17 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   String get nextTopicToDsicuss => _nextTopic;
 
+  String get lastVisitNotes => _lastVisitNotes;
+
   Future _loadData() async {
     var visits = await _rvService.getAllVisitsForRv(_returnVisit);
     visits.sort((a,b) => a.date.compareTo(b.date));
     _totalVisits = visits.length;
+
+    var lastVisit = visits.firstWhere((element) => element.id == _returnVisit.lastVisitId);
+
+    _nextTopic = lastVisit.nextTopic;
+    _lastVisitNotes = lastVisit.notes;
 
     _setMostPopularTime(visits);
     _setTimeByTypeSeries(visits);
@@ -75,21 +101,24 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   }
 
   void _setTimeByTypeSeries(List<Visit> visits) {
-    List<Tuple2<int, Color>> data = [];
+    List<Tuple3<int, int, Color>> data = [];
+    var seriesIndex = 1;
     for(var type in VisitType.values) {
       var visitsOfType = visits.where((v) => v.type == type).toList();
       if(visitsOfType.length == 0) continue;
     
-      data.add(Tuple2(visitsOfType.length, AppStyles.visitTypeToColor[type]));      
+      data.add(Tuple3(seriesIndex++, visitsOfType.length, AppStyles.visitTypeToColor[type]));      
     }
+
+    _visitsByTypeSeries.clear();
     
     _visitsByTypeSeries.add(
-      charts.Series<int, String>(
+      charts.Series<Tuple3, String>(
         id: "visits",
-        data: data.map((d) => d.item1).toList(),
-        domainFn: (int series, _) => series.toString(),
-        measureFn: (int series, _) => series,
-        colorFn: (int series, i) => charts.ColorUtil.fromDartColor(data[i].item2))
+        data: data,
+        domainFn: (series, _) => series.item1.toString(),
+        measureFn: (series, _) => series.item2,
+        colorFn: (series, _) => charts.ColorUtil.fromDartColor(series.item3))
     );
   }
 
@@ -309,5 +338,101 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
         && _returnVisit.address.city.isNotEmpty 
         && _returnVisit.lastVisitDate != null 
         && _returnVisit.lastVisitId > 0;
+  }
+
+  Future _addNotAtHome() async {
+    var visit = Visit(
+      parentRvId: _returnVisit.id,
+      date: DateTime.now(),
+      type: VisitType.NotAtHome
+    );
+
+    await _rvService.addVisit(visit);
+
+    await _loadData();
+  }
+
+  Future addVisit({BuildContext context, VisitType type}) async {
+    if(type == VisitType.NotAtHome) {
+      await _addNotAtHome();
+      return;
+    }
+
+    showAddEditVisitModal(context, type: type, parent: _returnVisit, onVisitSaved: (visit) async {
+          await _rvService.addVisit(visit);
+          await _loadData();
+    });
+  }
+
+  Future editVisit(BuildContext context, VisitCardModel visit) async {
+    assert(visit != null);
+    if(visit.visitType == VisitType.NotAtHome) {
+      editNotAtHomeVisit(
+        context,
+        visit: visit._visit,
+        onSaved: (v) async {
+          await _rvService.addVisit(v);
+          await _loadData();
+        },
+        onDeleted: (v) async {
+          await _rvService.deleteVisit(v);
+          await _loadData();
+        }
+      );
+      return;
+    }
+
+    showAddEditVisitModal(
+      context, 
+      visit: visit._visit, 
+      isDeletable: _visits.length > 1 && visits.minBy((a,b) => a.formattedDate.compareTo(b.formattedDate))._visit.id != visit._visit.id,
+      onVisitSaved: (visit) async {
+        await _rvService.addVisit(visit);
+        await _loadData();
+      },
+      onVisitDeleted: (visit) async {
+        await _rvService.deleteVisit(visit);
+        await _loadData();
+      }
+    );
+  }
+}
+
+class VisitCardModel {
+  final Visit _visit;
+
+  VisitCardModel._(this._visit);
+
+  factory VisitCardModel({Visit visit}) {
+    return VisitCardModel._(visit);
+  }
+
+  String get formattedDate => DateFormat
+  .yMMMMd(Intl.defaultLocale)
+  .format(DateTime
+    .fromMillisecondsSinceEpoch(_visit.date));
+
+  String get formattedTime => DateFormat
+    .jm(Intl.defaultLocale)
+    .format(DateTime
+      .fromMillisecondsSinceEpoch(_visit.date));
+
+  String get visitTypeString => Translation.visitTypeToString[_visit.type];
+  VisitType get visitType => _visit.type;
+  String get placements => _getPlacementsString();
+  String get nextTopic => _visit.nextTopic ?? "";
+  String get notes => _visit.notes ?? "";
+
+  String _getPlacementsString() {
+    if(_visit.placements.isEmpty) {
+      return "";
+    }
+
+    var s = "${_visit.placements.first.count} ${Translation.placementTypeToString[_visit.placements.first.type]}" + (_visit.placements.first.notes.isEmpty ? "" : ": ${_visit.placements.first.notes}");
+    if(_visit.placements.length > 1) {
+      s += " and others";
+    }
+
+    return s;
   }
 }
