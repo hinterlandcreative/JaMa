@@ -6,6 +6,8 @@ import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
 import 'package:jama/ui/screens/return_visits/edit_return_visit_screen.dart';
+import 'package:jama/mixins/date_mixin.dart';
+import 'package:jama/mixins/num_mixin.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:latlong/latlong.dart';
 import 'package:path/path.dart' as path;
@@ -41,33 +43,24 @@ class ReturnVisitListItemModel {
 
     var distance = "";
     Color timeSinceColor = Colors.green;
-    var duration =DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(returnVisit.lastVisitDate ?? DateTime.now().millisecondsSinceEpoch));
-    DurationTersity tersity;
-    if(duration < aMinute) {
-      tersity = DurationTersity.second;
-    } else if(duration < anHour) {
-      tersity = DurationTersity.minute;
-    } else if(duration < aDay) {
-      tersity = DurationTersity.hour;
-    } else if(duration < (aWeek + aWeek)) {
-      tersity = DurationTersity.day;
-    } else if(duration < (aWeek + aWeek + aWeek + aWeek)) {
-      tersity = DurationTersity.day;
-      timeSinceColor = Colors.yellow;
-    } else {
-      tersity = DurationTersity.day;
+    var lastVisitDate = DateTime.fromMillisecondsSinceEpoch(returnVisit.lastVisitDate);
+    var duration = DateTime.now().difference(lastVisitDate);
+    var aMonth = aWeek + aWeek + aWeek + aWeek;
+    if(duration.inDays >= 30) {
       timeSinceColor = Colors.red;
-    }
+    } else if(duration.inDays > 13) {
+      timeSinceColor = Colors.orange;
+    } 
 
-    var timeSinceString = printDuration(duration, tersity: tersity);
+    var timeSinceString = lastVisitDate.humanizeTimeSince();
 
     if(returnVisit.address.latitude != null && returnVisit.address.latitude != 0 && returnVisit.address.longitude != null && returnVisit.address.longitude != 0) {
       var distanceInMiles = locationService.getDistanceBetweenCoordinates(returnVisit.address.latitude, returnVisit.address.longitude, currentLatitude, currentLongitude, LengthUnit.Mile);
         if(distanceInMiles < 1.0) {
           var distanceInFeet = (distanceInMiles * 5280).toInt(); 
-          distance = "$distanceInFeet FEET";
+          distance = "${distanceInFeet.commaize()} FEET";
         } else {
-          distance = "${distanceInMiles.toStringAsFixed(1)} MILES";
+          distance = "${distanceInMiles.toInt().commaize()} MILES";
         }
     }
     

@@ -132,8 +132,7 @@ class ReturnVisitService {
     _returnVisitsUpdated.add(rv);
   }
 
-  Future addVisit(Visit visit) async {
-
+  Future addOrUpdateVisit(Visit visit) async {
     assert(visit.parentRvId >= 0);
     assert(visit.date != null);
 
@@ -149,7 +148,7 @@ class ReturnVisitService {
     var id = await visitsDb.add(visit);
     visit.id = id;
 
-    if(visit.type != VisitType.NotAtHome && visit.date > rv.lastVisitDate) {
+    if(visit.type != VisitType.NotAtHome && (visit.date != rv.lastVisitDate || visit.id != rv.lastVisitId)) {
       rv.lastVisitDate = visit.date;
       rv.lastVisitId = id;
       await updateReturnVisit(rv);
