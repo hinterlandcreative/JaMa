@@ -1,5 +1,5 @@
 name: jama
-version: 0.1.10+20200629.4
+version: 0.1.11+20200629.6
 description: A new Flutter project.
 environment: 
   sdk: '>=2.6.0'
