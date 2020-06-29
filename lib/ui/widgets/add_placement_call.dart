@@ -85,18 +85,16 @@ Future editNotAtHomeVisit(BuildContext context, {Visit visit, Function(Visit vis
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.only(left: AppStyles.leftMargin, top: 5.0, bottom: 10.0),
-          child: Text("Date & Time", style: AppStyles.heading4),
-        ),
         DateTimePickerWidget(
           maxDateTime: DateTime.now(),
+
           dateFormat: "EEEE MMMM d|hh|mm|a",
           initDateTime: DateTime.fromMillisecondsSinceEpoch(visit.date),
           onChange: (d, _) => newDate = d,
           pickerTheme: DateTimePickerTheme(
             backgroundColor: Colors.transparent,
-            confirm: Container(),
+            pickerHeight: 90.0,
+            showTitle: false,
           ),
         ),
         Row(
@@ -232,10 +230,17 @@ class __AddEditVisitState extends State<_AddEditVisit> {
               ],
             ),
           ),
-          DatePickerTimeline(
-            DateTime.fromMillisecondsSinceEpoch(widget.visit.date),
-            onDateChange: (date) => widget.visit.date = date.millisecondsSinceEpoch,
-            ),
+          DateTimePickerWidget(
+          maxDateTime: DateTime.now(),
+          dateFormat: "EEEE MMMM d|hh|mm|a",
+          initDateTime: DateTime.fromMillisecondsSinceEpoch(widget.visit.date),
+          onChange: (d, _) => widget.visit.date = d.millisecondsSinceEpoch, 
+          pickerTheme: DateTimePickerTheme(
+            backgroundColor: Colors.transparent,
+            pickerHeight: 90.0,
+            showTitle: false,
+          ),
+        ),
           Padding(
             padding: EdgeInsets.all(AppStyles.leftMargin),
             child: Column(
