@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'dto.dart';
 import 'query_package.dart';
 
@@ -20,6 +22,9 @@ abstract class DbCollection {
 
   /// get all the items in this collection.
   Future<List<T>> getAll<T extends DTO>(T Function(Map<String, dynamic>) itemCreator);
+
+  /// Get one record with the given [id] and create items with the supplied [itemCreator].
+  Future<T> getOne<T extends DTO>(int id, {@required T Function(Map<String, dynamic>) itemCreator});
 
   /// Search all records for a specified [query] string
   Future<List<T>> search<T extends DTO>(String query, T Function(Map<String, dynamic>) itemCreator);

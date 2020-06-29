@@ -356,12 +356,12 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
     final marks = model.isDateMarkedForPreviousEntry(date);
     final isSelected = date.compareTo(selectedDate) == 0;
     var style = isSelected 
-      ? AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold) 
-      : AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold, color: AppStyles.lightGrey);
+      ? AppStyles.smallTextStyle.copyWith(fontSize: 12)
+      : AppStyles.smallTextStyle.copyWith(fontSize: 12, color: AppStyles.lightGrey);
     
     var dateWidget = Column(children: <Widget>[
       Text(DateFormat.MMM().format(date).toUpperCase(), style: style),
-      Text(date.day.toString(), style: style.copyWith(fontSize: 22)),
+      Text(date.day.toString(), style: style.copyWith(fontSize: 18)),
       Text(DateFormat.E().format(date).toUpperCase().substring(0,3), style: style),
       marks.isNotEmpty 
         ? Row(

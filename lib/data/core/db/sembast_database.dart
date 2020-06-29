@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'dto.dart';
 import 'package:sembast/sembast.dart';
 
@@ -133,6 +135,26 @@ class SembastStore extends DbCollection {
         return record;
       })
       .toList();
+  }
+
+  @override
+  Future<T> getOne<T extends DTO>(int id, {@required T Function(Map<String, dynamic>) itemCreator}) async {
+    assert(id >= 0);
+    assert(itemCreator != null);
+
+    var store = intMapStoreFactory.store(_storeName);
+    Map<String, dynamic> record;
+    await _db.transaction((txn) async {
+      if(await store.record(id).exists(txn)) {
+        record = await store.record(id).get(txn);
+      }
+    });
+
+    if(record != null) {
+      return itemCreator(record);
+    }
+
+    return null;
   }
 
   @override

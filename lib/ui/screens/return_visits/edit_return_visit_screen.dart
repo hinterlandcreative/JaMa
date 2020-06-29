@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:jama/ui/transitions/slide_and_fade_transition.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import 'package:popup_menu/popup_menu.dart';
 import 'package:provider/provider.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
@@ -12,7 +14,6 @@ import 'package:tuple/tuple.dart';
 import 'package:jama/data/models/visit_model.dart';
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
-import 'package:jama/ui/models/return_visits/visit_card_model.dart';
 import 'package:jama/ui/widgets/donut_chart_widget.dart';
 import 'package:jama/ui/widgets/pinned_toggle.dart';
 import 'package:jama/ui/widgets/return_visit_personal_info_form.dart';
@@ -64,17 +65,25 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
                   child: Icon(Icons.thumb_up),
                   label: "add visit",
                   labelStyle: AppStyles.heading4,
-                  onTap: () {}),
+                  onTap: () => widget.returnVisit.addVisit(
+                    context: context,
+                    type: VisitType.ReturnVisit)),
               SpeedDialChild(
                   child: Icon(Icons.library_books),
                   label: "add study",
                   labelStyle: AppStyles.heading4,
-                  onTap: () {}),
+                  onTap: () => widget.returnVisit.addVisit(
+                    context: context,
+                    type: VisitType.Study
+                  )),
               SpeedDialChild(
                   child: Icon(Icons.not_interested),
                   label: "add not at home",
                   labelStyle: AppStyles.heading4,
-                  onTap: () {}),
+                  onTap: () => widget.returnVisit.addVisit(
+                    context: context,
+                    type: VisitType.NotAtHome
+                  )),
             ],
           ),
           body: Stack(
@@ -85,27 +94,31 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
                 height: MediaQuery.of(context).padding.top + 227.0,
                 child: widget.returnVisit.mapPosition == null
                   ? Container(color: AppStyles.primaryBackground,)
-                  : GoogleMap(
-                    rotateGesturesEnabled: false,
-                    scrollGesturesEnabled: false,
-                    tiltGesturesEnabled: false,
-                    zoomGesturesEnabled: false,
-                    myLocationButtonEnabled: false,
-                    buildingsEnabled: false,
-                    mapToolbarEnabled: false,
-                    circles: Set.from([
-                      Circle(
-                        circleId: CircleId("main location"),
-                        center: widget.returnVisit.mapPosition,
-                        radius: 25,
-                        fillColor: AppStyles.primaryColor,
-                        strokeColor: Colors.transparent,
-                      )
-                    ]),
-                    initialCameraPosition: CameraPosition(
-                      bearing: 360.0,
-                      target: widget.returnVisit.mapPosition.addOffset(latitudeOffset: -0.0012),
-                      zoom: _defaultZoom,
+                  : SlideAndFadeTransition(
+                    id: "map",
+                    offset: 0.0,
+                    child: GoogleMap(
+                      rotateGesturesEnabled: false,
+                      scrollGesturesEnabled: false,
+                      tiltGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
+                      myLocationButtonEnabled: false,
+                      buildingsEnabled: false,
+                      mapToolbarEnabled: false,
+                      circles: Set.from([
+                        Circle(
+                          circleId: CircleId("main location"),
+                          center: widget.returnVisit.mapPosition,
+                          radius: 25,
+                          fillColor: AppStyles.primaryColor,
+                          strokeColor: Colors.transparent,
+                        )
+                      ]),
+                      initialCameraPosition: CameraPosition(
+                        bearing: 360.0,
+                        target: widget.returnVisit.mapPosition.addOffset(latitudeOffset: -0.0012),
+                        zoom: _defaultZoom,
+                      ),
                     ),
                   ),
               ),
@@ -133,46 +146,56 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
               Positioned(
                 top: MediaQuery.of(context).padding.top + 130.0,
                 width: MediaQuery.of(context).size.width,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppStyles.secondaryBackground,
-                    boxShadow: [
-                      BoxShadow(
-                        offset: Offset(1.00,-1.00),
-                        color: AppStyles.primaryBackground,
-                        blurRadius: 15,),], 
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30.00), 
-                      topRight: Radius.circular(30.00),),),
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 35.0),
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      labelColor: Colors.black,
-                      unselectedLabelColor: Colors.white,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      labelPadding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 20.0),
-                      indicator: BoxDecoration(
-                        color: AppStyles.primaryBackground,
-                        boxShadow: [AppStyles.defaultBoxShadow],
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.00), 
-                          topRight: Radius.circular(20.00),),),
-                      tabs: [
-                      Tab(
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text("personal", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
-                        ),
+                child: SlideAndFadeTransition(
+                  id: "tabs_back",
+                  offset: 0.5,
+                    curve: Curves.ease,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppStyles.secondaryBackground,
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(1.00,-1.00),
+                          color: AppStyles.primaryBackground,
+                          blurRadius: 15,),], 
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30.00), 
+                        topRight: Radius.circular(30.00),),),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 35.0),
+                      child: SlideAndFadeTransition(
+                        id: "tabs_front",
+                        offset: 2.0,
+                        curve: Curves.ease,
+                        child: TabBar(
+                          controller: _tabController,
+                          isScrollable: true,
+                          labelColor: Colors.black,
+                          unselectedLabelColor: Colors.white,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          labelPadding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 20.0),
+                          indicator: BoxDecoration(
+                            color: AppStyles.primaryBackground,
+                            boxShadow: [AppStyles.defaultBoxShadow],
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20.00), 
+                              topRight: Radius.circular(20.00),),),
+                          tabs: [
+                          Tab(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text("personal", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
+                            ),
+                          ),
+                          Tab(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text("visits", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
+                            ),
+                          ),
+                        ]),
                       ),
-                      Tab(
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text("visits", style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),),
-                        ),
-                      ),
-                    ]),
+                    ),
                   ),
                 ),
               ),
@@ -180,16 +203,22 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
                 top: MediaQuery.of(context).padding.top + 200.0,
                 child: Container(
                   color: AppStyles.primaryBackground,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: <Widget>[
-                      _buildPersonalTab(context),
-                      Selector<EditReturnVisitModel, UnmodifiableListView<VisitCardModel>>(
-                        selector: (_, rv) => rv.visits,
-                        builder: (_, visits, __) => visits.isEmpty
-                          ? Container()
-                          : _buildVisitsTab(context, visits))
-                    ],),
+                  child: SlideAndFadeTransition(
+                    id: "tab_body",
+                    offset: 0.25,
+                    curve: Curves.ease,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: <Widget>[
+                        Consumer<EditReturnVisitModel>(
+                          builder: (context, model, __) => _buildPersonalTab(context)),
+                        Selector<EditReturnVisitModel, UnmodifiableListView<VisitCardModel>>(
+                          selector: (_, rv) => rv.visits,
+                          builder: (context, visits, __) => visits.isEmpty
+                            ? Container()
+                            : _buildVisitsTab(context, visits))
+                      ],),
+                  ),
                 )),
             ],),
         ),
@@ -198,10 +227,17 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
   }
 
   Widget _buildPersonalTab(BuildContext context) {
+    var model = Provider.of<EditReturnVisitModel>(context);
     var popupMenu = PopupMenu(
       context: context,
       onClickMenu: (item) {
-        if(item.menuTitle == "Edit") {
+        if(item.menuTitle == "Directions") {
+          if(model.mapPosition != null) {
+            MapsLauncher.launchCoordinates(model.mapPosition.latitude, model.mapPosition.longitude, model.formattedAddress);
+          } else {
+            MapsLauncher.launchQuery(model.formattedAddress);
+          }
+        } else if(item.menuTitle == "Edit") {
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -264,7 +300,6 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
                   Container(
                     child: Selector<EditReturnVisitModel, Tuple2<UnmodifiableListView<charts.Series<dynamic,dynamic>>, int>>(
                       selector: (_, rv) => Tuple2(rv.visitsByTypeSeries, rv.totalVisits),
-                      //shouldRebuild: (a, b) => a.item1.first.data != b.item1.first.data,
                       builder: (_,tuple,__) => DonutChartWidget(
                         tuple.item1, 
                         height: 70,
@@ -288,7 +323,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
               selector: (_, rv) => rv.bestTimeString,
               builder: (_, bestTimeString, __) => Text(
                 bestTimeString, 
-                maxLines: 2, 
+                maxLines: 3, 
                 textAlign: TextAlign.center,
                 style: AppStyles.heading4.copyWith(color: AppStyles.captionText),),
             ),
@@ -348,6 +383,11 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
                         style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),)),
                 ],),
                 Selector<EditReturnVisitModel, String>(
+                  selector: (_, rv) => rv.lastVisitNotes,
+                  builder: (_, lastVisitNotes, __) => lastVisitNotes.isEmpty
+                    ? Container()
+                    : Text(lastVisitNotes, style: AppStyles.smallTextStyle),),
+                Selector<EditReturnVisitModel, String>(
                   selector: (_, rv) => rv.nextTopicToDsicuss,
                   builder: (_, nextTopicToDiscuss, __) => nextTopicToDiscuss.isEmpty 
                     ? Container()
@@ -359,7 +399,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
                         child: Text("Topic To Discuss: ", style: AppStyles.smallTextStyle,),
                       ),
                       Text(
-                        widget.returnVisit.notes, 
+                        nextTopicToDiscuss, 
                         maxLines: 2, 
                         style: AppStyles.smallTextStyle,
                         overflow: TextOverflow.ellipsis,),
@@ -373,6 +413,8 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
   }
 
   Widget _buildVisitsTab(BuildContext context, UnmodifiableListView<VisitCardModel> visitsList) {
+    var model = Provider.of<EditReturnVisitModel>(context, listen: false);
+
     List<Widget> children = [];
     var first = visitsList.first;
     var last = visitsList.last;
@@ -404,6 +446,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen> with Tick
         iconColor: iconColor,
         isFirst: visit == first,
         isLast: visit == last,
+        onTap: () => model.editVisit(context, visit),
         children: visit.visitType == VisitType.NotAtHome || (visit.placements.isEmpty && visit.nextTopic.isEmpty && visit.notes.isEmpty)
           ? null
           : <Widget>[
