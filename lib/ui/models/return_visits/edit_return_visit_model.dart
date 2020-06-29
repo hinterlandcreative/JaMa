@@ -347,7 +347,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
       type: VisitType.NotAtHome
     );
 
-    await _rvService.addVisit(visit);
+    await _rvService.addOrUpdateVisit(visit);
 
     await _loadData();
   }
@@ -359,7 +359,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     }
 
     showAddEditVisitModal(context, type: type, parent: _returnVisit, onVisitSaved: (visit) async {
-          await _rvService.addVisit(visit);
+          await _rvService.addOrUpdateVisit(visit);
           await _loadData();
     });
   }
@@ -371,7 +371,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
         context,
         visit: visit._visit,
         onSaved: (v) async {
-          await _rvService.addVisit(v);
+          await _rvService.addOrUpdateVisit(v);
           await _loadData();
         },
         onDeleted: (v) async {
@@ -387,7 +387,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
       visit: visit._visit, 
       isDeletable: _visits.length > 1 && visits.minBy((a,b) => a.formattedDate.compareTo(b.formattedDate))._visit.id != visit._visit.id,
       onVisitSaved: (visit) async {
-        await _rvService.addVisit(visit);
+        await _rvService.addOrUpdateVisit(visit);
         await _loadData();
       },
       onVisitDeleted: (visit) async {
