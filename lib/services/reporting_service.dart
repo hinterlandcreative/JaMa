@@ -28,4 +28,6 @@ class ReportingService {
   }
 
   bool get currentMonthReportSent => DateTime.now().month == _monthReportSent;
+
+  
 }
