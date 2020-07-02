@@ -1,6 +1,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:jama/ui/models/time/time_category_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
 import 'package:jama/services/app_settings_service.dart';
@@ -27,5 +29,97 @@ class ReportingService {
       timeService ?? kiwi.Container().resolve<TimeService>());
   }
 
+  /// Gets a value indicating whether this month's report has been sent.
   bool get currentMonthReportSent => DateTime.now().month == _monthReportSent;
+
+  /// Gets an observable stream of reports that have been sent.
+  Stream<Tuple2<DateTime, DateTime>> get reportSent => _reportsSentStreamController.stream;
+
+  Future<ReportResult> getTimeReport({@required DateTime start, @required DateTime end}) async {
+    assert(end != null);
+    assert(start != null);
+    assert(start.compareTo(end) >= 0);
+
+    var time = await _timeService.getTimeEntriesByDate(startTime: start, endTime: end);
+    var returnVisits = await _rvService.getVisitsByDate(start: start, end: end);
+  }
+}
+
+class ReportResult {
+  /// The total [hours]. [hours.item1] is a list of hours by `TimeCategory` and [hours.item2] is the goal. If goals are not being used [hours.item2] will be null.
+  final Tuple2<List<TimeByCategory>, int> hours;
+  /// The total [placements]. [placements.item1] is the value, [placements.item2] is the goal. If goals are not being used, [placements.item2] will be null.
+  final Tuple2<int, int> placements;
+  /// The total [videos]. [videos.item1] is the value, [videos.item2] is the goal. If goals are not being used, [videos.item2] will be null.
+  final Tuple2<int, int> videos;
+  /// The total [returnVisits]. [returnVisits.item1] is the value, [returnVisits.item2] is the goal. If goals are not being used, [returnVisits.item2] will be null.
+  final Tuple2<int, int> returnVisits;
+  /// The [startDate] of the report.
+  final DateTime startDate;
+  /// The [endDate] of the report.
+  final DateTime endDate;
+  /// The [entries] that make up this report organized by date of the entry.
+  final Map<DateTime, ReportEntry> entries;
+
+  ReportResult({this.hours, this.placements, this.videos, this.returnVisits, this.startDate, this.endDate, this.entries});
+}
+
+
+abstract class ReportEntry {
+  /// The [hours] of this visit.
+  final int hours;
+  /// The total [placements].
+  final int placements;
+  /// The total [videos].
+  final int videos;
+  /// The [date].
+  final DateTime date;
+
+  const ReportEntry({this.hours, this.placements, this.videos, this.date});
+
+  Future navigate(BuildContext context);
+}
+
+class _TimeReportEntry implements ReportEntry {
+  @override
+  final DateTime date;
+
+  @override
+  final int hours;
+
+  @override
+  final int placements;
+
+  @override
+  final int videos;
+
+  const _TimeReportEntry({this.date, this.hours, this.placements, this.videos});
+
+  @override
+  Future navigate(BuildContext context) {
+    // TODO: implement navigate
+    throw UnimplementedError();
+  }
+}
+
+class _ReturnVisitReportEntry implements ReportEntry {
+  @override
+  final DateTime date;
+
+  @override
+  final int hours = 0;
+
+  @override
+  final int placements;
+
+  @override
+  final int videos;
+
+  const _ReturnVisitReportEntry({this.date, this.placements, this.videos});
+
+  @override
+  Future navigate(BuildContext context) {
+    // TODO: implement navigate
+    throw UnimplementedError();
+  }
 }

@@ -22,7 +22,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
   List<TimeByDateModel> _items = [];
   TimeService _timeService;
-  List<TimeByCategoryModel> _allHours = [];
+  List<TimeByCategory> _allHours = [];
   int _goalHours = 0;
   int _videos = 0;
   int _placements = 0;
@@ -30,7 +30,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
   StreamSubscription<Time> _subscription;
 
-  List<TimeByCategoryModel> get allHours => _allHours;
+  List<TimeByCategory> get allHours => _allHours;
   int get goalHours => _goalHours;
   int get videos => _videos;
   int get placements => _placements;
@@ -78,7 +78,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
       }
     }
 
-    _allHours = totals.map((t) => TimeByCategoryModel(t.item1, t.item2 / 60.0)).toList();
+    _allHours = totals.map((t) => TimeByCategory(t.item1, t.item2 / 60.0)).toList();
 
     _goalHours = 0;
 

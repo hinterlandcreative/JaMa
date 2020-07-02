@@ -273,7 +273,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
         );
       }
 
-      var rv = ReturnVisit(
+      var rv = ReturnVisitDto(
         address: address,
         name: name,
         gender: gender,

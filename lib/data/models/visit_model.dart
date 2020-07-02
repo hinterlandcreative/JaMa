@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:jama/data/core/db/dto.dart';
 import 'package:jama/data/models/placement_model.dart';
 
-class Visit extends DTO {
+class VisitDto extends DTO {
   /// the id of the parent return visit record.
   int parentRvId;
 
@@ -20,7 +20,7 @@ class Visit extends DTO {
 
   String nextTopic;
 
-  Visit._(
+  VisitDto._(
       {int id,
       @required this.parentRvId,
       @required this.date,
@@ -36,7 +36,7 @@ class Visit extends DTO {
   /// [date] The date of the visit.
   /// [type] The type of visit.
   /// [placements] The placements made or videos shown during this visit.
-  factory Visit(
+  factory VisitDto(
       {int id = -1,
       @required int parentRvId,
       @required DateTime date,
@@ -51,7 +51,7 @@ class Visit extends DTO {
       throw ArgumentError.notNull("visit date");
     }
 
-    return Visit._(
+    return VisitDto._(
         id: id ?? -1,
         parentRvId: parentRvId,
         date: date.millisecondsSinceEpoch,
@@ -62,7 +62,7 @@ class Visit extends DTO {
   }
 
   @override
-  Visit.fromMap(Map<String, dynamic> map) {
+  VisitDto.fromMap(Map<String, dynamic> map) {
     id = map["id"];
     parentRvId = map["parentRvId"];
     date = map["date"];
@@ -76,8 +76,8 @@ class Visit extends DTO {
   }
 
   @override
-  Visit copy() {
-    return Visit.fromMap(this.toMap());
+  VisitDto copy() {
+    return VisitDto.fromMap(this.toMap());
   }
 
   @override

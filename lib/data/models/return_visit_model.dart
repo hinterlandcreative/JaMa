@@ -3,7 +3,7 @@ import 'package:jama/data/models/visit_model.dart';
 
 import 'address_model.dart';
 
-class ReturnVisit extends DTO {
+class ReturnVisitDto extends DTO {
   Address address;
   String name;
   Gender gender;
@@ -13,7 +13,7 @@ class ReturnVisit extends DTO {
   int lastVisitId;
   bool pinned;
 
-  ReturnVisit({Address address, String name, Gender gender, String notes, String imagePath, Visit lastVisit, bool pinned}) : super(id: -1) {
+  ReturnVisitDto({Address address, String name, Gender gender, String notes, String imagePath, VisitDto lastVisit, bool pinned}) : super(id: -1) {
     this.address = address ?? Address();
     this.name = name;
     this.gender = gender;
@@ -25,7 +25,7 @@ class ReturnVisit extends DTO {
   }
 
   @override
-  ReturnVisit.fromMap(Map<String, dynamic> map) {
+  ReturnVisitDto.fromMap(Map<String, dynamic> map) {
       id = map['id'];
       address = Address.fromMap(map['address']);
       name = map['name'];
@@ -52,8 +52,8 @@ class ReturnVisit extends DTO {
       };
   }
       
-  ReturnVisit copy() {
-    return ReturnVisit.fromMap(this.toMap());
+  ReturnVisitDto copy() {
+    return ReturnVisitDto.fromMap(this.toMap());
   }
       
   String createSearchString() {

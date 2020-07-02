@@ -26,7 +26,7 @@ class TimeChartWidget extends DonutChartWidget {
             margin: 15);
 
   factory TimeChartWidget.fromTimeSeries(
-      List<TimeByCategoryModel> values, int goal,
+      List<TimeByCategory> values, int goal,
       {bool animate,
       @required double width,
       @required double height,

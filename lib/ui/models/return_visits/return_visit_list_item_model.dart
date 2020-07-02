@@ -13,7 +13,7 @@ import 'package:latlong/latlong.dart';
 import 'package:path/path.dart' as path;
 
 class ReturnVisitListItemModel {
-  final ReturnVisit _returnVisit;
+  final ReturnVisitDto _returnVisit;
   final String distanceFromCurrentLocation;
   final Color timeSinceColor;
   final String timeSinceString;
@@ -31,7 +31,7 @@ class ReturnVisitListItemModel {
       _imageService.documentsDirectory.then((value) => _basePath = value.path);
     }
   
-  factory ReturnVisitListItemModel({@required ReturnVisit returnVisit, @required double currentLatitude, @required double currentLongitude, LocationService locationService, ReturnVisitService returnVisitService, ImageService imageService}) {
+  factory ReturnVisitListItemModel({@required ReturnVisitDto returnVisit, @required double currentLatitude, @required double currentLongitude, LocationService locationService, ReturnVisitService returnVisitService, ImageService imageService}) {
     assert(returnVisit != null);
     assert(returnVisit.id >= 0);
     assert(currentLatitude != null);
@@ -45,7 +45,7 @@ class ReturnVisitListItemModel {
     Color timeSinceColor = Colors.green;
     var lastVisitDate = DateTime.fromMillisecondsSinceEpoch(returnVisit.lastVisitDate);
     var duration = DateTime.now().difference(lastVisitDate);
-    var aMonth = aWeek + aWeek + aWeek + aWeek;
+    
     if(duration.inDays >= 30) {
       timeSinceColor = Colors.red;
     } else if(duration.inDays > 13) {

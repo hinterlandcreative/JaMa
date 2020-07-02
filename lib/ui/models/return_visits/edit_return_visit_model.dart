@@ -19,7 +19,7 @@ import 'package:tuple/tuple.dart';
 import 'package:supercharged/supercharged.dart';
 
 class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
-  ReturnVisit _returnVisit;
+  ReturnVisitDto _returnVisit;
   final ReturnVisitService _rvService;
   final List<Color> colors = [AppStyles.primaryColor, Colors.red, Colors.yellow];
 
@@ -30,13 +30,13 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   List<VisitCardModel> _visits = [];
   List<charts.Series> _visitsByTypeSeries = [];
 
-  StreamSubscription<ReturnVisit> _rvUpdatedSubscription;
+  StreamSubscription<ReturnVisitDto> _rvUpdatedSubscription;
 
   var _lastVisitNotes;
 
   EditReturnVisitModel._(this._returnVisit, this._rvService) {
     _rvUpdatedSubscription = _rvService.returnVisitUpdates
-      .listen((ReturnVisit rv) {
+      .listen((ReturnVisitDto rv) {
         if(rv.id == _returnVisit.id) {
           _returnVisit = rv;
           notifyListeners();
@@ -45,7 +45,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     _loadData();
   }
 
-  factory EditReturnVisitModel(ReturnVisit returnVisit, [ReturnVisitService rvService]) {
+  factory EditReturnVisitModel(ReturnVisitDto returnVisit, [ReturnVisitService rvService]) {
     var container = kiwi.Container();
     return EditReturnVisitModel._(returnVisit, rvService ?? container.resolve<ReturnVisitService>());
   }
@@ -100,7 +100,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     notifyListeners();
   }
 
-  void _setTimeByTypeSeries(List<Visit> visits) {
+  void _setTimeByTypeSeries(List<VisitDto> visits) {
     List<Tuple3<int, int, Color>> data = [];
     var seriesIndex = 1;
     for(var type in VisitType.values) {
@@ -122,7 +122,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     );
   }
 
-  void _setMostPopularTime(List<Visit> visits) {
+  void _setMostPopularTime(List<VisitDto> visits) {
     List<DateTime> datesOfVisits = visits
       .where((v) => v.type != VisitType.NotAtHome)
       .map((v) => DateTime.fromMillisecondsSinceEpoch(v.date))
@@ -341,7 +341,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   }
 
   Future _addNotAtHome() async {
-    var visit = Visit(
+    var visit = VisitDto(
       parentRvId: _returnVisit.id,
       date: DateTime.now(),
       type: VisitType.NotAtHome
@@ -399,11 +399,11 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 }
 
 class VisitCardModel {
-  final Visit _visit;
+  final VisitDto _visit;
 
   VisitCardModel._(this._visit);
 
-  factory VisitCardModel({Visit visit}) {
+  factory VisitCardModel({VisitDto visit}) {
     return VisitCardModel._(visit);
   }
 

@@ -20,7 +20,7 @@ class HomeModel extends ChangeNotifier {
   final TimeService _timeService;
   final ReportingService _reportingService;
 
-  List<TimeByCategoryModel> _allHours = [];
+  List<TimeByCategory> _allHours = [];
   int _goalHours = 0;
   int _placements = 0;
   int _videos = 0;
@@ -30,7 +30,7 @@ class HomeModel extends ChangeNotifier {
   StreamSubscription<Time> _subscription;
 
   
-  UnmodifiableListView<TimeByCategoryModel> get allHours => UnmodifiableListView(_allHours);
+  UnmodifiableListView<TimeByCategory> get allHours => UnmodifiableListView(_allHours);
   UnmodifiableListView<GoalModel> get goals => UnmodifiableListView(_goals);
   int get goalHours => _goalHours;
   int get placements => _placements;
@@ -66,7 +66,7 @@ class HomeModel extends ChangeNotifier {
       }
     }
 
-    _allHours = totals.map((t) => TimeByCategoryModel(t.item1, t.item2 / 60.0)).toList();
+    _allHours = totals.map((t) => TimeByCategory(t.item1, t.item2 / 60.0)).toList();
 
     _goalHours = 0;
 

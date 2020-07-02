@@ -26,15 +26,15 @@ import 'package:jama/ui/widgets/tree_select.dart';
 Future showAddEditVisitModal(
   BuildContext context, 
   {VisitType type, 
-  Visit visit, 
-  ReturnVisit parent, 
-  Function(Visit visit) onVisitSaved,
-  Function(Visit visit) onVisitDeleted, 
+  VisitDto visit, 
+  ReturnVisitDto parent, 
+  Function(VisitDto visit) onVisitSaved,
+  Function(VisitDto visit) onVisitDeleted, 
   bool isDeletable = false}) async {
   if(visit == null && parent == null) {
     throw ArgumentError.notNull("`visit` and `parent` cannot be null. \\r\\nTo create a new visit, supply a parent. To edit an existing visit supply a visit.");
   } else if(visit == null && parent != null) {
-    visit = Visit(
+    visit = VisitDto(
       parentRvId: parent.id,
       date: DateTime.now(),
       type: type ?? VisitType.ReturnVisit
@@ -53,7 +53,7 @@ Future showAddEditVisitModal(
         onVisitSaved: onVisitSaved,)));
 }
 
-Future editNotAtHomeVisit(BuildContext context, {Visit visit, Function(Visit visit) onSaved, Function(Visit visit) onDeleted}) async {
+Future editNotAtHomeVisit(BuildContext context, {VisitDto visit, Function(VisitDto visit) onSaved, Function(VisitDto visit) onDeleted}) async {
   assert(visit.id > 0);
   var newDate = DateTime.fromMillisecondsSinceEpoch(visit.date);
   return await showMaterialModalBottomSheet(
@@ -189,9 +189,9 @@ Future showAddSinglePlacementModal(BuildContext context, Function(int count, Pla
 }
 
 class _AddEditVisit extends StatefulWidget {
-  final Visit visit;
-  final Function(Visit visit) onVisitSaved;
-  final Function(Visit visit) onVisitDeleted;
+  final VisitDto visit;
+  final Function(VisitDto visit) onVisitSaved;
+  final Function(VisitDto visit) onVisitDeleted;
   final bool isDeleteable;
   _AddEditVisit({Key key, @required this.visit, @required this.onVisitSaved, this.onVisitDeleted, this.isDeleteable}) : super(key: key);
 

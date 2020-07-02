@@ -14,7 +14,7 @@ void main() {
 
       var now = DateTime.now();
 
-      Visit visit = Visit(
+      VisitDto visit = VisitDto(
         id:123,
         parentRvId: 321,
         date: now,
@@ -51,7 +51,7 @@ void main() {
         notes: "placement notes"
       );
 
-      var visit = Visit.fromMap({
+      var visit = VisitDto.fromMap({
         'id': 123,
         'parentRvId': 456,
         'date': 789,
@@ -80,7 +80,7 @@ void main() {
         Placement(count: 100, type: PlacementType.Book, notes: "placement note")
       ];
 
-      Visit visit = Visit(
+      VisitDto visit = VisitDto(
         id:123,
         parentRvId: 456,
         date: DateTime.now(),
@@ -103,11 +103,11 @@ void main() {
 
     test("constructor requires a valid parent return visit", () {
       expect(
-        () => Visit(date:DateTime.now(), parentRvId: -1),
+        () => VisitDto(date:DateTime.now(), parentRvId: -1),
         throwsArgumentError);
       
       expect(
-        () => Visit(date:DateTime.now(), parentRvId: null), 
+        () => VisitDto(date:DateTime.now(), parentRvId: null), 
         throwsArgumentError);
     });
   });
