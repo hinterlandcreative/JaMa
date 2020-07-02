@@ -1,6 +1,11 @@
 trigger:
 - master
 
+pr:
+  branches:
+    exclude:
+    - '*' 
+
 pool:
   vmImage: 'macOS-latest'
 
