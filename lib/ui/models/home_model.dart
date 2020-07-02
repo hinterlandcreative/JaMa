@@ -5,16 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/data/models/time_model.dart';
+import 'package:jama/services/reporting_service.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
 import 'package:jama/ui/screens/reports/time_report_screen.dart';
+import 'package:jama/mixins/date_mixin.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:quiver/time.dart';
 import 'package:tuple/tuple.dart';
 
 import 'time/time_category_model.dart';
 
 class HomeModel extends ChangeNotifier {
-  TimeService _timeService;
+  final TimeService _timeService;
+  final ReportingService _reportingService;
 
   List<TimeByCategoryModel> _allHours = [];
   int _goalHours = 0;
@@ -33,13 +37,16 @@ class HomeModel extends ChangeNotifier {
   int get videos => _videos;
   int get returnVisits => _returnVisits;
 
-  HomeModel([TimeService timeService]) {
-    final container = kiwi.Container();
-    _timeService = timeService ?? container.resolve<TimeService>();
-
+  HomeModel._(this._timeService, this._reportingService) {
     _subscription = _timeService.timeUpdatedStream.listen((_) => _loadData());
 
     _loadData();
+  }
+
+  factory HomeModel([TimeService timeService, ReportingService reportingService]) {
+    return HomeModel._(
+      timeService ?? kiwi.Container().resolve<TimeService>(),
+      reportingService ?? kiwi.Container().resolve<ReportingService>());
   }
 
   Future _loadData() async {
@@ -70,15 +77,18 @@ class HomeModel extends ChangeNotifier {
     _returnVisits = 0;
 
     _goals.clear();
-    _goals.add(
-      GoalModel(
-        text: "${DateFormat.MMM().format(DateTime(now.year, now.month - 1))} was a great month! Let's look at how your ministry went.",
-        iconPath: "graphics/confetti.png",
-        navigationWidget: () => TimeReportScreen(
-          start: DateTime(now.year, now.month -1, 1),
-          end: DateTime(now.year, now.month, 1).subtract(Duration(milliseconds: 1))
+    if(now.isBefore(now.toFirstDayOfMonth().add(aWeek + aWeek)) || !_reportingService.currentMonthReportSent) {
+      _goals.add(
+        GoalModel(
+          text: "${DateFormat.MMMM().format(DateTime(now.year, now.month - 1))} was a great month! Let's look at how your ministry went.",
+          iconPath: "graphics/confetti.png",
+          navigationWidget: () => TimeReportScreen(
+            start: DateTime(now.year, now.month -1, 1),
+            end: DateTime(now.year, now.month, 1).subtract(Duration(milliseconds: 1))
+          )
         )
-      )); 
+      );
+    }
     // _goals.add(
     //   GoalModel(
     //     "You’ve averaged 14 ministry days per month, 4 hours per day and 72 hours per month.",

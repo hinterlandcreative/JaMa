@@ -266,6 +266,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
         style: AppStyles.heading4),
             ),
             TextFormField(
+              initialValue: model.notes,
               keyboardType: TextInputType.multiline,
               minLines: 1,
               maxLines: 5,
