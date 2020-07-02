@@ -72,7 +72,7 @@ class HomeModel extends ChangeNotifier {
     _goals.clear();
     _goals.add(
       GoalModel(
-        text: "${DateFormat.MMM().format(DateTime(now.year, now.month - 1))} was a great month! Let's look at how your ministry went.",
+        text: "${DateFormat.MMMM().format(DateTime(now.year, now.month - 1))} was a great month! Let's look at how your ministry went.",
         iconPath: "graphics/confetti.png",
         navigationWidget: () => TimeReportScreen(
           start: DateTime(now.year, now.month -1, 1),
