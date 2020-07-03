@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:jama/data/models/dto/dto.dart';
 
-import 'dto.dart';
 import 'query_package.dart';
 
 abstract class DbCollection {

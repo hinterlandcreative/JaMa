@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:jama/data/core/db/db_collection.dart';
 import 'package:jama/data/core/db/query_package.dart';
 import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/placement_model.dart';
-import 'package:jama/data/models/return_visit_model.dart';
-import 'package:jama/data/models/visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/placement.dart';
 import 'package:jama/services/database_service.dart';
 import 'package:jama/services/image_service.dart';
 
@@ -21,10 +21,10 @@ class ReturnVisitService {
   final String _visitsDatabaseName = "visits";
   final Completer<DbCollection> _returnVisitCollection = Completer();
   final Completer<DbCollection> _visitsCollection = Completer();
-  final StreamController<ReturnVisitDto> _returnVisitsUpdated = StreamController.broadcast();
+  final StreamController<ReturnVisit> _returnVisitsUpdated = StreamController.broadcast();
 
   /// Get the stream of events indicating the return visits have changed.
-  Stream<ReturnVisitDto> get returnVisitUpdates => _returnVisitsUpdated.stream;
+  Stream<ReturnVisit> get returnVisitUpdates => _returnVisitsUpdated.stream;
 
   ReturnVisitService([ImageService imageService, DatabaseService databaseService]) {
     var container = Container();
@@ -50,24 +50,25 @@ class ReturnVisitService {
   /// Add [rv] as a new return visit.
   /// 
   /// The [rv] and [initialCallDate] are required.
-  Future<ReturnVisitDto> addNewReturnVisit({
-    @required ReturnVisitDto rv, 
+  Future<ReturnVisit> addNewReturnVisit({
+    @required ReturnVisit rv, 
     @required DateTime initialCallDate, 
     List<Placement> initialCallPlacements, 
     String initialCallNotes}) async {
     assert(initialCallDate != null);
     assert(rv != null);
 
+    var rvDto = rv._toDto();
+
     var returnVisitDb = await _returnVisitCollection.future;
-    var rvId = await returnVisitDb.add(rv);
+    var rvId = await returnVisitDb.add(rvDto);
     assert(rvId != null);
     assert(rvId >= 0);
+    rvDto = rvDto.copyWith(id: rvId);
     
-    rv.id = rvId;
-    rv.lastVisitDate = initialCallDate.millisecondsSinceEpoch;
     
     var initialCall = VisitDto(
-      date: initialCallDate,
+      date: initialCallDate.millisecondsSinceEpoch,
       parentRvId: rvId,
       notes: initialCallNotes,
       type: VisitType.ReturnVisit,
@@ -75,40 +76,50 @@ class ReturnVisitService {
     
     var visitsDb = await _visitsCollection.future;
     
-    rv.lastVisitId = await visitsDb.add(initialCall);
+    var visitId = await visitsDb.add(initialCall);
 
-    assert(rv.lastVisitId != null);
-    assert(rv.lastVisitId >= 0);
+    rvDto = rvDto.copyWith(
+      lastVisitDate: initialCallDate.millisecondsSinceEpoch,
+      lastVisitId: visitId
+    );
 
-    await returnVisitDb.update(rv);
+    await returnVisitDb.update(rvDto);
 
-    _returnVisitsUpdated.add(rv);
+    _returnVisitsUpdated.add(ReturnVisit.fromDto(rvDto, [initialCall]));
     return rv;
   }
 
-  Future<List<ReturnVisitDto>> getAllReturnVisits() async {
+  Future<List<ReturnVisit>> getAllReturnVisits() async {
     var returnVisitsDb = await _returnVisitCollection.future;
-    return await returnVisitsDb.getAll((map) => ReturnVisitDto.fromMap(map));
+    var dtoList = await returnVisitsDb.getAll((map) => ReturnVisitDto.fromMap(map));
+    List<ReturnVisit> rvList = [];
+    for(var dto in dtoList) {
+      var visits = await _getAllVisitsForRv(dto);
+      rvList.add(ReturnVisit.fromDto(dto, visits));
+    }
+
+    return rvList;
   }
 
-  Future<List<VisitDto>> getAllVisitsForRv(ReturnVisitDto rv) async {
+  Future<List<VisitDto>> _getAllVisitsForRv(ReturnVisitDto rv) async {
     var visitsDb = await _visitsCollection.future;
     return await visitsDb.query([
       QueryPackage(
         key: "parentRvId",
         value: rv.id,
         filter: FilterType.EqualTo)
-    ], 
+    ],  
     (map) => VisitDto.fromMap(map));
   }
 
-  Future delete(ReturnVisitDto rv) async {
+  Future delete(ReturnVisit rv) async {
     assert(rv != null);
-    assert(rv.id > 0);
+    assert(rv._id > 0);
+    var dto = rv._toDto();
     var returnVisitsDb = await _returnVisitCollection.future;
-    await returnVisitsDb.deleteFromDto(rv);
+    await returnVisitsDb.deleteFromDto(dto);
 
-    var visits = await getAllVisitsForRv(rv);
+    var visits = await _getAllVisitsForRv(dto);
     var visitsDb = await _visitsCollection.future;
     for(var visit in visits) {
       await visitsDb.deleteFromDto(visit);
@@ -122,65 +133,110 @@ class ReturnVisitService {
     _returnVisitsUpdated.add(rv);
   }
 
-  Future updateReturnVisit(ReturnVisitDto rv) async {
+  Future updateReturnVisit(ReturnVisit rv) async {
     assert(rv != null);
-    assert(rv.id > 0);
+    assert(rv._id > 0);
     assert(rv.lastVisitDate != null);
-    assert(rv.lastVisitId > 0);
+    assert(rv.lastVisit._id > 0);
 
     var returnVisitsDb = await _returnVisitCollection.future;
-    await returnVisitsDb.update(rv);
+    await returnVisitsDb.update(rv._toDto());
 
     _returnVisitsUpdated.add(rv);
   }
 
-  Future addOrUpdateVisit(VisitDto visit) async {
-    assert(visit.parentRvId >= 0);
+  Future addVisit(Visit visit) async {
+    assert(visit != null);
+    assert(visit._parentId > 0);
     assert(visit.date != null);
+    if(visit._id > 0) return await updateVisit(visit);
+    var dto = visit._toDto();
 
     var rvDb = await _returnVisitCollection.future;
-    var rv = await rvDb.getOne(
-      visit.parentRvId, 
-      itemCreator: (map) => ReturnVisitDto.fromMap(map));
-
-    assert(rv != null);
-
+    var rv = await rvDb.getOne(visit._parentId, itemCreator: (map) => ReturnVisitDto.fromMap(map));
+    
     var visitsDb = await _visitsCollection.future;
 
-    var id = await visitsDb.add(visit);
-    visit.id = id;
+    var id = await visitsDb.add(dto);
+    dto = dto.copyWith(id: id);
 
-    if(visit.type != VisitType.NotAtHome && (visit.date != rv.lastVisitDate || visit.id != rv.lastVisitId)) {
-      rv.lastVisitDate = visit.date;
-      rv.lastVisitId = id;
-      await updateReturnVisit(rv);
-      _returnVisitsUpdated.add(rv);
+    if(visit.type != VisitType.NotAtHome && visit.date.millisecondsSinceEpoch > rv.lastVisitDate) {
+
+      rv = rv.copyWith(
+        lastVisitDate: dto.date,
+        lastVisitId: id
+      );
+      
+      await rvDb.update(rv);
+      var visits = await _getAllVisitsForRv(rv);
+
+      _returnVisitsUpdated.add(ReturnVisit.fromDto(rv, visits));
     }
   }
 
-  Future deleteVisit(VisitDto visit) async {
-    assert(visit.parentRvId >= 0);
+  Future updateVisit(Visit visit) async {
+    assert(visit._parentId >= 0);
+    assert(visit.date != null);
+
+    if(visit._id <= 0) return await addVisit(visit);
+
+    var rvDb = await _returnVisitCollection.future;
+    var rv = await rvDb.getOne(visit._parentId, itemCreator: (map) => ReturnVisitDto.fromMap(map));
+    var dto = visit._toDto();
+
+    assert(rv != null);
+
+    var visitsDb = await _visitsCollection.future;
+
+    var id = await visitsDb.update(dto);
+    dto = dto.copyWith(id: id);
+
+    // TODO: this needs lots of tests.
+    if((rv.lastVisitId == id && dto.date != rv.lastVisitDate)
+      || (dto.date > rv.lastVisitDate)) {
+
+      var visits = await _getAllVisitsForRv(rv);
+      var latestVisit = visits
+        .where((element) => element.type != VisitType.NotAtHome)
+        .maxBy((a, b) => a.date.compareTo(b.date));
+
+      rv = rv.copyWith(
+        lastVisitDate: latestVisit.date,
+        lastVisitId: latestVisit.id
+      );
+      await rvDb.update(rv);
+      _returnVisitsUpdated.add(ReturnVisit.fromDto(rv, visits));
+    }
+  }
+
+  Future deleteVisit(Visit visit) async {
+    assert(visit._parentId >= 0);
     assert(visit.date != null);
 
     var rvDb = await _returnVisitCollection.future;
     var rv = await rvDb.getOne(
-      visit.parentRvId, 
+      visit._parentId, 
       itemCreator: (map) => ReturnVisitDto.fromMap(map));
 
     assert(rv != null);
 
     var visitsDb = await _visitsCollection.future;
 
-    await visitsDb.deleteFromId(visit.id);
+    await visitsDb.deleteFromId(visit._id);
 
-    if(rv.lastVisitId == visit.id) {
-      var visits = await getAllVisitsForRv(rv);
-      var last = visits.where((v) => v.type != VisitType.NotAtHome).maxBy((a, b) => a.date.compareTo(b.date));
-      rv.lastVisitDate = last.date;
-      rv.lastVisitId = last.id;
+    if(rv.lastVisitId == visit._id) {
+      var visits = await _getAllVisitsForRv(rv);
+      var last = visits
+        .where((v) => v.type != VisitType.NotAtHome)
+        .maxBy((a, b) => a.date.compareTo(b.date));
+      
+      rv = rv.copyWith(
+        lastVisitDate: last.date,
+        lastVisitId: last.id
+      );
 
-      await updateReturnVisit(rv);
-      _returnVisitsUpdated.add(rv);
+      await rvDb.update(rv);
+      _returnVisitsUpdated.add(ReturnVisit.fromDto(rv, visits));
     }
   }
 
@@ -219,7 +275,7 @@ class ReturnVisitService {
   }
 }
 
-class ReturnVisit extends ChangeNotifier {
+class ReturnVisit {
   int _id;
   Address _address;
   String _name;
@@ -249,10 +305,25 @@ class ReturnVisit extends ChangeNotifier {
     return rv;
   }
 
-  factory ReturnVisit.create() {
-    return ReturnVisit._(-1, Address(), "", Gender.Male, "", null, "", false);
+  factory ReturnVisit.create(
+    {Address address,
+    String name,
+    Gender gender,
+    String notes,
+    String imagePath,
+    bool pinned}
+  ) {
+    return ReturnVisit._(
+      -1, 
+      address ?? Address(), 
+      name ?? "", 
+      gender ?? Gender.Male, 
+      imagePath ?? "", 
+      null, 
+      notes ?? "", 
+      pinned ?? false);
   }
-
+  
   bool get isSaved => _id > 0;
   bool get pinned => _pinned;
   Address get address => _address;
@@ -263,6 +334,8 @@ class ReturnVisit extends ChangeNotifier {
   DateTime get lastVisitDate => _visits.maxBy((a, b) => a.date.compareTo(b.date)).date;
   Visit get lastVisit => _visits.firstWhere((element) => element._id == _lastVisitId);
   Visit get initialVisit => _visits.minBy((a, b) => a.date.compareTo(b.date));
+  UnmodifiableListView<Visit> get visits => UnmodifiableListView(_visits);
+  String get searchString => _toDto().createSearchString();
 
   set address(Address value) {
     if(_address != value) {
@@ -300,8 +373,17 @@ class ReturnVisit extends ChangeNotifier {
     }
   }
 
+  /// Examines the [other] return visit to determine if [other] is an updated
+  /// copy of this return visit.
+  bool isSameAs(ReturnVisit other) => _id == other._id;
+
+  /// Examines the [visit] to determine if it is a child of this return visit.
+  bool isParentOf(Visit visit) => _id == visit._parentId;
+
+  /// Add a [visit] to this return visits list. Does not save to the database.
   void addVisit(Visit visit) => _visits.add(visit);
 
+  /// Remove a [visit] from this object's list of visits.
   void deleteVisit(Visit visit) => _visits.removeWhere((element) => element._id == visit._id);
 
   ReturnVisitDto _toDto() => ReturnVisitDto(
@@ -310,7 +392,8 @@ class ReturnVisit extends ChangeNotifier {
       gender: gender,
       notes: notes,
       imagePath: imagePath,
-      lastVisit: lastVisit._toDto(),
+      lastVisitId: lastVisit._id,
+      lastVisitDate: lastVisit._date,
       pinned: pinned
     );
 }
@@ -322,27 +405,40 @@ class Visit {
   VisitType _type;
   List<Placement> _placements;
   String _nextTopic;
-  ReturnVisit _parent;
+  int _parentId;
 
   Visit._(
     this._id,
     this._date,
     this._nextTopic,
     this._notes,
-    this._parent,
+    this._parentId,
     this._placements,
     this._type
   );
 
-  factory Visit.fromDto({VisitDto dto, ReturnVisit parent}) {
-    return Visit._(dto.id, dto.date, dto.nextTopic, dto.notes, parent, dto.placements, dto.type);
-  }
+  factory Visit.fromDto({VisitDto dto, ReturnVisit parent}) => Visit._(
+    dto.id, 
+    dto.date, 
+    dto.nextTopic, 
+    dto.notes, 
+    parent._id, 
+    dto.placements, 
+    dto.type);
 
-  factory Visit.create({ReturnVisit parent, DateTime date, VisitType type}) {
-    return Visit._(-1, date.millisecondsSinceEpoch, "", "", parent, [], type);
-  }
-
-  ReturnVisit get parent => _parent;
+  factory Visit.create({
+    @required ReturnVisit parent, 
+    @required DateTime date, 
+    @required VisitType type}) => Visit._(
+    -1, 
+    date.millisecondsSinceEpoch, 
+    "", 
+    "", 
+    parent._id, 
+    [], 
+    type);
+  
+  bool get isSaved => _id > 0;
   DateTime get date => DateTime.fromMillisecondsSinceEpoch(_date);
   String get notes => _notes;
   VisitType get type => _type;
@@ -361,10 +457,33 @@ class Visit {
     }
   }
 
+  set type(VisitType value) {
+    if(_type != value) {
+      _type = value;
+    }
+  }
+
+  set nextTopic(String value) {
+    if(_nextTopic != value) {
+      _nextTopic = value;
+    }
+  }
+
+  // Examines the [other] visit to determine if [other] is an updated
+  /// copy of this visit.
+  bool isSameAs(Visit other) => _id == other._id;
+
+  /// Examines the [rv] to determine if it is the parent of this visit.
+  bool isChildOf(ReturnVisit rv) => _parentId == rv._id;
+
+  void addPlacement(Placement placement) => _placements.add(placement);
+
+  void removePlacement(Placement placement) => _placements.removeWhere((p) => p == placement);
+
   VisitDto _toDto() => VisitDto(
       id: _id,
-      parentRvId: parent._id,
-      date: date,
+      parentRvId: _parentId,
+      date: date.millisecondsSinceEpoch,
       notes: notes,
       type: type,
       placements: placements, 

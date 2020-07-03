@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:jama/data/core/mappable.dart';
-import 'package:jama/data/models/visit_model.dart';
+import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/mappable.dart';
 import 'package:quiver/core.dart';
 
 class Placement extends Mappable {

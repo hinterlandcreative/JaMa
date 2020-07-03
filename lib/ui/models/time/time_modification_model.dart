@@ -1,12 +1,10 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:jama/data/models/time_category_model.dart';
 
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:quiver/time.dart';
 
-import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/mixins/date_mixin.dart';
 
@@ -32,23 +30,19 @@ class TimeModificationModel extends ChangeNotifier {
   }
   
   /// Creates a new [TimeModificationModel] that has not been saved yet.
-  factory TimeModificationModel.create([TimeService timeService]) {
-    var now = DateTime.now();
-
-    return TimeModificationModel._(
-      Time(
-        date: DateTime.now().toNearestIncrement().subtract(anHour).millisecondsSinceEpoch,
+  factory TimeModificationModel.create([TimeService timeService]) => TimeModificationModel._(
+      Time.create(
+        date: DateTime.now().toNearestIncrement().subtract(anHour),
         totalMinutes: anHour.inMinutes,
         category: null),
       timeService ?? kiwi.Container().resolve<TimeService>()
     );
-  }
 
   /// The [duration] of the current time entry.
   Duration get duration => _time.duration;
 
   /// The [date] of the curent time entry.
-  DateTime get date => DateTime.fromMillisecondsSinceEpoch(_time.date);
+  DateTime get date => _time.date;
 
   /// The list of available [categories].
   UnmodifiableListView<TimeCategory> get categories => UnmodifiableListView(_categories);
@@ -66,7 +60,7 @@ class TimeModificationModel extends ChangeNotifier {
   TimeCategory get category => _time.category;
 
   /// Gets a value indicating whether goals should be hidden.
-  bool get shouldHideGoals => _time.category != null  && _time.category.id != 1;
+  bool get shouldHideGoals => _time.category != null  && !_time.category.isMinistry;
 
   /// The placements total from other days this month.
   int get previousPlacements => _currentPlacements;
@@ -90,8 +84,8 @@ class TimeModificationModel extends ChangeNotifier {
 
   /// The [date] of the curent time entry.
   set date(DateTime value) {
-    if (_time.date != value.millisecondsSinceEpoch) {
-      _time.date = value.millisecondsSinceEpoch;
+    if (_time.date != value) {
+      _time.date = value;
       notifyListeners();
     }
   }
@@ -130,7 +124,7 @@ class TimeModificationModel extends ChangeNotifier {
 
   /// Sets the time based on the [startTime] and the [totalMinutes] from that start time.
   void setTime(DateTime startTime, int totalMinutes) {
-    _time.date = DateTime(_time.formattedDate.year, _time.formattedDate.month, _time.formattedDate.day, startTime.hour, startTime.minute).millisecondsSinceEpoch;
+    _time.date = DateTime(_time.date.year, _time.date.month, _time.date.day, startTime.hour, startTime.minute);
     if (_time.totalMinutes != totalMinutes) {
       _time.totalMinutes = totalMinutes;
       notifyListeners();
@@ -148,7 +142,7 @@ class TimeModificationModel extends ChangeNotifier {
   
   /// [Deletes] this time entry.
   Future delete() async {
-    if(_time.id == -1) return;
+    if(!_time.isSaved) return;
 
     await _timeService.deleteTime(_time);
   }
@@ -170,7 +164,7 @@ class TimeModificationModel extends ChangeNotifier {
 
   List<TimeCategory> isDateMarkedForPreviousEntry(DateTime date) {
     return _entriesForMonth
-      .where((time) => time.formattedDate.isSameDayAs(date))
+      .where((time) => time.date.isSameDayAs(date))
       .map((e) => e.category)
       .toSet()
       .toList();

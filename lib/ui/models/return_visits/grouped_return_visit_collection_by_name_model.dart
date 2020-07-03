@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:jama/data/models/return_visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_model.dart';
 import 'package:jama/ui/models/return_visits/return_visits_by_name_model.dart';
 import 'package:jama/ui/models/grouped_collection_base_model.dart';
 import 'package:jama/ui/models/return_visits/grouped_return_visit_collection_model.dart';

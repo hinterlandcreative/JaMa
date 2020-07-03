@@ -1,19 +1,19 @@
+import 'package:flutter/material.dart';
+
+import 'package:tuple/tuple.dart';
 import 'package:calendar_strip/calendar_strip.dart';
 import 'package:commons/commons.dart';
-import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gradual_stepper/gradual_stepper.dart';
+
 import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:jama/ui/widgets/goal_display_widget.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:provider/provider.dart';
-
 import 'package:jama/ui/widgets/time_selection_slider_widget.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/screens/base_screen.dart';
-import 'package:tuple/tuple.dart';
-import 'package:uuid/uuid.dart';
 
 class AddEditTimeScreen extends StatefulWidget {
   final TimeModificationModel model;
@@ -150,8 +150,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                           context, "You must add time before saving.");
                       return;
                     }
-                    if (model.category == null ||
-                        model.category.id == -1) {
+                    if (model.category == null) {
                       infoDialog(context,
                           "You must select a category for your new time.");
                       return;
@@ -202,7 +201,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
           itemScrollController: categoryScrollListController,
           scrollDirection: Axis.horizontal,
           itemCount: model.categories.length,
-          initialScrollIndex: model.categories.length <= 0 ? 0 : model.categories.indexWhere((category) => category.id == model.category.id),
+          initialScrollIndex: model.categories.length <= 0 ? 0 : model.categories.indexWhere((category) => category == model.category),
           itemBuilder: (_, index) {
             var category =
                 model.categories[index];
@@ -220,7 +219,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                   avatar: Padding(
                     padding: const EdgeInsets.only(bottom: 2),
                     child: SlideFadeTransition(
-                      id: "cc_circle_${category.id}",
+                      id: "cc_circle_${category.name}",
                       delay: 30 + (index * 30),
                       curve: Curves.bounceIn,
                       child: CircleAvatar(
@@ -236,7 +235,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                   selectedColor:
                       AppStyles.lightGrey,
                   selected:
-                      model.category.id == category.id,
+                      model.category == category,
                   onSelected: (selected) {
                     if (selected) {
                       categoryScrollListController.scrollTo(index: index, duration: Duration(milliseconds: 300));
@@ -374,7 +373,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
               height: 7.0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: category.id == 1 && !isSelected ? Colors.white : category.color,
+                color: category.isMinistry && !isSelected ? Colors.white : category.color,
                 ),
               )
             ).toList(),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/time_model.dart';
 
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/mixins/duration_mixin.dart';

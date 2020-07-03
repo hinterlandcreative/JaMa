@@ -35,6 +35,10 @@ class ReportingService {
   /// Gets an observable stream of reports that have been sent.
   Stream<Tuple2<DateTime, DateTime>> get reportSent => _reportsSentStreamController.stream;
 
+  void dispose() { 
+    _reportsSentStreamController.close();
+  }
+
   Future<ReportResult> getTimeReport({@required DateTime start, @required DateTime end}) async {
     assert(end != null);
     assert(start != null);

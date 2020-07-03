@@ -3,8 +3,6 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/time_category_model.dart';
-import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/reporting_service.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
@@ -60,7 +58,7 @@ class HomeModel extends ChangeNotifier {
     var totals = <Tuple2<TimeCategory, int>>[];    
 
     for(var category in categories) {
-      var entries = timeEntries.where((t) => t.category.id == category.id);
+      var entries = timeEntries.where((t) => t.category == category);
       if(entries.isNotEmpty) {
         totals.add(Tuple2<TimeCategory,int>(category, entries.map((t) => t.totalMinutes).reduce((a, b) => a + b)));
       }

@@ -6,20 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/return_visit_model.dart';
-import 'package:jama/data/models/visit_model.dart';
-import 'package:jama/services/return_visit_service.dart';
-import 'package:jama/ui/app_styles.dart';
-import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
-import 'package:jama/ui/translation.dart';
-import 'package:jama/ui/widgets/add_placement_call.dart';
+import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/dto/visit_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tuple/tuple.dart';
 import 'package:supercharged/supercharged.dart';
 
+import 'package:jama/services/return_visit_service.dart';
+import 'package:jama/ui/app_styles.dart';
+import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
+import 'package:jama/ui/translation.dart';
+import 'package:jama/ui/widgets/add_placement_call.dart';
+
 class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
-  ReturnVisitDto _returnVisit;
+  ReturnVisit _returnVisit;
   final ReturnVisitService _rvService;
   final List<Color> colors = [AppStyles.primaryColor, Colors.red, Colors.yellow];
 
@@ -30,14 +31,14 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   List<VisitCardModel> _visits = [];
   List<charts.Series> _visitsByTypeSeries = [];
 
-  StreamSubscription<ReturnVisitDto> _rvUpdatedSubscription;
+  StreamSubscription<ReturnVisit> _rvUpdatedSubscription;
 
   var _lastVisitNotes;
 
   EditReturnVisitModel._(this._returnVisit, this._rvService) {
     _rvUpdatedSubscription = _rvService.returnVisitUpdates
-      .listen((ReturnVisitDto rv) {
-        if(rv.id == _returnVisit.id) {
+      .listen((ReturnVisit rv) {
+        if(rv.isSameAs(_returnVisit)) {
           _returnVisit = rv;
           notifyListeners();
         }
@@ -45,7 +46,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     _loadData();
   }
 
-  factory EditReturnVisitModel(ReturnVisitDto returnVisit, [ReturnVisitService rvService]) {
+  factory EditReturnVisitModel(ReturnVisit returnVisit, [ReturnVisitService rvService]) {
     var container = kiwi.Container();
     return EditReturnVisitModel._(returnVisit, rvService ?? container.resolve<ReturnVisitService>());
   }
@@ -74,18 +75,18 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   String get notes => _returnVisit.notes;
 
-  String get lastVisitDate => DateFormat.yMMMEd(Intl.defaultLocale).format(DateTime.fromMillisecondsSinceEpoch(_returnVisit.lastVisitDate));
+  String get lastVisitDate => DateFormat.yMMMEd(Intl.defaultLocale).format(_returnVisit.lastVisitDate);
 
   String get nextTopicToDsicuss => _nextTopic;
 
   String get lastVisitNotes => _lastVisitNotes;
 
   Future _loadData() async {
-    var visits = await _rvService.getAllVisitsForRv(_returnVisit);
+    var visits = _returnVisit.visits;
     visits.sort((a,b) => a.date.compareTo(b.date));
     _totalVisits = visits.length;
 
-    var lastVisit = visits.firstWhere((element) => element.id == _returnVisit.lastVisitId);
+    var lastVisit = _returnVisit.lastVisit;
 
     _nextTopic = lastVisit.nextTopic;
     _lastVisitNotes = lastVisit.notes;
@@ -100,7 +101,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     notifyListeners();
   }
 
-  void _setTimeByTypeSeries(List<VisitDto> visits) {
+  void _setTimeByTypeSeries(List<Visit> visits) {
     List<Tuple3<int, int, Color>> data = [];
     var seriesIndex = 1;
     for(var type in VisitType.values) {
@@ -122,10 +123,10 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     );
   }
 
-  void _setMostPopularTime(List<VisitDto> visits) {
+  void _setMostPopularTime(List<Visit> visits) {
     List<DateTime> datesOfVisits = visits
       .where((v) => v.type != VisitType.NotAtHome)
-      .map((v) => DateTime.fromMillisecondsSinceEpoch(v.date))
+      .map((v) => v.date)
       .toList();
     
     int mostPopularDay = _getMostPopularDay(datesOfVisits);
@@ -336,18 +337,17 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   bool validate() {
     return _returnVisit.address.city != null 
         && _returnVisit.address.city.isNotEmpty 
-        && _returnVisit.lastVisitDate != null 
-        && _returnVisit.lastVisitId > 0;
+        && _returnVisit.lastVisit != null;
   }
 
   Future _addNotAtHome() async {
-    var visit = VisitDto(
-      parentRvId: _returnVisit.id,
+    var visit = Visit.create(
+      parent: _returnVisit,
       date: DateTime.now(),
       type: VisitType.NotAtHome
     );
 
-    await _rvService.addOrUpdateVisit(visit);
+    await _rvService.updateVisit(visit);
 
     await _loadData();
   }
@@ -359,7 +359,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     }
 
     showAddEditVisitModal(context, type: type, parent: _returnVisit, onVisitSaved: (visit) async {
-          await _rvService.addOrUpdateVisit(visit);
+          await _rvService.updateVisit(visit);
           await _loadData();
     });
   }
@@ -371,7 +371,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
         context,
         visit: visit._visit,
         onSaved: (v) async {
-          await _rvService.addOrUpdateVisit(v);
+          await _rvService.updateVisit(v);
           await _loadData();
         },
         onDeleted: (v) async {
@@ -385,9 +385,11 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     showAddEditVisitModal(
       context, 
       visit: visit._visit, 
-      isDeletable: _visits.length > 1 && visits.minBy((a,b) => a.formattedDate.compareTo(b.formattedDate))._visit.id != visit._visit.id,
+      isDeletable: _visits.length > 1 
+        && visits
+          .minBy((a,b) => a.formattedDate.compareTo(b.formattedDate))._visit.isSameAs(visit._visit),
       onVisitSaved: (visit) async {
-        await _rvService.addOrUpdateVisit(visit);
+        await _rvService.updateVisit(visit);
         await _loadData();
       },
       onVisitDeleted: (visit) async {
@@ -399,23 +401,21 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 }
 
 class VisitCardModel {
-  final VisitDto _visit;
+  final Visit _visit;
 
   VisitCardModel._(this._visit);
 
-  factory VisitCardModel({VisitDto visit}) {
+  factory VisitCardModel({Visit visit}) {
     return VisitCardModel._(visit);
   }
 
   String get formattedDate => DateFormat
   .yMMMMd(Intl.defaultLocale)
-  .format(DateTime
-    .fromMillisecondsSinceEpoch(_visit.date));
+  .format(_visit.date);
 
   String get formattedTime => DateFormat
     .jm(Intl.defaultLocale)
-    .format(DateTime
-      .fromMillisecondsSinceEpoch(_visit.date));
+    .format(_visit.date);
 
   String get visitTypeString => Translation.visitTypeToString[_visit.type];
   VisitType get visitType => _visit.type;
