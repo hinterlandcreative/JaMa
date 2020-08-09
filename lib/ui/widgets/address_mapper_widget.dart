@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:jama/ui/app_styles.dart';
+import 'package:latlong/latlong.dart' as LatLong;
+
 import 'package:jama/data/models/address_model.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/ui/controllers/address_controller.dart';
 import 'package:jama/ui/controllers/address_image_controller.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
-import 'package:jama/ui/app_styles.dart';
-import 'package:latlong/latlong.dart' as LatLong;
 
 class AddressMapper extends StatefulWidget {
   /// the height to constrain the widget to.

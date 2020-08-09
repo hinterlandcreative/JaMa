@@ -1,5 +1,5 @@
 abstract class Mappable {
-  Mappable();
+  const Mappable();
 
   Mappable.fromMap(Map<String, dynamic> map);
 

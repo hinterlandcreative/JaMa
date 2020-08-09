@@ -1,6 +1,10 @@
-import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
-import 'package:jama/data/models/return_visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_model.dart';
+
+import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:latlong/latlong.dart';
+import 'package:path/path.dart' as path;
+
 import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
@@ -8,9 +12,6 @@ import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
 import 'package:jama/ui/screens/return_visits/edit_return_visit_screen.dart';
 import 'package:jama/mixins/date_mixin.dart';
 import 'package:jama/mixins/num_mixin.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
-import 'package:latlong/latlong.dart';
-import 'package:path/path.dart' as path;
 
 class ReturnVisitListItemModel {
   final ReturnVisit _returnVisit;
@@ -33,7 +34,7 @@ class ReturnVisitListItemModel {
   
   factory ReturnVisitListItemModel({@required ReturnVisit returnVisit, @required double currentLatitude, @required double currentLongitude, LocationService locationService, ReturnVisitService returnVisitService, ImageService imageService}) {
     assert(returnVisit != null);
-    assert(returnVisit.id >= 0);
+    assert(returnVisit.isSaved);
     assert(currentLatitude != null);
     assert(currentLongitude != null);
 
@@ -43,9 +44,9 @@ class ReturnVisitListItemModel {
 
     var distance = "";
     Color timeSinceColor = Colors.green;
-    var lastVisitDate = DateTime.fromMillisecondsSinceEpoch(returnVisit.lastVisitDate);
+    var lastVisitDate = returnVisit.lastVisitDate;
     var duration = DateTime.now().difference(lastVisitDate);
-    var aMonth = aWeek + aWeek + aWeek + aWeek;
+    
     if(duration.inDays >= 30) {
       timeSinceColor = Colors.red;
     } else if(duration.inDays > 13) {
@@ -87,12 +88,12 @@ class ReturnVisitListItemModel {
 
   String get imagePath => _returnVisit.imagePath.isNotEmpty ? path.join(_basePath, _returnVisit.imagePath) : "";
 
-  String get searchString => _returnVisit.createSearchString();
+  String get searchString => _returnVisit.searchString;
 
   bool get isPinned => _returnVisit.pinned;
 
   void navigate(BuildContext context) {
-    if(_returnVisit.id != null && _returnVisit.id > 0) {
+    if(_returnVisit.isSaved) {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => EditReturnVisitScreen(

@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:jama/data/core/mappable.dart';
+import 'package:jama/data/models/mappable.dart';
 import 'package:quiver/core.dart';
 
 class Address extends Mappable {

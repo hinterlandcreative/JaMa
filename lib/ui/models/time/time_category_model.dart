@@ -1,8 +1,9 @@
-import 'package:jama/data/models/time_category_model.dart';
 
-class TimeByCategoryModel {
+import 'package:jama/services/time_service.dart';
+
+class TimeByCategory {
   final TimeCategory category;
   final double time;
 
-  TimeByCategoryModel(this.category, this.time);
+  TimeByCategory(this.category, this.time);
 }

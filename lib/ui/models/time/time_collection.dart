@@ -6,8 +6,6 @@ import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:tuple/tuple.dart';
 
-import 'package:jama/data/models/time_category_model.dart';
-import 'package:jama/data/models/time_model.dart';
 import 'package:jama/ui/models/collection_base_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/time/time_category_model.dart';
@@ -22,7 +20,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
   List<TimeByDateModel> _items = [];
   TimeService _timeService;
-  List<TimeByCategoryModel> _allHours = [];
+  List<TimeByCategory> _allHours = [];
   int _goalHours = 0;
   int _videos = 0;
   int _placements = 0;
@@ -30,7 +28,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
   StreamSubscription<Time> _subscription;
 
-  List<TimeByCategoryModel> get allHours => _allHours;
+  List<TimeByCategory> get allHours => _allHours;
   int get goalHours => _goalHours;
   int get videos => _videos;
   int get placements => _placements;
@@ -41,7 +39,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
   
     _timeService = timeService ?? container.resolve<TimeService>();
     _subscription = _timeService.timeUpdatedStream.listen((time) {
-      if(time == null || (time.formattedDate.compareTo(startDate) >= 0 && time.formattedDate.compareTo(endDate) <= 0)) {
+      if(time == null || (time.date.compareTo(startDate) >= 0 && time.date.compareTo(endDate) <= 0)) {
         loadChildren();
       }
     });
@@ -57,11 +55,11 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
       startTime: startDate, 
       endTime: endDate);
     
-    var dates = timeEntries.map((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime()).toList();
+    var dates = timeEntries.map((t) => t.date.dropTime()).toList();
     dates = dates.toSet().toList();
     _items = dates.map((date) => TimeByDateModel(
       timeEntries
-        .where((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime() == date)
+        .where((t) => t.date.dropTime() == date)
         .map((t) => TimeModificationModel.edit(time: t))
         .toList(), 
       date)
@@ -72,13 +70,13 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
     var totals = <Tuple2<TimeCategory, int>>[];    
 
     for(var category in categories) {
-      var entries = timeEntries.where((t) => t.category.id == category.id);
+      var entries = timeEntries.where((t) => t.category == category);
       if(entries.isNotEmpty) {
         totals.add(Tuple2<TimeCategory,int>(category, entries.map((t) => t.totalMinutes).reduce((a, b) => a + b)));
       }
     }
 
-    _allHours = totals.map((t) => TimeByCategoryModel(t.item1, t.item2 / 60.0)).toList();
+    _allHours = totals.map((t) => TimeByCategory(t.item1, t.item2 / 60.0)).toList();
 
     _goalHours = 0;
 

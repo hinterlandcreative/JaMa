@@ -1,16 +1,17 @@
 import 'dart:collection';
-import 'dart:io';
 import 'dart:typed_data';
+
+import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:kiwi/kiwi.dart' as kiwi;
+
 import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/placement_model.dart';
-import 'package:jama/data/models/return_visit_model.dart';
-import 'package:jama/data/models/visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/placement.dart';
 import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/controllers/address_controller.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
 
 class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
 
@@ -273,7 +274,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
         );
       }
 
-      var rv = ReturnVisit(
+      var rv = ReturnVisit.create(
         address: address,
         name: name,
         gender: gender,

@@ -1,7 +1,7 @@
 
 // import 'package:flutter_test/flutter_test.dart';
-// import 'package:jama/data/models/time_category_model.dart';
-// import 'package:jama/data/models/time_model.dart';
+// import 'package:jama/data/dto/time_category_model.dart';
+// import 'package:jama/data/dto/time_model.dart';
 // import 'package:jama/ui/models/time/time_collection.dart';
 // import 'package:mockito/mockito.dart';
 

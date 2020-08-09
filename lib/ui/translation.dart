@@ -1,5 +1,6 @@
-import 'package:jama/data/models/return_visit_model.dart';
-import 'package:jama/data/models/visit_model.dart';
+
+import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/dto/visit_model.dart';
 
 class Translation {
   static Map<VisitType, String> visitTypeToString = {

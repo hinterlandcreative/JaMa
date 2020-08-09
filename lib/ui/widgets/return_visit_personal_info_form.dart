@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
-import 'package:jama/data/models/return_visit_model.dart';
+
+import 'package:jama/data/models/dto/return_visit_model.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
 import 'package:jama/ui/translation.dart';
-import 'package:provider/provider.dart';
-
-import '../app_styles.dart';
+import 'package:jama/ui/app_styles.dart';
 
 class ReturnVisitPersonalInfoForm extends StatefulWidget {
   final EdittableReturnVisitBaseModel returnVisitModel;

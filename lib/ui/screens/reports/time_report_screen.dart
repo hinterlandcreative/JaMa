@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:provider/provider.dart';
 
-import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/mixins/date_mixin.dart';
 import 'package:jama/ui/app_styles.dart';
@@ -88,12 +87,12 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
       startTime: start, 
       endTime: end);
 
-    var dates = timeEntries.map((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime()).toList();
+    var dates = timeEntries.map((t) => t.date.dropTime()).toList();
     dates = dates.toSet().toList();
     
     _items = dates.map((date) => TimeByDateModel(
       timeEntries
-        .where((t) => DateTime.fromMillisecondsSinceEpoch(t.date).dropTime() == date)
+        .where((t) => t.date.dropTime() == date)
         .map((t) => TimeModificationModel.edit(time: t))
         .toList(),
       date)

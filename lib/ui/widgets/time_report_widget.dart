@@ -5,7 +5,7 @@ import '../widgets/time_chart_widget.dart';
 import '../app_styles.dart';
 
 class TimeReportWidget extends StatelessWidget {
-  final List<TimeByCategoryModel> allHours;
+  final List<TimeByCategory> allHours;
   final int goalHours, placements, videos, returnVisits;
   const TimeReportWidget({
     Key key, 

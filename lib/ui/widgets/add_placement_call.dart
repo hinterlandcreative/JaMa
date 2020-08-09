@@ -1,23 +1,23 @@
-import 'package:commons/commons.dart';
-import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+
+import 'package:commons/commons.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gradual_stepper/gradual_stepper.dart';
-import 'package:jama/data/models/placement_model.dart';
-import 'package:jama/data/models/return_visit_model.dart';
-import 'package:jama/mixins/color_mixin.dart';
-import 'package:jama/ui/translation.dart';
-import 'package:jama/ui/widgets/spacer.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:supercharged/supercharged.dart';
 
-import 'package:jama/data/models/visit_model.dart';
+import 'package:jama/mixins/color_mixin.dart';
+import 'package:jama/services/return_visit_service.dart';
+import 'package:jama/ui/translation.dart';
+import 'package:jama/ui/widgets/spacer.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/node.dart';
 import 'package:jama/ui/transitions/slide_and_fade_transition.dart';
 import 'package:jama/ui/widgets/tree_select.dart';
+import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/placement.dart';
 
 /// Shows a modal for editting or creating a new visit. 
 /// To edit a current visit, supply a [visit]. 
@@ -28,14 +28,14 @@ Future showAddEditVisitModal(
   {VisitType type, 
   Visit visit, 
   ReturnVisit parent, 
-  Function(Visit visit) onVisitSaved,
-  Function(Visit visit) onVisitDeleted, 
+  Function(Visit	 visit) onVisitSaved,
+  Function(Visit	 visit) onVisitDeleted, 
   bool isDeletable = false}) async {
   if(visit == null && parent == null) {
     throw ArgumentError.notNull("`visit` and `parent` cannot be null. \\r\\nTo create a new visit, supply a parent. To edit an existing visit supply a visit.");
   } else if(visit == null && parent != null) {
-    visit = Visit(
-      parentRvId: parent.id,
+    visit = Visit.create(
+      parent: parent,
       date: DateTime.now(),
       type: type ?? VisitType.ReturnVisit
     );
@@ -54,8 +54,8 @@ Future showAddEditVisitModal(
 }
 
 Future editNotAtHomeVisit(BuildContext context, {Visit visit, Function(Visit visit) onSaved, Function(Visit visit) onDeleted}) async {
-  assert(visit.id > 0);
-  var newDate = DateTime.fromMillisecondsSinceEpoch(visit.date);
+  assert(visit.isSaved);
+  var newDate = visit.date;
   return await showMaterialModalBottomSheet(
     context: context, 
     expand: false,
@@ -89,7 +89,7 @@ Future editNotAtHomeVisit(BuildContext context, {Visit visit, Function(Visit vis
           maxDateTime: DateTime.now(),
 
           dateFormat: "EEEE MMMM d|hh|mm|a",
-          initDateTime: DateTime.fromMillisecondsSinceEpoch(visit.date),
+          initDateTime: visit.date,
           onChange: (d, _) => newDate = d,
           pickerTheme: DateTimePickerTheme(
             backgroundColor: Colors.transparent,
@@ -107,7 +107,7 @@ Future editNotAtHomeVisit(BuildContext context, {Visit visit, Function(Visit vis
               child: IconButton(
                 icon: FaIcon(FontAwesomeIcons.check, color: Colors.green,),
                 onPressed: () {
-                  visit.date = newDate.millisecondsSinceEpoch;
+                  visit.date = newDate;
                   onSaved(visit);
                   Navigator.of(context).pop();
                  },),
@@ -233,8 +233,8 @@ class __AddEditVisitState extends State<_AddEditVisit> {
           DateTimePickerWidget(
           maxDateTime: DateTime.now(),
           dateFormat: "EEEE MMMM d|hh|mm|a",
-          initDateTime: DateTime.fromMillisecondsSinceEpoch(widget.visit.date),
-          onChange: (d, _) => widget.visit.date = d.millisecondsSinceEpoch, 
+          initDateTime: widget.visit.date,
+          onChange: (d, _) => widget.visit.date = d, 
           pickerTheme: DateTimePickerTheme(
             backgroundColor: Colors.transparent,
             pickerHeight: 90.0,
@@ -383,112 +383,112 @@ class __AddEditVisitState extends State<_AddEditVisit> {
   Widget buildCurrentPlacementsList(BuildContext context) {
     return Column(children: <Widget>[
       Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15.0),
-                      child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment
-                                .spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            "Placements",
-                            style:
-                                AppStyles.smallTextStyle,
+        padding: const EdgeInsets.symmetric(
+            vertical: 15.0),
+        child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment
+                  .spaceBetween,
+          children: <Widget>[
+            Text(
+              "Placements",
+              style:
+                  AppStyles.smallTextStyle,
+            ),
+            FlatButton.icon(
+              icon: Icon(Icons.add),
+              label: Text("add"),
+              onPressed: () => setState(() => addingPlacement = true)
+            )
+          ],
+        ),
+      ),
+      widget.visit.placements.isNotEmpty
+        ? ListView.builder(
+            shrinkWrap: true,
+            itemCount: widget.visit.placements
+                .length,
+            itemBuilder: (_, index) {
+              var placement = widget.visit.placements[
+                  index];
+              return Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment
+                              .center,
+                      crossAxisAlignment:
+                          CrossAxisAlignment
+                              .center,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4.0, right: 8.0, bottom: 4.0),
+                            child: Container(
+                              color: Colors.black12,
+                              child: Center(
+                                child: Text(
+                                    placement
+                                        .count
+                                        .toString(),
+                                    style: AppStyles
+                                        .heading2
+                                        .copyWith(
+                                            fontWeight:
+                                                FontWeight.bold)),
+                              ),
+                            ),
                           ),
-                          FlatButton.icon(
-                            icon: Icon(Icons.add),
-                            label: Text("add"),
-                            onPressed: () => setState(() => addingPlacement = true)
-                          )
-                        ],
-                      ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                                Translation.placementTypeToString[
+                                        placement
+                                            .type] + (placement.count > 1 ? "(s)" : ""),
+                                style: AppStyles
+                                    .smallTextStyle
+                                    .copyWith(
+                                        fontWeight:
+                                            FontWeight.bold)),
+                            if (placement
+                                .notes
+                                .isNotEmpty)
+                              Text(
+                                  placement
+                                      .notes,
+                                  style: AppStyles
+                                      .smallTextStyle
+                                      .copyWith(
+                                          color:
+                                              Colors.black54))
+                          ],
+                        ),
+                        Expanded(
+                            child:
+                                Container()),
+                        IconButton(icon: Icon(Icons.close), onPressed: () {
+                          setState(() => widget.visit.placements.removeAt(index));
+                        })
+                      ],
                     ),
-                    widget.visit.placements.isNotEmpty
-                      ? ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: widget.visit.placements
-                              .length,
-                          itemBuilder: (_, index) {
-                            var placement = widget.visit.placements[
-                                index];
-                            return Column(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .center,
-                                    children: <Widget>[
-                                      SizedBox(
-                                        height: 50,
-                                        width: 50,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(top: 4.0, right: 8.0, bottom: 4.0),
-                                          child: Container(
-                                            color: Colors.black12,
-                                            child: Center(
-                                              child: Text(
-                                                  placement
-                                                      .count
-                                                      .toString(),
-                                                  style: AppStyles
-                                                      .heading2
-                                                      .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                              Translation.placementTypeToString[
-                                                      placement
-                                                          .type] + (placement.count > 1 ? "(s)" : ""),
-                                              style: AppStyles
-                                                  .smallTextStyle
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                          if (placement
-                                              .notes
-                                              .isNotEmpty)
-                                            Text(
-                                                placement
-                                                    .notes,
-                                                style: AppStyles
-                                                    .smallTextStyle
-                                                    .copyWith(
-                                                        color:
-                                                            Colors.black54))
-                                        ],
-                                      ),
-                                      Expanded(
-                                          child:
-                                              Container()),
-                                      IconButton(icon: Icon(Icons.close), onPressed: () {
-                                        setState(() => widget.visit.placements.removeAt(index));
-                                      })
-                                    ],
-                                  ),
-                                ),
-                                if(placement != widget.visit.placements.last) Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                                  child: Container(
-                                    height: 1.00,
-                                    color: HexColor.fromHex("ffdbdbdb"),
-                                  ),
-                                )
-                              ],
-                            );
-                          })
-                    : Center(child: Text("no placements", style: AppStyles.smallTextStyle.copyWith(color: Colors.black38),)),
+                  ),
+                  if(placement != widget.visit.placements.last) Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Container(
+                      height: 1.00,
+                      color: HexColor.fromHex("ffdbdbdb"),
+                    ),
+                  )
+                ],
+              );
+            })
+      : Center(child: Text("no placements", style: AppStyles.smallTextStyle.copyWith(color: Colors.black38),)),
     ],);
   }
 }

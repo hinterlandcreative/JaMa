@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:jama/data/models/dto/visit_model.dart';
 import 'package:jama/ui/transitions/slide_and_fade_transition.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:popup_menu/popup_menu.dart';
@@ -11,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tuple/tuple.dart';
 
-import 'package:jama/data/models/visit_model.dart';
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/ui/models/return_visits/edit_return_visit_model.dart';
 import 'package:jama/ui/widgets/donut_chart_widget.dart';

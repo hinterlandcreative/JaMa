@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/time_category_model.dart';
 import 'package:jama/services/app_settings_service.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
@@ -39,9 +38,13 @@ class SendCurrentReportModel extends ChangeNotifier {
     var timeEntries = await _timeService.getTimeEntriesByDate(startTime: startDate, endTime: endDate);
 
     Map<String, int> timeByCategory = {};
-    List<TimeCategory> categories = timeEntries.map((f) => f.category).toSet().toList()..sort((a,b) => a.id.compareTo(b.id));
+    List<TimeCategory> categories = timeEntries
+      .map((f) => f.category)
+      .toSet()
+      .toList();
+
     for(var category in categories) {
-      timeByCategory[category.name] = timeEntries.where((t) => t.category.id == category.id).fold(0, (total, time) => total + time.totalMinutes);
+      timeByCategory[category.name] = timeEntries.where((t) => t.category == category).fold(0, (total, time) => total + time.totalMinutes);
     }
 
     var totalMinutes = timeByCategory.values.fold(0, (t, v) => t + v);

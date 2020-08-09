@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 
-import 'dto.dart';
 import 'package:sembast/sembast.dart';
 
-import 'app_database.dart';
-import 'db_collection.dart';
-import 'query_package.dart';
+import 'package:jama/data/models/dto/dto.dart';
+import 'package:jama/data/core/db/app_database.dart';
+import 'package:jama/data/core/db/db_collection.dart';
+import 'package:jama/data/core/db/query_package.dart';
 
 class SembastDatabase extends AppDatabase {
   Database _db;
@@ -32,7 +32,7 @@ class SembastStore extends DbCollection {
 
   @override
   Future<int> add(DTO dto) async {
-    if(dto.id != -1) {
+    if(dto.id > 0) {
       await update(dto);
       return dto.id;
     }
@@ -48,7 +48,7 @@ class SembastStore extends DbCollection {
 
   @override
   Future deleteFromDto(DTO dto) async {
-    if(dto.id == -1) {
+    if(dto.id <= 0) {
       return;
     }
 
@@ -97,16 +97,16 @@ class SembastStore extends DbCollection {
 
     return records
       .map((r) {
-        T record = itemCreator(r.value);
-        record.id = r.key;
-        return record;
+        var map = Map<String,dynamic>.from(r.value);
+        map["id"] = r.key;
+        return itemCreator(map);
       })
       .toList();
   }
     
   @override
   Future update(DTO dto) async {
-    if(dto.id == -1) {
+    if(dto.id <= 0) {
       await add(dto);
       return;
     }
@@ -130,9 +130,9 @@ class SembastStore extends DbCollection {
 
     return records
       .map((r) {
-        T record = itemCreator(r.value);
-        record.id = r.key;
-        return record;
+        var map = Map<String,dynamic>.from(r.value);
+        map["id"] = r.key;
+        return itemCreator(map);
       })
       .toList();
   }
@@ -169,9 +169,9 @@ class SembastStore extends DbCollection {
 
     return records
       .map((r) {
-        T record = itemCreator(r.value);
-        record.id = r.key;
-        return record;
+        var map = Map<String,dynamic>.from(r.value);
+        map["id"] = r.key;
+        return itemCreator(map);
       })
       .toList();
   }

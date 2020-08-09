@@ -3,8 +3,6 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/time_category_model.dart';
-import 'package:jama/data/models/time_model.dart';
 import 'package:jama/services/reporting_service.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
@@ -20,7 +18,7 @@ class HomeModel extends ChangeNotifier {
   final TimeService _timeService;
   final ReportingService _reportingService;
 
-  List<TimeByCategoryModel> _allHours = [];
+  List<TimeByCategory> _allHours = [];
   int _goalHours = 0;
   int _placements = 0;
   int _videos = 0;
@@ -30,7 +28,7 @@ class HomeModel extends ChangeNotifier {
   StreamSubscription<Time> _subscription;
 
   
-  UnmodifiableListView<TimeByCategoryModel> get allHours => UnmodifiableListView(_allHours);
+  UnmodifiableListView<TimeByCategory> get allHours => UnmodifiableListView(_allHours);
   UnmodifiableListView<GoalModel> get goals => UnmodifiableListView(_goals);
   int get goalHours => _goalHours;
   int get placements => _placements;
@@ -60,13 +58,13 @@ class HomeModel extends ChangeNotifier {
     var totals = <Tuple2<TimeCategory, int>>[];    
 
     for(var category in categories) {
-      var entries = timeEntries.where((t) => t.category.id == category.id);
+      var entries = timeEntries.where((t) => t.category == category);
       if(entries.isNotEmpty) {
         totals.add(Tuple2<TimeCategory,int>(category, entries.map((t) => t.totalMinutes).reduce((a, b) => a + b)));
       }
     }
 
-    _allHours = totals.map((t) => TimeByCategoryModel(t.item1, t.item2 / 60.0)).toList();
+    _allHours = totals.map((t) => TimeByCategory(t.item1, t.item2 / 60.0)).toList();
 
     _goalHours = 0;
 

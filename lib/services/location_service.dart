@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/address_model.dart';
 import 'package:latlong/latlong.dart';
+
+import 'package:jama/data/models/address_model.dart';
 
 class LocationService {
   static const _defaultLocationPermission = GeolocationPermission.locationWhenInUse;

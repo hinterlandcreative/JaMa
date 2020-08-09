@@ -14,7 +14,6 @@ class TimeByDateModel extends GroupedCollection<TimeModificationModel> {
   @override
   UnmodifiableListView<TimeModificationModel> get items => UnmodifiableListView(_items);
 
-  @override
   Future loadChildren() {
     return Future.value(0);
   }

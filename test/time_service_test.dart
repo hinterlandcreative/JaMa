@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jama/data/core/db/db_collection.dart';
 import 'package:jama/data/core/db/query_package.dart';
-import 'package:jama/data/models/time_category_model.dart';
-import 'package:jama/data/models/time_model.dart';
+import 'package:jama/data/models/dto/time_category_model.dart';
+import 'package:jama/data/models/dto/time_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:mockito/mockito.dart';
 
@@ -230,12 +230,14 @@ void main() {
       verify(dbCollectionMock.getAll(any)).called(1);
     });
     test("TimeService.saveOrAddTime() throws on invalid date.", () async {
-      var timeData = Time(
-        date: 0,
-        totalMinutes: 60,
-        category: TimeCategory(name: "ministry")
+      var timeData = Time.fromDto(
+        TimeDto(
+          id: 0xDEADBEEF,
+          date: 0,
+          totalMinutes: 60,
+          category: TimeCategoryDto(name: "ministry", color: "")
+        )
       );
-      timeData.id = 0xDEADBEEF;
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -253,12 +255,14 @@ void main() {
       );
     });
     test("TimeService.saveOrAddTime() throws on invalid type.", () async {
-      var timeData = Time(
-        date: DateTime.now().millisecondsSinceEpoch,
-        totalMinutes: 60,
-        category: null
+      var timeData = Time.fromDto(
+        TimeDto(
+          id: 0xDEADBEEF,
+          date: DateTime.now().millisecondsSinceEpoch,
+          totalMinutes: 60,
+          category: null
+        )
       );
-      timeData.id = 0xDEADBEEF;
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -276,12 +280,14 @@ void main() {
       );
     });
     test("TimeService.saveOrAddTime() throws on invalid time amount.", () async {
-      var timeData = Time(
-        date: DateTime.now().millisecondsSinceEpoch,
-        totalMinutes: 0,
-        category: TimeCategory(name: "ministry")
+      var timeData = Time.fromDto(
+        TimeDto(
+          id: 0xDEADBEEF,
+          date: DateTime.now().millisecondsSinceEpoch,
+          totalMinutes: 0,
+          category: TimeCategoryDto(name: "ministry", color: "")
+        )
       );
-      timeData.id = 0xDEADBEEF;
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -299,12 +305,13 @@ void main() {
       );
     });
     test("TimeService.deleteTime() calls deleteFromDTO() if the time entry has an id.", () async {
-      var timeData = Time(
+      var dto = TimeDto(
+        id: 0xC0FFEE,
         date: DateTime.now().millisecondsSinceEpoch,
         totalMinutes: 60,
-        category: TimeCategory(name: "ministry")
+        category: TimeCategoryDto(name: "ministry")
       );
-      timeData.id = 0xDEADBEEF;
+      var timeData = Time.fromDto(dto);
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -318,15 +325,16 @@ void main() {
 
       await timeService.deleteTime(timeData);
 
-      verify(dbCollectionMock.deleteFromDto(timeData)).called(1);
+      verify(dbCollectionMock.deleteFromDto(dto)).called(1);
     });
     test("TimeService.deleteTime() does not call deleteFromDto() if the item is missing an id.", () async {
-      var timeData = Time(
+      var dto = TimeDto(
+        id: -1,
         date: DateTime.now().millisecondsSinceEpoch,
         totalMinutes: 60,
-        category: TimeCategory(name: "ministry")
+        category: TimeCategoryDto(name: "ministry")
       );
-      timeData.id = -1;
+      var timeData = Time.fromDto(dto);
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -340,16 +348,16 @@ void main() {
 
       await timeService.deleteTime(timeData);
 
-      verifyNever(dbCollectionMock.deleteFromDto(timeData));
+      verifyNever(dbCollectionMock.deleteFromDto(dto));
     });
     test("TimeService.saveOrAddTime() calls update() if the item has an id.", () async {
-      var timeData = Time(
+      var dto = TimeDto(
+        id: 0xC0FFEE,
         date: DateTime.now().millisecondsSinceEpoch,
         totalMinutes: 60,
-        category: TimeCategory(name: "ministry")
+        category: TimeCategoryDto(name: "ministry")
       );
-      timeData.id = 0xDEADBEEF;
-      timeData.category.id = 1;
+      var timeData = Time.fromDto(dto);
 
       var dbCollectionMock = DbCollectionMock();
 
@@ -363,20 +371,20 @@ void main() {
 
       await timeService.saveOrAddTime(timeData);
 
-      verifyNever(dbCollectionMock.add(timeData));
-      verify(dbCollectionMock.update(timeData)).called(1);
+      verifyNever(dbCollectionMock.add(dto));
+      verify(dbCollectionMock.update(dto)).called(1);
     });
     test("TimeService.saveOrAddTime() calls add() if the doesn't exist and returns an id.", () async {
-      var timeData = Time(
+      var dto = TimeDto(
+        id: -1,
         date: DateTime.now().millisecondsSinceEpoch,
         totalMinutes: 60,
-        category: TimeCategory(name: "ministry")
+        category: TimeCategoryDto(name: "ministry")
       );
-      timeData.id = -1;
-      timeData.category.id = 1;
+      var timeData = Time.fromDto(dto);
 
       var dbCollectionMock = DbCollectionMock();
-      when(dbCollectionMock.add(timeData)).thenAnswer((_) async => 0xDEADBEEF);
+      when(dbCollectionMock.add(dto)).thenAnswer((_) async => 0xDEADBEEF);
 
       var appDb = AppDatabaseMock();
       when(appDb.collections("time")).thenReturn(dbCollectionMock);
@@ -388,8 +396,8 @@ void main() {
 
       var newTimeData = await timeService.saveOrAddTime(timeData);
 
-      verifyNever(dbCollectionMock.update(timeData));
-      verify(dbCollectionMock.add(timeData)).called(1);
+      verifyNever(dbCollectionMock.update(dto));
+      verify(dbCollectionMock.add(dto)).called(1);
 
       expect(newTimeData.id, 0xDEADBEEF);
     });

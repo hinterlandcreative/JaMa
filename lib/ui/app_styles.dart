@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jama/data/models/visit_model.dart';
+
+import 'package:jama/data/models/dto/visit_model.dart';
 import 'package:jama/mixins/color_mixin.dart';
 
 class AppStyles {

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jama/data/models/placement_model.dart';
-import 'package:jama/data/models/visit_model.dart';
-import 'package:tuple/tuple.dart';
+
+import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/placement.dart';
 
 void main() {
   group("Visit model tests:", () {
@@ -14,10 +14,10 @@ void main() {
 
       var now = DateTime.now();
 
-      Visit visit = Visit(
+      VisitDto visit = VisitDto(
         id:123,
         parentRvId: 321,
-        date: now,
+        date: now.millisecondsSinceEpoch,
         notes: "some notes",
         type: VisitType.NotAtHome,
         nextTopic: "Something",
@@ -51,7 +51,7 @@ void main() {
         notes: "placement notes"
       );
 
-      var visit = Visit.fromMap({
+      var visit = VisitDto.fromMap({
         'id': 123,
         'parentRvId': 456,
         'date': 789,
@@ -80,10 +80,10 @@ void main() {
         Placement(count: 100, type: PlacementType.Book, notes: "placement note")
       ];
 
-      Visit visit = Visit(
+      VisitDto visit = VisitDto(
         id:123,
         parentRvId: 456,
-        date: DateTime.now(),
+        date: DateTime.now().millisecondsSinceEpoch,
         notes: "some notes",
         type: VisitType.NotAtHome,
         nextTopic: "some topic",
@@ -103,11 +103,11 @@ void main() {
 
     test("constructor requires a valid parent return visit", () {
       expect(
-        () => Visit(date:DateTime.now(), parentRvId: -1),
+        () => VisitDto(date:DateTime.now().millisecondsSinceEpoch, parentRvId: -1),
         throwsArgumentError);
       
       expect(
-        () => Visit(date:DateTime.now(), parentRvId: null), 
+        () => VisitDto(date:DateTime.now().millisecondsSinceEpoch, parentRvId: null), 
         throwsArgumentError);
     });
   });
