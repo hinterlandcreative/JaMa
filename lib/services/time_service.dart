@@ -15,7 +15,7 @@ import 'package:jama/mixins/color_mixin.dart';
 class TimeService {
   DatabaseService _dbService;
 
-  // we are not concerned with disposing of this because TimeService is registered as a singleton that 
+  // we are not concerned with disposing of this because TimeService is registered as a singleton that
   // lasts the entire lifetime of the app.
   final StreamController<Time> _timeUpdatedController = StreamController<Time>.broadcast();
   final _timeCollectionName = "time";
@@ -34,8 +34,8 @@ class TimeService {
     };
     _timeCollection.complete(getTimeCollection());
   }
-  
-  void dispose() { 
+
+  void dispose() {
     _timeUpdatedController.close();
   }
 
@@ -43,8 +43,7 @@ class TimeService {
     final db = await _dbService.getMainStorage();
     final catCollection = db.collections(_categoriesCollectionName);
 
-    var categories =
-        await catCollection.getAll((map) => TimeCategoryDto.fromMap(map));
+    var categories = await catCollection.getAll((map) => TimeCategoryDto.fromMap(map));
     if (categories.isEmpty) {
       return await _createDefaultCategories(catCollection);
     }
@@ -54,28 +53,27 @@ class TimeService {
 
   Future<List<TimeCategory>> _createDefaultCategories(DbCollection catCollection) async {
     var defaultCategory = TimeCategoryDto(
-      name: "ministry",
-      description: "Time spent in the minstry.",
-      color: AppStyles.primaryColor.toHex());
+        name: "ministry",
+        description: "Time spent in the minstry.",
+        color: AppStyles.primaryColor.toHex());
 
     var ldcCategory = TimeCategoryDto(
-      name: "local design construction",
-      description: "Time spent in ldc support.",
-      color: Colors.yellow.toHex()
-    );
+        name: "local design construction",
+        description: "Time spent in ldc support.",
+        color: Colors.yellow.toHex());
 
     var remoteWorkCategory = TimeCategoryDto(
-      name: "remote work",
-      description: "Time spent as a Bethel remote volunteer.",
-      color: Colors.red.toHex()
-    );
-    
+        name: "remote work",
+        description: "Time spent as a Bethel remote volunteer.",
+        color: Colors.red.toHex());
+
     defaultCategory = defaultCategory.copyWith(id: await catCollection.add(defaultCategory));
     ldcCategory = ldcCategory.copyWith(id: await catCollection.add(ldcCategory));
-    remoteWorkCategory = remoteWorkCategory.copyWith(id: await catCollection.add(remoteWorkCategory));
+    remoteWorkCategory =
+        remoteWorkCategory.copyWith(id: await catCollection.add(remoteWorkCategory));
     return [defaultCategory, ldcCategory, remoteWorkCategory]
-      .map((e) => TimeCategory.fromDto(e))
-      .toList();
+        .map((e) => TimeCategory.fromDto(e))
+        .toList();
   }
 
   /// gets all time entires.
@@ -84,9 +82,7 @@ class TimeService {
 
     var entries = await db.getAll((map) => TimeDto.fromMap(map));
 
-    return entries
-      .map((e) => Time.fromDto(e))
-      .toList();
+    return entries == null ? <Time>[] : entries.map((e) => Time.fromDto(e)).toList();
   }
 
   Future<List<Time>> getTimeEntriesByCategory(String category) async {
@@ -95,14 +91,11 @@ class TimeService {
     }
 
     final db = await _timeCollection.future;
-    var entries = await db.query([
-      QueryPackage(
-          key: "category.name", value: category, filter: FilterType.EqualTo)
-    ], (x) => TimeDto.fromMap(x));
+    var entries = await db.query(
+        [QueryPackage(key: "category.name", value: category, filter: FilterType.EqualTo)],
+        (x) => TimeDto.fromMap(x));
 
-    return entries
-      .map((e) => Time.fromDto(e))
-      .toList();
+    return entries == null ? <Time>[] : entries.map((e) => Time.fromDto(e)).toList();
   }
 
   /// get time entries filtered by date.
@@ -110,12 +103,10 @@ class TimeService {
   /// If [endTime] is not set it will include all entries after [startTime].
   /// Otherwise, it will include all entries between [startTime] and [endTime].
   /// If no dates are provided it returns all entries.
-  Future<List<Time>> getTimeEntriesByDate(
-      {DateTime startTime, DateTime endTime}) async {
+  Future<List<Time>> getTimeEntriesByDate({DateTime startTime, DateTime endTime}) async {
     if (startTime == null && endTime == null) {
       return await getAllTimeEntries();
-    } else if ((startTime != null && endTime != null) &&
-        startTime.compareTo(endTime) > 0) {
+    } else if ((startTime != null && endTime != null) && startTime.compareTo(endTime) > 0) {
       throw new ArgumentError("start time cannot be after end time.");
     }
 
@@ -125,18 +116,18 @@ class TimeService {
 
     var entries = await db.query(query, (x) => TimeDto.fromMap(x),
         sort: SortOrderType.Decending, sortKey: "date");
-    
-    return entries
-      .map((e) => Time.fromDto(e))
-      .toList();
+
+    return entries == null ? <Time>[] : entries.map((e) => Time.fromDto(e)).toList();
   }
 
   /// saves or updates an existing time entry.
   Future<Time> saveOrAddTime(Time timeData) async {
-    if (timeData.category == null || timeData.category._id <= 0) {
-      throw new ArgumentError.notNull("category");
+    if (timeData.category == null) {
+      throw ArgumentError.notNull("category");
+    } else if (timeData.date == null || timeData.date.millisecondsSinceEpoch <= 0) {
+      throw ArgumentError("Date must be set.");
     } else if (timeData.totalMinutes == 0) {
-      throw new ArgumentError("Total minutes must not be zero.");
+      throw ArgumentError("Total minutes must not be zero.");
     }
 
     final db = await _timeCollection.future;
@@ -162,8 +153,6 @@ class TimeService {
 
     _timeUpdatedController.sink.add(null);
   }
-
-
 
   List<QueryPackage> _getQueryPackageForDates(DateTime startTime, DateTime endTime) {
     var query = List<QueryPackage>();
@@ -201,33 +190,23 @@ class Time {
   int _totalMinutes;
   int _videos;
 
-  Time._(this.id, this._category, this._date, this._notes, this._placements, this._totalMinutes, this._videos);
+  Time._(this.id, this._category, this._date, this._notes, this._placements, this._totalMinutes,
+      this._videos);
 
   /// Creates a new time entry.
-  factory Time.create({
-    @required DateTime date, 
-    @required int totalMinutes,
-    @required TimeCategory category,
-    String notes, 
-    int placements,
-    int videos}) => Time._(
-      -1,
-      category, 
-      date.millisecondsSinceEpoch, 
-      notes ?? "", 
-      placements ?? 0, 
-      totalMinutes, 
-      videos ?? 0);
-  
+  factory Time.create(
+          {@required DateTime date,
+          @required int totalMinutes,
+          @required TimeCategory category,
+          String notes,
+          int placements,
+          int videos}) =>
+      Time._(-1, category, date.millisecondsSinceEpoch, notes ?? "", placements ?? 0, totalMinutes,
+          videos ?? 0);
+
   /// Creates a time entry from an `TimeDto`.
-  factory Time.fromDto(TimeDto dto) => Time._(
-    dto.id,
-    TimeCategory.fromDto(dto.category), 
-    dto.date, 
-    dto.notes, 
-    dto.placements, 
-    dto.totalMinutes, 
-    dto.videos);
+  factory Time.fromDto(TimeDto dto) => Time._(dto.id, TimeCategory.fromDto(dto.category), dto.date,
+      dto.notes, dto.placements, dto.totalMinutes, dto.videos);
 
   bool get isSaved => id > 0;
 
@@ -253,55 +232,55 @@ class Time {
   int get videos => _videos;
 
   set category(TimeCategory value) {
-    if(_category != value) {
+    if (_category != value) {
       _category = value;
     }
   }
 
   set date(DateTime value) {
-    if(_date != value.millisecondsSinceEpoch) {
+    if (_date != value.millisecondsSinceEpoch) {
       _date = value.millisecondsSinceEpoch;
     }
   }
 
   set notes(String value) {
-    if(_notes != value) {
+    if (_notes != value) {
       _notes = value;
     }
   }
 
   set placements(int value) {
-    if(_placements != value) {
+    if (_placements != value) {
       _placements = value;
     }
   }
 
   set totalMinutes(int value) {
-    if(_totalMinutes != value) {
+    if (_totalMinutes != value) {
       _totalMinutes = value;
     }
   }
 
   set duration(Duration value) {
-    if(_totalMinutes != value.inMinutes) {
+    if (_totalMinutes != value.inMinutes) {
       _totalMinutes = value.inMinutes;
     }
   }
 
   set videos(int value) {
-    if(_videos != value) {
+    if (_videos != value) {
       _videos = value;
     }
   }
 
   TimeDto _toDto() => TimeDto(
-    category: _category._toDto(),
-    id: id,
-    date: _date,
-    totalMinutes: _totalMinutes,
-    placements: _placements,
-    videos: _videos,
-    notes: _notes);
+      category: _category._toDto(),
+      id: id,
+      date: _date,
+      totalMinutes: _totalMinutes,
+      placements: _placements,
+      videos: _videos,
+      notes: _notes);
 
   Time copy() {
     return Time.fromDto(_toDto());
@@ -314,27 +293,19 @@ class TimeCategory {
   String _description;
   String _name;
 
-  TimeCategory._(
-    this._id,
-    this._color,
-    this._description,
-    this._name
-  );
+  TimeCategory._(this._id, this._color, this._description, this._name);
 
   /// Creates a new time category.
-  factory TimeCategory.create({
-    @required Color color,
-    @required String name,
-    String description
-  }) => TimeCategory._(-1, color, description, name);
+  factory TimeCategory.create({@required Color color, @required String name, String description}) =>
+      TimeCategory._(-1, color, description, name);
 
   /// Creates a time category from a `TimeCategoryDto`.
   factory TimeCategory.fromDto(TimeCategoryDto dto) => TimeCategory._(
-    dto.id, 
-    HexColor.fromHex(dto.color), 
-    dto.description, 
-    dto.name);  
-  
+      dto.id,
+      dto.color?.isNotEmpty == false ? HexColor.fromHex(dto.color) : Colors.transparent,
+      dto.description,
+      dto.name);
+
   /// Gets the [color] of the category.
   Color get color => _color;
 
@@ -347,41 +318,38 @@ class TimeCategory {
   bool get isMinistry => _id == 1;
 
   set color(Color value) {
-    if(_color != value) {
+    if (_color != value) {
       _color = value;
     }
   }
 
   set description(String value) {
-    if(_description != value) {
+    if (_description != value) {
       _description = value;
     }
   }
 
   set name(String value) {
-    if(_name != value) {
+    if (_name != value) {
       _name = value;
     }
   }
 
-  TimeCategoryDto _toDto() => TimeCategoryDto(
-    id: _id, 
-    name: _name, 
-    description: _description, 
-    color: _color.toHex());
+  TimeCategoryDto _toDto() =>
+      TimeCategoryDto(id: _id, name: _name, description: _description, color: _color.toHex());
 
   @override
-  operator ==(other) => 
-    (other is TimeCategory
-      && this._id == other._id
-      && this.name == other.name 
-      && this.description == other.description 
-      && this.color == other.color)
-    || (other is TimeCategoryDto
-      && this._id == other.id
-      && this.name == other.name
-      && this.description == other.description
-      && this.color == HexColor.fromHex(other.color));
+  operator ==(other) =>
+      (other is TimeCategory &&
+          this._id == other._id &&
+          this.name == other.name &&
+          this.description == other.description &&
+          this.color == other.color) ||
+      (other is TimeCategoryDto &&
+          this._id == other.id &&
+          this.name == other.name &&
+          this.description == other.description &&
+          this.color == HexColor.fromHex(other.color));
 
   @override
   int get hashCode => hash3(name, description, color);

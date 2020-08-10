@@ -23,26 +23,27 @@ class VisitDto extends DTO {
   final String nextTopic;
 
   const VisitDto(
-    {int id = -1,
-    @required this.parentRvId,
-    @required this.date,
-    this.notes = "",
-    this.type = VisitType.ReturnVisit,
-    this.placements,
-    this.nextTopic = ""})
-    : super(id: id);
-
+      {int id = -1,
+      @required this.parentRvId,
+      @required this.date,
+      this.notes = "",
+      this.type = VisitType.ReturnVisit,
+      this.placements,
+      this.nextTopic = ""})
+      : super(id: id);
 
   @override
-  VisitDto.fromMap(Map<String, dynamic> map) : this(
-      id: map["id"],
-      parentRvId: map["parentRvId"],
-      date: map["date"],
-      notes: map["notes"],
-      nextTopic: map["nextTopic"],
-      type: VisitType.values.firstWhere((t) => t.toString().split('.').last == map["type"]),
-      placements: (map["placements"] ?? []).map((p) => Placement.fromMap(p)).toList()
-    );
+  VisitDto.fromMap(Map<String, dynamic> map)
+      : this(
+            id: map["id"],
+            parentRvId: map["parentRvId"],
+            date: map["date"],
+            notes: map["notes"],
+            nextTopic: map["nextTopic"],
+            type: VisitType.values.firstWhere((t) => t.toString().split('.').last == map["type"]),
+            placements: map.containsKey("placements")
+                ? map["placements"].map<Placement>((p) => Placement.fromMap(p)).toList()
+                : <Placement>[]);
 
   @override
   VisitDto copy() {
@@ -62,24 +63,26 @@ class VisitDto extends DTO {
     };
   }
 
-  VisitDto copyWith({int id, int parentRvId, int date, String notes, VisitType type, List<Placement> placements, String nextTopic}) {
+  VisitDto copyWith(
+      {int id,
+      int parentRvId,
+      int date,
+      String notes,
+      VisitType type,
+      List<Placement> placements,
+      String nextTopic}) {
     return VisitDto(
-      id: id ?? this.id,
-      parentRvId: parentRvId ?? this.parentRvId,
-      date: date ?? this.parentRvId,
-      notes: notes ?? this.notes,
-      type: type ?? this.type,
-      placements: placements ?? this.placements,
-      nextTopic: nextTopic ?? this.nextTopic
-    );
+        id: id ?? this.id,
+        parentRvId: parentRvId ?? this.parentRvId,
+        date: date ?? this.parentRvId,
+        notes: notes ?? this.notes,
+        type: type ?? this.type,
+        placements: placements ?? this.placements,
+        nextTopic: nextTopic ?? this.nextTopic);
   }
 }
 
-enum VisitType { 
-  NotAtHome, 
-  ReturnVisit, 
-  Study 
-}
+enum VisitType { NotAtHome, ReturnVisit, Study }
 
 enum PlacementType {
   Magazine,
