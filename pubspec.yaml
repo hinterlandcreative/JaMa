@@ -39,7 +39,6 @@ dependencies:
   flutter_sms: 2.0.0+2
   search_widget: ^1.0.2
   popup_menu: ^1.0.5
-  toggle_switch: ^0.1.4
   typicons_flutter: ^0.3.1
   flutter_focus_watcher: ^0.0.1
   gradual_stepper: ^1.0.0

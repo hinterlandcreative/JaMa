@@ -2,12 +2,12 @@ import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:jama/ui/widgets/add_placement_call.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/controllers/address_image_controller.dart';
 import 'package:jama/ui/models/return_visits/add_return_visit_model.dart';
 import 'package:jama/ui/widgets/address_mapper_widget.dart';
-import 'package:jama/ui/widgets/pinned_toggle.dart';
 import 'package:jama/ui/widgets/return_visit_personal_info_form.dart';
 import 'package:jama/mixins/date_mixin.dart';
 import 'package:jama/mixins/color_mixin.dart';
@@ -52,7 +52,7 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                 builder: (_, model, __) {
                   return Container(
                     color: AppStyles.primaryBackground,
-                                    child: Stack(children: <Widget>[
+                    child: Stack(children: <Widget>[
                       Positioned.fill(
                         bottom: 86,
                         child: SingleChildScrollView(
@@ -61,7 +61,8 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               SizedBox(
-                                height: 227 + MediaQuery.of(context).padding.top,
+                                height:
+                                    227 + MediaQuery.of(context).padding.top,
                                 width: MediaQuery.of(context).size.width,
                                 child: Stack(
                                   children: <Widget>[
@@ -93,24 +94,34 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                                       ),
                                     ),
                                     Positioned(
-                                      top: MediaQuery.of(context).padding.top + AppStyles.leftMargin,
-                                      left: AppStyles.leftMargin,
-                                      child: ClipOval(
-                                        child: Material(
-                                          color: Colors.white, // button color
-                                          child: InkWell( // inkwell color
-                                            child: SizedBox(width: 38.0, height: 38.0, child: Center(child: Icon(Icons.arrow_back_ios, size: 17.0,))),
-                                            onTap: () => Navigator.of(context).pop(),
+                                        top:
+                                            MediaQuery.of(context).padding.top +
+                                                AppStyles.leftMargin,
+                                        left: AppStyles.leftMargin,
+                                        child: ClipOval(
+                                          child: Material(
+                                            color: Colors.white, // button color
+                                            child: InkWell(
+                                              // inkwell color
+                                              child: SizedBox(
+                                                  width: 38.0,
+                                                  height: 38.0,
+                                                  child: Center(
+                                                      child: Icon(
+                                                    Icons.arrow_back_ios,
+                                                    size: 17.0,
+                                                  ))),
+                                              onTap: () =>
+                                                  Navigator.of(context).pop(),
+                                            ),
                                           ),
-                                        ),
-                                      ))
+                                        ))
                                   ],
                                 ),
                               ),
                               Container(
-                                color: AppStyles.primaryBackground,
-                                child: _buildFormWidget(context, model)
-                              )
+                                  color: AppStyles.primaryBackground,
+                                  child: _buildFormWidget(context, model))
                             ],
                           ),
                         ),
@@ -156,7 +167,6 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                       ),
                     ]),
                   );
-                  
                 },
               ),
             ),
@@ -168,264 +178,252 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
 
   _buildFormWidget(BuildContext context, AddReturnVisitModel model) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal:30.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-                Selector<AddReturnVisitModel, bool>(
-                  selector: (_, m) => m.pinned,
-                  builder: (_, pinned, __) => Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: Align(
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              Selector<AddReturnVisitModel, bool>(
+                selector: (_, m) => m.pinned,
+                builder: (_, pinned, __) => Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Align(
                       alignment: Alignment.centerRight,
-                      child: PinnedToggle(
-                        pinned: model.pinned,
-                        onChanged: (b) => model.pinned = b),),
+                      child: FlutterSwitch(
+                        activeColor: AppStyles.primaryColor,
+                        value: pinned,
+                        activeText: "pinned",
+                        inactiveText: "unpinned",
+                        showOnOff: true,
+                        width: 125,
+                        onToggle: (v) => model.pinned = v,
+                      )),
+                ),
+              ),
+              StickyHeader(
+                header: Container(
+                  color: AppStyles.primaryBackground,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Divider(
+                          color: Colors.black,
+                          thickness: 1.0,
+                          height: 10,
+                        ),
+                      )),
+                      Text("Personal Info"),
+                      Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Divider(
+                          color: Colors.black,
+                          thickness: 1.0,
+                        ),
+                      ))
+                    ],
                   ),
                 ),
-            StickyHeader(
-              header: Container(
-                color: AppStyles.primaryBackground,
-                child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Expanded(
-                        child: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: Colors.black,
-                        thickness: 1.0,
-                        height: 10,
-                      ),
-                    )),
-                    Text("Personal Info"),
-                    Expanded(
-                        child: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: Colors.black,
-                        thickness: 1.0,
-                      ),
-                    ))
-                  ],
-                ),
+                content: ReturnVisitPersonalInfoForm(returnVisitModel: model),
               ),
-              content: ReturnVisitPersonalInfoForm(returnVisitModel: model),
-            ),
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: 15.0),
-            ),
-            StickyHeader(
-              header: Container(
-                color: AppStyles.primaryBackground,
-                child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Expanded(
-                        child: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: Colors.black,
-                        thickness: 1.0,
-                        height: 10,
-                      ),
-                    )),
-                    Text("Initial Call"),
-                    Expanded(
-                        child: Padding(
-                      padding:
-                          const EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: Colors.black,
-                        thickness: 1.0,
-                      ),
-                    ))
-                  ],
-                ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0),
               ),
-              content: Padding(
-                padding: const EdgeInsets.only(top: 30.0),
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Selector<AddReturnVisitModel,
-                        DateTime>(
-                      selector: (_, m) =>
-                          m.initialCallDate,
-                      shouldRebuild: (a, b) =>
-                          !a.isSameDayAs(b),
-                      builder: (_, date, __) =>
-                          DatePickerTimeline(
-                        date ?? DateTime.now(),
-                        selectionColor: Colors.black12,
-                        onDateChange: (date) {
-                          model.initialCallDate = date;
-                        },
+              StickyHeader(
+                header: Container(
+                  color: AppStyles.primaryBackground,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Divider(
+                          color: Colors.black,
+                          thickness: 1.0,
+                          height: 10,
+                        ),
+                      )),
+                      Text("Initial Call"),
+                      Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Divider(
+                          color: Colors.black,
+                          thickness: 1.0,
+                        ),
+                      ))
+                    ],
+                  ),
+                ),
+                content: Padding(
+                  padding: const EdgeInsets.only(top: 30.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Selector<AddReturnVisitModel, DateTime>(
+                        selector: (_, m) => m.initialCallDate,
+                        shouldRebuild: (a, b) => !a.isSameDayAs(b),
+                        builder: (_, date, __) => DatePickerTimeline(
+                          date ?? DateTime.now(),
+                          selectionColor: Colors.black12,
+                          onDateChange: (date) {
+                            model.initialCallDate = date;
+                          },
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15.0),
-                      child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment
-                                .spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            "Placements",
-                            style:
-                                AppStyles.smallTextStyle,
-                          ),
-                          FlatButton.icon(
-                            icon: Icon(Icons.add),
-                            label: Text("add"),
-                            onPressed: () => showAddSinglePlacementModal(
-                              context,
-                              (count, type, description) => model.addPlacement(count, type, description)
-                            ) 
-                          )
-                        ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              "Placements",
+                              style: AppStyles.smallTextStyle,
+                            ),
+                            FlatButton.icon(
+                                icon: Icon(Icons.add),
+                                label: Text("add"),
+                                onPressed: () => showAddSinglePlacementModal(
+                                    context,
+                                    (count, type, description) =>
+                                        model.addPlacement(
+                                            count, type, description)))
+                          ],
+                        ),
                       ),
-                    ),
-                    model.initialCallPlacements.isNotEmpty
-                      ? ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: model
-                              .initialCallPlacements
-                              .length,
-                          itemBuilder: (_, index) {
-                            var placement = model
-                                    .initialCallPlacements[
-                                index];
-                            return Column(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .center,
-                                    children: <Widget>[
-                                      SizedBox(
-                                        height: 50,
-                                        width: 50,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(top: 4.0, right: 8.0, bottom: 4.0),
-                                          child: Container(
-                                            color: Colors.black12,
-                                            child: Center(
-                                              child: Text(
-                                                  placement
-                                                      .count
-                                                      .toString(),
+                      model.initialCallPlacements.isNotEmpty
+                          ? ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: model.initialCallPlacements.length,
+                              itemBuilder: (_, index) {
+                                var placement =
+                                    model.initialCallPlacements[index];
+                                return Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 4.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          SizedBox(
+                                            height: 50,
+                                            width: 50,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 4.0,
+                                                  right: 8.0,
+                                                  bottom: 4.0),
+                                              child: Container(
+                                                color: Colors.black12,
+                                                child: Center(
+                                                  child: Text(
+                                                      placement.count
+                                                          .toString(),
+                                                      style: AppStyles.heading2
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold)),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(
+                                                  Translation.placementTypeToString[
+                                                          placement.type] +
+                                                      (placement.count > 1
+                                                          ? "(s)"
+                                                          : ""),
                                                   style: AppStyles
-                                                      .heading2
+                                                      .smallTextStyle
                                                       .copyWith(
                                                           fontWeight:
                                                               FontWeight.bold)),
-                                            ),
+                                              if (placement.notes.isNotEmpty)
+                                                Text(placement.notes,
+                                                    style: AppStyles
+                                                        .smallTextStyle
+                                                        .copyWith(
+                                                            color:
+                                                                Colors.black54))
+                                            ],
                                           ),
-                                        ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                              Translation.placementTypeToString[
-                                                      placement
-                                                          .type] + (placement.count > 1 ? "(s)" : ""),
-                                              style: AppStyles
-                                                  .smallTextStyle
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                          if (placement
-                                              .notes
-                                              .isNotEmpty)
-                                            Text(
-                                                placement
-                                                    .notes,
-                                                style: AppStyles
-                                                    .smallTextStyle
-                                                    .copyWith(
-                                                        color:
-                                                            Colors.black54))
+                                          Expanded(child: Container()),
+                                          IconButton(
+                                              icon: Icon(Icons.close),
+                                              onPressed: () {
+                                                model
+                                                    .removePlacement(placement);
+                                              })
                                         ],
                                       ),
-                                      Expanded(
-                                          child:
-                                              Container()),
-                                      IconButton(icon: Icon(Icons.close), onPressed: () {
-                                        model.removePlacement(placement);
-                                      })
-                                    ],
-                                  ),
-                                ),
-                                if(placement != model.initialCallPlacements.last) Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                                  child: Container(
-                                    height: 1.00,
-                                    color: HexColor.fromHex("ffdbdbdb"),
-                                  ),
-                                )
-                              ],
-                            );
-                          })
-                    : Center(child: Text("no placements", style: AppStyles.smallTextStyle.copyWith(color: Colors.black38),)),
-                    Selector<AddReturnVisitModel, String>(
-                      selector: (_, m) => m.initialCallNextTopic,
-                      builder: (_, nextTopic, __) => TextFormField(
-                        initialValue: nextTopic,
-                        onSaved: (s) => model.initialCallNextTopic = s,
-                        onFieldSubmitted: (s) => model.initialCallNextTopic = s,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          labelText: "Next Topic/Question?",
-                          alignLabelWithHint: true,
-                          labelStyle: AppStyles.smallTextStyle)
-                      )
-                    ),
-                    Selector<AddReturnVisitModel, String>(
-                      selector: (_, m) =>
-                          m.initialCallNotes,
-                      builder: (_, notes, __) =>
-                          TextFormField(
-                              initialValue: notes,
-                              onSaved: (s) => model
-                                  .initialCallNotes = s,
-                              onFieldSubmitted: (s) => model
-                                  .initialCallNotes = s,
-                              keyboardType:
-                                  TextInputType.multiline,
-                              maxLines: 4,
+                                    ),
+                                    if (placement !=
+                                        model.initialCallPlacements.last)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15.0),
+                                        child: Container(
+                                          height: 1.00,
+                                          color: HexColor.fromHex("ffdbdbdb"),
+                                        ),
+                                      )
+                                  ],
+                                );
+                              })
+                          : Center(
+                              child: Text(
+                              "no placements",
+                              style: AppStyles.smallTextStyle
+                                  .copyWith(color: Colors.black38),
+                            )),
+                      Selector<AddReturnVisitModel, String>(
+                          selector: (_, m) => m.initialCallNextTopic,
+                          builder: (_, nextTopic, __) => TextFormField(
+                              initialValue: nextTopic,
+                              onSaved: (s) => model.initialCallNextTopic = s,
+                              onFieldSubmitted: (s) =>
+                                  model.initialCallNextTopic = s,
+                              keyboardType: TextInputType.text,
                               decoration: InputDecoration(
-                                  labelText: "Other Notes (Scriptures Used, etc.)",
-                                  alignLabelWithHint:
-                                      true,
-                                  labelStyle: AppStyles
-                                      .smallTextStyle)),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: 50.0),
-                    ),
-                  ],
+                                  labelText: "Next Topic/Question?",
+                                  alignLabelWithHint: true,
+                                  labelStyle: AppStyles.smallTextStyle))),
+                      Selector<AddReturnVisitModel, String>(
+                        selector: (_, m) => m.initialCallNotes,
+                        builder: (_, notes, __) => TextFormField(
+                            initialValue: notes,
+                            onSaved: (s) => model.initialCallNotes = s,
+                            onFieldSubmitted: (s) => model.initialCallNotes = s,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 4,
+                            decoration: InputDecoration(
+                                labelText:
+                                    "Other Notes (Scriptures Used, etc.)",
+                                alignLabelWithHint: true,
+                                labelStyle: AppStyles.smallTextStyle)),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 50.0),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            )
-          ],
-        ),
-      ));
+              )
+            ],
+          ),
+        ));
   }
 }
