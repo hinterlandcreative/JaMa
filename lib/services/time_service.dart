@@ -1,128 +1,183 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:quiver/core.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:supercharged/supercharged.dart';
+import 'package:kiwi/kiwi.dart' as kiwi;
 
-import 'package:jama/data/core/db/db_collection.dart';
-import 'package:jama/data/core/db/query_package.dart';
 import 'package:jama/data/models/dto/time_category_model.dart';
 import 'package:jama/data/models/dto/time_model.dart';
-import 'package:jama/services/database_service.dart';
-import 'package:jama/ui/app_styles.dart';
 import 'package:jama/mixins/color_mixin.dart';
+import 'package:jama/mixins/date_mixin.dart';
+import 'package:jama/services/database_service2.dart';
+import 'package:jama/ui/app_styles.dart';
 
 class TimeService {
-  DatabaseService _dbService;
+  static const String _timeTable = "TimeEntries";
+  static const String _timeCategoryTable = "TimeCategory";
 
-  // we are not concerned with disposing of this because TimeService is registered as a singleton that
-  // lasts the entire lifetime of the app.
   final StreamController<Time> _timeUpdatedController = StreamController<Time>.broadcast();
-  final _timeCollectionName = "time";
-  final _categoriesCollectionName = "categories";
-  final Completer<DbCollection> _timeCollection = Completer();
-  Stream<Time> get timeUpdatedStream => _timeUpdatedController.stream;
+  final Completer<Database> _databaseCompleter;
 
-  TimeService([DatabaseService databaseService]) {
-    var container = kiwi.Container();
+  TimeService._(this._databaseCompleter);
 
-    _dbService = databaseService ?? container.resolve<DatabaseService>();
+  /// Creates an instance of the `TimeService`.
+  /// For unit testing provide the [dbService]. Otherwise,
+  /// the [context] will provide the `DatabaseService`.
+  factory TimeService([DatabaseService2 dbService]) {
+    dbService = dbService ?? kiwi.Container().resolve<DatabaseService2>();
 
-    var getTimeCollection = () async {
-      final db = await _dbService.getMainStorage();
-      return db.collections(_timeCollectionName);
+    var getTimeDb = () async {
+      return await dbService.getLocalMainStorage();
     };
-    _timeCollection.complete(getTimeCollection());
+
+    return TimeService._(Completer()..complete(getTimeDb()));
   }
+
+  /// Gets a `Stream` representing changes to time entries.
+  Stream<Time> get timeUpdatedStream => _timeUpdatedController.stream;
 
   void dispose() {
     _timeUpdatedController.close();
   }
 
+  /// Get a list of available `TimeCategory`
   Future<List<TimeCategory>> getCategories() async {
-    final db = await _dbService.getMainStorage();
-    final catCollection = db.collections(_categoriesCollectionName);
+    final db = await _databaseCompleter.future;
 
-    var categories = await catCollection.getAll((map) => TimeCategoryDto.fromMap(map));
+    var categories = await db.rawQuery("SELECT * FROM $_timeCategoryTable;");
+
     if (categories.isEmpty) {
-      return await _createDefaultCategories(catCollection);
+      var defaultCategory = TimeCategoryDto(
+          name: "ministry",
+          description: "Time spent in the field minstry.",
+          color: AppStyles.primaryColor.toHex());
+
+      var ldcCategory = TimeCategoryDto(
+          name: "local design construction",
+          description: "Time spent in ldc support.",
+          color: Colors.yellow.toHex());
+
+      var remoteWorkCategory = TimeCategoryDto(
+          name: "remote work",
+          description: "Time spent as a Bethel remote volunteer.",
+          color: Colors.red.toHex());
+
+      int defaultId, ldcId, remoteWorkId = -1;
+
+      await db.transaction((txn) async {
+        defaultId = await txn.insert(_timeCategoryTable, defaultCategory.toMap());
+        ldcId = await txn.insert(_timeCategoryTable, ldcCategory.toMap());
+        remoteWorkId = await txn.insert(_timeCategoryTable, remoteWorkCategory.toMap());
+      });
+
+      defaultCategory = defaultCategory.copyWith(id: defaultId);
+
+      ldcCategory = ldcCategory.copyWith(id: ldcId);
+
+      remoteWorkCategory = remoteWorkCategory.copyWith(id: remoteWorkId);
+
+      return [defaultCategory, ldcCategory, remoteWorkCategory]
+          .map((e) => TimeCategory.fromDto(e))
+          .toList();
     }
 
-    return categories.map((e) => TimeCategory.fromDto(e)).toList();
+    return categories.map((e) => TimeCategory.fromDto(TimeCategoryDto.fromMap(e))).toList();
   }
 
-  Future<List<TimeCategory>> _createDefaultCategories(DbCollection catCollection) async {
-    var defaultCategory = TimeCategoryDto(
-        name: "ministry",
-        description: "Time spent in the minstry.",
-        color: AppStyles.primaryColor.toHex());
-
-    var ldcCategory = TimeCategoryDto(
-        name: "local design construction",
-        description: "Time spent in ldc support.",
-        color: Colors.yellow.toHex());
-
-    var remoteWorkCategory = TimeCategoryDto(
-        name: "remote work",
-        description: "Time spent as a Bethel remote volunteer.",
-        color: Colors.red.toHex());
-
-    defaultCategory = defaultCategory.copyWith(id: await catCollection.add(defaultCategory));
-    ldcCategory = ldcCategory.copyWith(id: await catCollection.add(ldcCategory));
-    remoteWorkCategory =
-        remoteWorkCategory.copyWith(id: await catCollection.add(remoteWorkCategory));
-    return [defaultCategory, ldcCategory, remoteWorkCategory]
-        .map((e) => TimeCategory.fromDto(e))
-        .toList();
-  }
-
-  /// gets all time entires.
+  /// Get all of the `Time` entries.
   Future<List<Time>> getAllTimeEntries() async {
-    final db = await _timeCollection.future;
+    final db = await _databaseCompleter.future;
 
-    var entries = await db.getAll((map) => TimeDto.fromMap(map));
+    var entries = await db.rawQuery("""
+  SELECT * FROM $_timeTable
+	  INNER JOIN $_timeCategoryTable 
+    ON $_timeTable.FK_TimeCategory_Time = $_timeCategoryTable.TimeCategoryId;
+  """);
 
-    return entries == null ? <Time>[] : entries.map((e) => Time.fromDto(e)).toList();
+    return entries.map((e) => Time.fromDto(TimeDto.fromMap(e))).toList();
   }
 
-  Future<List<Time>> getTimeEntriesByCategory(String category) async {
-    if (category == null || !category.isNotEmpty) {
-      throw ArgumentError.notNull('category');
+  /// Gets all of the `Time` entries by [category] name.
+  Future<List<Time>> getTimeEntriesByCategoryName(String category) async {
+    if (category == null || category.isEmpty) {
+      throw ArgumentError.notNull("category");
     }
 
-    final db = await _timeCollection.future;
-    var entries = await db.query(
-        [QueryPackage(key: "category.name", value: category, filter: FilterType.EqualTo)],
-        (x) => TimeDto.fromMap(x));
+    final db = await _databaseCompleter.future;
 
-    return entries == null ? <Time>[] : entries.map((e) => Time.fromDto(e)).toList();
+    var entries = await db.rawQuery("""
+SELECT * FROM TimeEntries
+	INNER JOIN TimeCategory ON TimeEntries.FK_TimeCategory_Time = TimeCategory.TimeCategoryId
+	WHERE TimeCategory.Name = ?;
+""", [category]);
+
+    return entries.map((e) => Time.fromDto(TimeDto.fromMap(e))).toList();
   }
 
-  /// get time entries filtered by date.
-  /// If [startTime] is not set it will include all entries before [endTime].
-  /// If [endTime] is not set it will include all entries after [startTime].
-  /// Otherwise, it will include all entries between [startTime] and [endTime].
-  /// If no dates are provided it returns all entries.
-  Future<List<Time>> getTimeEntriesByDate({DateTime startTime, DateTime endTime}) async {
+  /// Get all the `Time` entries by [category].
+  Future<List<Time>> getTimeEntriesByCategory(TimeCategory category) async {
+    if (category == null || category._id <= 0) {
+      throw ArgumentError.notNull("category");
+    }
+
+    final db = await _databaseCompleter.future;
+
+    var entries = await db.rawQuery("""
+SELECT * FROM TimeEntries
+	INNER JOIN TimeCategory ON TimeEntries.FK_TimeCategory_Time = TimeCategory.TimeCategoryId
+	WHERE FK_TimeCategory_Time = ?;
+""", [category._id]);
+
+    return entries.map((e) => Time.fromDto(TimeDto.fromMap(e))).toList();
+  }
+
+  Future<List<Time>> getTimeEntriesByDate(
+      {DateTime startTime, DateTime endTime, bool dropTime = true}) async {
     if (startTime == null && endTime == null) {
       return await getAllTimeEntries();
     } else if ((startTime != null && endTime != null) && startTime.compareTo(endTime) > 0) {
-      throw new ArgumentError("start time cannot be after end time.");
+      throw ArgumentError("[start] cannot be after [end]");
     }
 
-    List<QueryPackage> query = _getQueryPackageForDates(startTime, endTime);
+    final db = await _databaseCompleter.future;
 
-    final db = await _timeCollection.future;
+    if (dropTime) {
+      startTime = startTime.dropTime();
+      endTime = endTime.dropTime().add(1.days).subtract(1.milliseconds);
+    }
 
-    var entries = await db.query(query, (x) => TimeDto.fromMap(x),
-        sort: SortOrderType.Decending, sortKey: "date");
+    var baseQuery = """
+SELECT * FROM TimeEntries
+	INNER JOIN TimeCategory ON TimeEntries.FK_TimeCategory_Time = TimeCategory.TimeCategoryId
+	WHERE""";
+    var arguments = [];
+    if (startTime != null) {
+      baseQuery = "$baseQuery Date >= ?";
+      arguments.add(startTime.millisecondsSinceEpoch);
+      if (endTime != null) {
+        baseQuery = "$baseQuery AND Date <= ?";
+        arguments.add(endTime.millisecondsSinceEpoch);
+      }
+    } else if (endTime != null) {
+      baseQuery = "$baseQuery Date <= ?";
+      arguments.add(endTime.millisecondsSinceEpoch);
+    }
 
-    return entries == null ? <Time>[] : entries.map((e) => Time.fromDto(e)).toList();
+    baseQuery = "$baseQuery;";
+
+    var entries = await db.rawQuery(baseQuery, arguments);
+
+    return entries.map((map) => Time.fromDto(TimeDto.fromMap(map))).toList();
   }
 
-  /// saves or updates an existing time entry.
+  /// Save or Add a `Time` entry.
+  /// [timeData.category] must not be null.
   Future<Time> saveOrAddTime(Time timeData) async {
-    if (timeData.category == null) {
+    if (timeData.category == null || timeData.category._id <= 0) {
       throw ArgumentError.notNull("category");
     } else if (timeData.date == null || timeData.date.millisecondsSinceEpoch <= 0) {
       throw ArgumentError("Date must be set.");
@@ -130,11 +185,12 @@ class TimeService {
       throw ArgumentError("Total minutes must not be zero.");
     }
 
-    final db = await _timeCollection.future;
+    final db = await _databaseCompleter.future;
+
     if (timeData.id <= 0) {
-      timeData.id = await db.add(timeData._toDto());
+      timeData.id = await db.insert(_timeTable, timeData._toDto().toMap());
     } else {
-      await db.update(timeData._toDto());
+      await db.update(_timeTable, timeData._toDto().toMap());
     }
 
     _timeUpdatedController.sink.add(timeData);
@@ -142,41 +198,16 @@ class TimeService {
     return timeData;
   }
 
-  /// deletes a time entry if has been previously saved.
   Future deleteTime(Time timeData) async {
     if (timeData.id <= 0) {
       return;
     }
 
-    final collection = await _timeCollection.future;
-    await collection.deleteFromDto(timeData._toDto());
+    final db = await _databaseCompleter.future;
 
-    _timeUpdatedController.sink.add(null);
-  }
+    await db.delete(_timeTable, where: "TimeEntryId = ?", whereArgs: [timeData.id]);
 
-  List<QueryPackage> _getQueryPackageForDates(DateTime startTime, DateTime endTime) {
-    var query = List<QueryPackage>();
-    if (startTime == null) {
-      query.add(QueryPackage(
-          key: "date",
-          value: endTime.millisecondsSinceEpoch,
-          filter: FilterType.LessThanOrEqualTo));
-    } else if (endTime == null) {
-      query.add(QueryPackage(
-          key: "date",
-          value: startTime.millisecondsSinceEpoch,
-          filter: FilterType.GreaterThanOrEqualTo));
-    } else {
-      query.add(QueryPackage(
-          key: "date",
-          value: startTime.millisecondsSinceEpoch,
-          filter: FilterType.GreaterThanOrEqualTo));
-      query.add(QueryPackage(
-          key: "date",
-          value: endTime.millisecondsSinceEpoch,
-          filter: FilterType.LessThanOrEqualTo));
-    }
-    return query;
+    _timeUpdatedController.add(null);
   }
 }
 
@@ -302,7 +333,9 @@ class TimeCategory {
   /// Creates a time category from a `TimeCategoryDto`.
   factory TimeCategory.fromDto(TimeCategoryDto dto) => TimeCategory._(
       dto.id,
-      dto.color?.isNotEmpty == false ? HexColor.fromHex(dto.color) : Colors.transparent,
+      (dto.color != null && dto.color.isNotEmpty)
+          ? HexColor.fromHex(dto.color)
+          : Colors.transparent,
       dto.description,
       dto.name);
 
