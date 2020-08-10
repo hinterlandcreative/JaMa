@@ -50,7 +50,7 @@ dependencies:
   supercharged: ^1.6.0
   flutter_switch: ^0.1.1
   flutter_cupertino_date_picker: 
-    git: https://github.com/rdev-software/flutter-cupertino-date-picker
+    git: https://github.com/hinterlandsupplyco/flutter-cupertino-date-picker.git
   flutter: 
     sdk: flutter
   flutter_speed_dial: 
