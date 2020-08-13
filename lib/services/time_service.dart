@@ -8,11 +8,11 @@ import 'package:sqflite/sqflite.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
-import 'package:jama/data/models/dto/time_category_model.dart';
-import 'package:jama/data/models/dto/time_model.dart';
+import 'package:jama/data/models/dto/time_category_dto.dart';
+import 'package:jama/data/models/dto/time_dto.dart';
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/mixins/date_mixin.dart';
-import 'package:jama/services/database_service2.dart';
+import 'package:jama/services/database_service.dart';
 import 'package:jama/ui/app_styles.dart';
 
 class TimeService {
@@ -27,8 +27,8 @@ class TimeService {
   /// Creates an instance of the `TimeService`.
   /// For unit testing provide the [dbService]. Otherwise,
   /// the [context] will provide the `DatabaseService`.
-  factory TimeService([DatabaseService2 dbService]) {
-    dbService = dbService ?? kiwi.Container().resolve<DatabaseService2>();
+  factory TimeService([DatabaseService dbService]) {
+    dbService = dbService ?? kiwi.Container().resolve<DatabaseService>();
 
     var getTimeDb = () async {
       return await dbService.getLocalMainStorage();
@@ -190,7 +190,8 @@ SELECT * FROM TimeEntries
     if (timeData.id <= 0) {
       timeData.id = await db.insert(_timeTable, timeData._toDto().toMap());
     } else {
-      await db.update(_timeTable, timeData._toDto().toMap());
+      await db.update(_timeTable, timeData._toDto().toMap(),
+          where: "TimeEntryId = ?", whereArgs: [timeData.id]);
     }
 
     _timeUpdatedController.sink.add(timeData);

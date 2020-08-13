@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
 
 abstract class EdittableReturnVisitBaseModel extends ChangeNotifier {
   bool get pinned => null;

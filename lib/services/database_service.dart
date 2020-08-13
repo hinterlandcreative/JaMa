@@ -1,19 +1,23 @@
-import 'package:jama/data/core/db/app_database.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:kiwi/kiwi.dart';
+
 import 'package:jama/data/core/db/database_provider.dart';
 
 class DatabaseService {
-  final String _mainStorageDatabaseName = "appstore.db";
-  DatabaseProvider _provider;
+  static const String _localDatabaseName = "app_storage.db";
+  final DatabaseProvider _databaseProvider;
 
-  DatabaseService([DatabaseProvider provider]) {
-    Container container = Container();
+  const DatabaseService._(this._databaseProvider);
 
-    _provider = provider ?? container.resolve<DatabaseProvider>();
+  /// Creates an instance of the `DatabaseService`.
+  /// For unit testing provide a [dbProvider] otherwise
+  /// the `DatabaseProvider` will be provided by the [context].
+  factory DatabaseService([DatabaseProvider dbProvider]) {
+    return DatabaseService._(dbProvider ?? Container().resolve<DatabaseProvider>());
   }
 
-  /// Gets the main storage database for the app.
-  Future<AppDatabase> getMainStorage() async {
-    return await _provider.getLocalDatabase(_mainStorageDatabaseName);
+  /// Gets the local SQLite `Database` for the main app storage.
+  Future<Database> getLocalMainStorage() async {
+    return await _databaseProvider.getLocalDatabase(_localDatabaseName);
   }
 }

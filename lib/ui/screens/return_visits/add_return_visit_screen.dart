@@ -61,18 +61,15 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               SizedBox(
-                                height:
-                                    227 + MediaQuery.of(context).padding.top,
+                                height: 227 + MediaQuery.of(context).padding.top,
                                 width: MediaQuery.of(context).size.width,
                                 child: Stack(
                                   children: <Widget>[
                                     Positioned.fill(
                                         top: 0,
                                         child: AddressMapper(
-                                          addressImageController:
-                                              _addressImageController,
-                                          addressController:
-                                              model.addressController,
+                                          addressImageController: _addressImageController,
+                                          addressController: model.addressController,
                                           onUseAddressSelected: (address) {
                                             FocusScope.of(context).unfocus();
                                             model.address = address;
@@ -94,9 +91,8 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                                       ),
                                     ),
                                     Positioned(
-                                        top:
-                                            MediaQuery.of(context).padding.top +
-                                                AppStyles.leftMargin,
+                                        top: MediaQuery.of(context).padding.top +
+                                            AppStyles.leftMargin,
                                         left: AppStyles.leftMargin,
                                         child: ClipOval(
                                           child: Material(
@@ -111,8 +107,7 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                                                     Icons.arrow_back_ios,
                                                     size: 17.0,
                                                   ))),
-                                              onTap: () =>
-                                                  Navigator.of(context).pop(),
+                                              onTap: () => Navigator.of(context).pop(),
                                             ),
                                           ),
                                         ))
@@ -157,8 +152,7 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                                 child: Center(
                                   child: Text("save",
                                       style: AppStyles.heading2.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
+                                          color: Colors.white, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ],
@@ -290,8 +284,7 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                                 onPressed: () => showAddSinglePlacementModal(
                                     context,
                                     (count, type, description) =>
-                                        model.addPlacement(
-                                            count, type, description)))
+                                        model.addPlacement(count, type, description)))
                           ],
                         ),
                       ),
@@ -300,81 +293,58 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                               shrinkWrap: true,
                               itemCount: model.initialCallPlacements.length,
                               itemBuilder: (_, index) {
-                                var placement =
-                                    model.initialCallPlacements[index];
+                                var placement = model.initialCallPlacements[index];
                                 return Column(
                                   children: <Widget>[
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0),
+                                      padding: const EdgeInsets.symmetric(vertical: 4.0),
                                       child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: <Widget>[
                                           SizedBox(
                                             height: 50,
                                             width: 50,
                                             child: Padding(
                                               padding: const EdgeInsets.only(
-                                                  top: 4.0,
-                                                  right: 8.0,
-                                                  bottom: 4.0),
+                                                  top: 4.0, right: 8.0, bottom: 4.0),
                                               child: Container(
                                                 color: Colors.black12,
                                                 child: Center(
-                                                  child: Text(
-                                                      placement.count
-                                                          .toString(),
+                                                  child: Text(placement.item1.toString(),
                                                       style: AppStyles.heading2
-                                                          .copyWith(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)),
+                                                          .copyWith(fontWeight: FontWeight.bold)),
                                                 ),
                                               ),
                                             ),
                                           ),
                                           Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: <Widget>[
                                               Text(
-                                                  Translation.placementTypeToString[
-                                                          placement.type] +
-                                                      (placement.count > 1
-                                                          ? "(s)"
-                                                          : ""),
-                                                  style: AppStyles
-                                                      .smallTextStyle
-                                                      .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                              if (placement.notes.isNotEmpty)
-                                                Text(placement.notes,
-                                                    style: AppStyles
-                                                        .smallTextStyle
-                                                        .copyWith(
-                                                            color:
-                                                                Colors.black54))
+                                                  Translation
+                                                          .placementTypeToString[placement.item2] +
+                                                      (placement.item1 > 1 ? "(s)" : ""),
+                                                  style: AppStyles.smallTextStyle
+                                                      .copyWith(fontWeight: FontWeight.bold)),
+                                              if (placement.item3.isNotEmpty)
+                                                Text(placement.item3,
+                                                    style: AppStyles.smallTextStyle
+                                                        .copyWith(color: Colors.black54))
                                             ],
                                           ),
                                           Expanded(child: Container()),
                                           IconButton(
                                               icon: Icon(Icons.close),
                                               onPressed: () {
-                                                model
-                                                    .removePlacement(placement);
+                                                model.removePlacement(placement);
                                               })
                                         ],
                                       ),
                                     ),
-                                    if (placement !=
-                                        model.initialCallPlacements.last)
+                                    if (placement != model.initialCallPlacements.last)
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 15.0),
+                                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
                                         child: Container(
                                           height: 1.00,
                                           color: HexColor.fromHex("ffdbdbdb"),
@@ -386,16 +356,14 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                           : Center(
                               child: Text(
                               "no placements",
-                              style: AppStyles.smallTextStyle
-                                  .copyWith(color: Colors.black38),
+                              style: AppStyles.smallTextStyle.copyWith(color: Colors.black38),
                             )),
                       Selector<AddReturnVisitModel, String>(
                           selector: (_, m) => m.initialCallNextTopic,
                           builder: (_, nextTopic, __) => TextFormField(
                               initialValue: nextTopic,
                               onSaved: (s) => model.initialCallNextTopic = s,
-                              onFieldSubmitted: (s) =>
-                                  model.initialCallNextTopic = s,
+                              onFieldSubmitted: (s) => model.initialCallNextTopic = s,
                               keyboardType: TextInputType.text,
                               decoration: InputDecoration(
                                   labelText: "Next Topic/Question?",
@@ -410,8 +378,7 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                             keyboardType: TextInputType.multiline,
                             maxLines: 4,
                             decoration: InputDecoration(
-                                labelText:
-                                    "Other Notes (Scriptures Used, etc.)",
+                                labelText: "Other Notes (Scriptures Used, etc.)",
                                 alignLabelWithHint: true,
                                 labelStyle: AppStyles.smallTextStyle)),
                       ),

@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'package:jama/data/models/dto/dto.dart';
-import 'package:jama/data/models/dto/time_category_model.dart';
+import 'package:jama/data/models/dto/time_category_dto.dart';
 
 class TimeDto extends DTO {
   static const String _idColumnName = "TimeEntryId";
