@@ -5,14 +5,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/dto/return_visit_model.dart';
-import 'package:jama/data/models/dto/visit_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tuple/tuple.dart';
 import 'package:supercharged/supercharged.dart';
 
+import 'package:jama/data/models/address_model.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
@@ -36,30 +36,32 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   var _lastVisitNotes;
 
   EditReturnVisitModel._(this._returnVisit, this._rvService) {
-    _rvUpdatedSubscription = _rvService.returnVisitUpdates
-      .listen((ReturnVisit rv) {
-        if(rv.isSameAs(_returnVisit)) {
-          _returnVisit = rv;
-          notifyListeners();
-        }
-      });
+    _rvUpdatedSubscription = _rvService.returnVisitUpdates.listen((ReturnVisit rv) {
+      if (rv.isSameAs(_returnVisit)) {
+        _returnVisit = rv;
+        notifyListeners();
+      }
+    });
     _loadData();
   }
 
   factory EditReturnVisitModel(ReturnVisit returnVisit, [ReturnVisitService rvService]) {
     var container = kiwi.Container();
-    return EditReturnVisitModel._(returnVisit, rvService ?? container.resolve<ReturnVisitService>());
+    return EditReturnVisitModel._(
+        returnVisit, rvService ?? container.resolve<ReturnVisitService>());
   }
 
   @override
-  void dispose() { 
+  void dispose() {
     _rvUpdatedSubscription.cancel();
     super.dispose();
   }
 
   LatLng get mapPosition => _getPosition();
 
-  String get nameOrDescription => _returnVisit.name.isNotEmpty ? _returnVisit.name : Translation.genderToNounString[_returnVisit.gender];
+  String get nameOrDescription => _returnVisit.name.isNotEmpty
+      ? _returnVisit.name
+      : Translation.genderToNounString[_returnVisit.gender];
 
   String get lastVisitString => _lastVisitString;
 
@@ -69,21 +71,24 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   String get formattedAddress => _returnVisit.address.toFormattedString(true, false);
 
-  UnmodifiableListView<charts.Series> get visitsByTypeSeries => UnmodifiableListView(_visitsByTypeSeries);
+  UnmodifiableListView<charts.Series> get visitsByTypeSeries =>
+      UnmodifiableListView(_visitsByTypeSeries);
 
   String get bestTimeString => _bestTimeString;
 
   String get notes => _returnVisit.notes;
 
-  String get lastVisitDate => DateFormat.yMMMEd(Intl.defaultLocale).format(_returnVisit.lastVisitDate);
+  String get lastVisitDate =>
+      DateFormat.yMMMEd(Intl.defaultLocale).format(_returnVisit.lastVisitDate);
 
   String get nextTopicToDsicuss => _nextTopic;
 
   String get lastVisitNotes => _lastVisitNotes;
 
   Future _loadData() async {
+    _returnVisit = await _rvService.getAllVisitsForRv(_returnVisit);
+
     var visits = _returnVisit.visits;
-    visits.sort((a,b) => a.date.compareTo(b.date));
     _totalVisits = visits.length;
 
     var lastVisit = _returnVisit.lastVisit;
@@ -94,9 +99,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
     _setMostPopularTime(visits);
     _setTimeByTypeSeries(visits);
 
-    _visits = visits.reversed
-      .map((v) => VisitCardModel(visit: v))
-      .toList();
+    _visits = visits.map((v) => VisitCardModel(visit: v)).toList();
 
     notifyListeners();
   }
@@ -104,77 +107,72 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   void _setTimeByTypeSeries(List<Visit> visits) {
     List<Tuple3<int, int, Color>> data = [];
     var seriesIndex = 1;
-    for(var type in VisitType.values) {
+    for (var type in VisitType.values) {
       var visitsOfType = visits.where((v) => v.type == type).toList();
-      if(visitsOfType.length == 0) continue;
-    
-      data.add(Tuple3(seriesIndex++, visitsOfType.length, AppStyles.visitTypeToColor[type]));      
+      if (visitsOfType.length == 0) continue;
+
+      data.add(Tuple3(seriesIndex++, visitsOfType.length, AppStyles.visitTypeToColor[type]));
     }
 
     _visitsByTypeSeries.clear();
-    
-    _visitsByTypeSeries.add(
-      charts.Series<Tuple3, String>(
+
+    _visitsByTypeSeries.add(charts.Series<Tuple3, String>(
         id: "visits",
         data: data,
         domainFn: (series, _) => series.item1.toString(),
         measureFn: (series, _) => series.item2,
-        colorFn: (series, _) => charts.ColorUtil.fromDartColor(series.item3))
-    );
+        colorFn: (series, _) => charts.ColorUtil.fromDartColor(series.item3)));
   }
 
   void _setMostPopularTime(List<Visit> visits) {
-    List<DateTime> datesOfVisits = visits
-      .where((v) => v.type != VisitType.NotAtHome)
-      .map((v) => v.date)
-      .toList();
-    
+    List<DateTime> datesOfVisits =
+        visits.where((v) => v.type != VisitType.NotAtHome).map((v) => v.date).toList();
+
     int mostPopularDay = _getMostPopularDay(datesOfVisits);
     String mostPopularDayString = Translation.daysOfTheWeek[mostPopularDay];
 
-    
-    var visitsFromMostPopularDay = datesOfVisits
-      .where((v) => v.weekday == mostPopularDay)
-      .toList();
-    
+    var visitsFromMostPopularDay = datesOfVisits.where((v) => v.weekday == mostPopularDay).toList();
+
     var mostPopularHours = _getMostPopularHour(visitsFromMostPopularDay);
-    var startTime = DateTime(DateTime.now().year, 1,1, mostPopularHours.first);
-    var endTime = DateTime(DateTime.now().year, 1,1, mostPopularHours.last);
-    _bestTimeString = "Usually home on $mostPopularDayString between ${DateFormat.jm(Intl.defaultLocale).format(startTime)} - ${DateFormat.jm(Intl.defaultLocale).format(endTime)}";
+    var startTime = DateTime(DateTime.now().year, 1, 1, mostPopularHours.first);
+    var endTime = DateTime(DateTime.now().year, 1, 1, mostPopularHours.last);
+    _bestTimeString =
+        "Usually home on $mostPopularDayString between ${DateFormat.jm(Intl.defaultLocale).format(startTime)} - ${DateFormat.jm(Intl.defaultLocale).format(endTime)}";
   }
-  
+
   LatLng _getPosition() {
-    if(_returnVisit.address.latitude != null && _returnVisit.address.latitude != 0.0
-       && _returnVisit.address.longitude != null && _returnVisit.address.longitude != 0.0) {
-        return LatLng(_returnVisit.address.latitude, _returnVisit.address.longitude);
-      }
-    
+    if (_returnVisit.address.latitude != null &&
+        _returnVisit.address.latitude != 0.0 &&
+        _returnVisit.address.longitude != null &&
+        _returnVisit.address.longitude != 0.0) {
+      return LatLng(_returnVisit.address.latitude, _returnVisit.address.longitude);
+    }
+
     return null;
   }
 
   int _getMostPopularDay(List<DateTime> days) {
-    Map<int,int> countByDaysOfTheWeek = { };
-    var dayOfWeek = 1;
-    var highestCount = 0;
-    for(var day in [1, 2, 3, 4, 5, 6, 7]) {
-      countByDaysOfTheWeek[day] = days.fold(0, (x, v) => x + v.weekday == day ? 1 : 0);
-      var count = countByDaysOfTheWeek[day];
-      if(count > highestCount) {
-        dayOfWeek = day;
-      }
+    Map<int, int> countByDaysOfTheWeek = {};
+    for (var day in [1, 2, 3, 4, 5, 6, 7]) {
+      countByDaysOfTheWeek[day] = days.count((d) => d.weekday == day);
     }
-    return dayOfWeek;
+
+    return countByDaysOfTheWeek.entries.maxBy((a, b) => a.value.compareTo(b.value)).key;
   }
 
   List<int> _getMostPopularHour(List<DateTime> days) {
-    Map<int,int> countByHourOfTheDay = { };
-    if(days.length == 1) {
+    Map<int, int> countByHourOfTheDay = {};
+    if (days.length == 1) {
       return [days.first.hour, days.first.hour + 1];
-    } else if(days.length == 2) {
-      var hours = days.map((x) => x.hour).toList();
-      hours.sort();
-      return [hours.first, hours.last];
-    } else if(days.length == 3) {
+    } else if (days.length == 2) {
+      if (days.first.hour == days.last.hour) {
+        return [days.first.hour, days.first.hour + 1];
+      } else {
+        var hours = days.map((x) => x.hour).toList();
+        hours.sort();
+        return [hours.first, hours.last];
+      }
+    } else if (days.length == 3) {
       var hours = days.map((x) => x.hour).toList();
       hours.sort();
       var minDiff = hours[1] - hours[0];
@@ -185,13 +183,37 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
         return [hours[1], hours[2]];
       }
     } else {
-      for(int hour in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24]) {
+      for (int hour in [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        23,
+        24
+      ]) {
         countByHourOfTheDay[hour] = days.fold(0, (x, v) => x + v.hour == hour ? 1 : 0);
       }
       var sortedHours = countByHourOfTheDay.values.where((x) => x != 0).toList();
       sortedHours.sort();
-      if(sortedHours.last == 1) {
-        var hour = sortedHours.reduce((a,b) => a + b) ~/ sortedHours.length;
+      if (sortedHours.last == 1) {
+        var hour = sortedHours.reduce((a, b) => a + b) ~/ sortedHours.length;
         return [hour, hour + 1];
       } else {
         return [sortedHours.last, sortedHours.last + 1];
@@ -202,8 +224,8 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   @override
   bool get pinned => _returnVisit.pinned;
   @override
-  set pinned(bool isPinned){
-    if(_returnVisit.pinned != isPinned) {
+  set pinned(bool isPinned) {
+    if (_returnVisit.pinned != isPinned) {
       _returnVisit.pinned = isPinned;
       save();
       notifyListeners();
@@ -214,7 +236,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get name => _returnVisit.name;
   @override
   set name(String name) {
-    if(_returnVisit.name != name) {
+    if (_returnVisit.name != name) {
       _returnVisit.name = name;
       notifyListeners();
     }
@@ -224,18 +246,17 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   Gender get gender => _returnVisit.gender;
   @override
   set gender(Gender gender) {
-    if(_returnVisit.gender != gender) {
+    if (_returnVisit.gender != gender) {
       _returnVisit.gender = gender;
       notifyListeners();
     }
-
   }
 
   @override
   Address get address => _returnVisit.address;
   @override
   set address(Address address) {
-    if(_returnVisit.address != address) {
+    if (_returnVisit.address != address) {
       _returnVisit.address = address;
       notifyListeners();
     }
@@ -245,7 +266,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get street => _returnVisit.address.street;
   @override
   set street(String street) {
-    if(_returnVisit.address.street != street) {
+    if (_returnVisit.address.street != street) {
       _returnVisit.address.street = street;
       notifyListeners();
     }
@@ -255,7 +276,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get city => _returnVisit.address.city;
   @override
   set city(String city) {
-    if(_returnVisit.address.city != city) {
+    if (_returnVisit.address.city != city) {
       _returnVisit.address.city = city;
       notifyListeners();
     }
@@ -265,7 +286,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get state => _returnVisit.address.state;
   @override
   set state(String state) {
-    if(_returnVisit.address.state != state) {
+    if (_returnVisit.address.state != state) {
       _returnVisit.address.state = state;
       notifyListeners();
     }
@@ -275,7 +296,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get postalCode => _returnVisit.address.postalCode;
   @override
   set postalCode(String postalCode) {
-    if(_returnVisit.address.postalCode != postalCode) {
+    if (_returnVisit.address.postalCode != postalCode) {
       _returnVisit.address.postalCode = postalCode;
       notifyListeners();
     }
@@ -285,7 +306,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get country => _returnVisit.address.country;
   @override
   set country(String country) {
-    if(_returnVisit.address.country != country) {
+    if (_returnVisit.address.country != country) {
       _returnVisit.address.country = country;
       notifyListeners();
     }
@@ -293,7 +314,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   @override
   set notes(String notes) {
-    if(_returnVisit.notes != notes) {
+    if (_returnVisit.notes != notes) {
       _returnVisit.notes = notes;
       notifyListeners();
     }
@@ -310,7 +331,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   double get latitude => _returnVisit.address.latitude;
   @override
   set latitude(double lat) {
-    if(_returnVisit.address.latitude != lat) {
+    if (_returnVisit.address.latitude != lat) {
       _returnVisit.address.latitude = lat;
       notifyListeners();
     }
@@ -320,7 +341,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   double get longitude => _returnVisit.address.longitude;
   @override
   set longitude(double long) {
-    if(_returnVisit.address.longitude != long) {
+    if (_returnVisit.address.longitude != long) {
       _returnVisit.address.longitude = long;
       notifyListeners();
     }
@@ -328,24 +349,20 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   @override
   Future save() async {
-    if(validate()) {
+    if (validate()) {
       await _rvService.updateReturnVisit(_returnVisit);
     }
   }
 
   @override
   bool validate() {
-    return _returnVisit.address.city != null 
-        && _returnVisit.address.city.isNotEmpty 
-        && _returnVisit.lastVisit != null;
+    return _returnVisit.address.city != null &&
+        _returnVisit.address.city.isNotEmpty &&
+        _returnVisit.lastVisit != null;
   }
 
   Future _addNotAtHome() async {
-    var visit = Visit.create(
-      parent: _returnVisit,
-      date: DateTime.now(),
-      type: VisitType.NotAtHome
-    );
+    var visit = Visit.create(parent: _returnVisit, date: DateTime.now(), type: VisitType.NotAtHome);
 
     await _rvService.updateVisit(visit);
 
@@ -353,50 +370,46 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   }
 
   Future addVisit({BuildContext context, VisitType type}) async {
-    if(type == VisitType.NotAtHome) {
+    if (type == VisitType.NotAtHome) {
       await _addNotAtHome();
       return;
     }
 
     showAddEditVisitModal(context, type: type, parent: _returnVisit, onVisitSaved: (visit) async {
-          await _rvService.updateVisit(visit);
-          await _loadData();
+      await _rvService.updateVisit(visit);
+      await _loadData();
     });
   }
 
   Future editVisit(BuildContext context, VisitCardModel visit) async {
     assert(visit != null);
-    if(visit.visitType == VisitType.NotAtHome) {
-      editNotAtHomeVisit(
-        context,
-        visit: visit._visit,
-        onSaved: (v) async {
-          await _rvService.updateVisit(v);
-          await _loadData();
-        },
-        onDeleted: (v) async {
-          await _rvService.deleteVisit(v);
-          await _loadData();
-        }
-      );
+    if (visit.visitType == VisitType.NotAtHome) {
+      editNotAtHomeVisit(context, visit: visit._visit, onSaved: (v) async {
+        await _rvService.updateVisit(v);
+        await _loadData();
+      }, onDeleted: (v) async {
+        await _rvService.deleteVisit(v);
+        await _loadData();
+      });
       return;
     }
 
-    showAddEditVisitModal(
-      context, 
-      visit: visit._visit, 
-      isDeletable: _visits.length > 1 
-        && visits
-          .minBy((a,b) => a.formattedDate.compareTo(b.formattedDate))._visit.isSameAs(visit._visit),
-      onVisitSaved: (visit) async {
-        await _rvService.updateVisit(visit);
-        await _loadData();
-      },
-      onVisitDeleted: (visit) async {
-        await _rvService.deleteVisit(visit);
-        await _loadData();
-      }
-    );
+    showAddEditVisitModal(context, visit: visit._visit, isDeletable: _isVisitDeleteable(visit),
+        onVisitSaved: (visit) async {
+      await _rvService.updateVisit(visit);
+      await _loadData();
+    }, onVisitDeleted: (visit) async {
+      await _rvService.deleteVisit(visit);
+      await _loadData();
+    });
+  }
+
+  bool _isVisitDeleteable(VisitCardModel visit) {
+    return _visits.length > 1 &&
+        !(visits
+            .minBy((a, b) => a.formattedDate.compareTo(b.formattedDate))
+            ._visit
+            .isSameAs(visit._visit));
   }
 }
 
@@ -409,13 +422,9 @@ class VisitCardModel {
     return VisitCardModel._(visit);
   }
 
-  String get formattedDate => DateFormat
-  .yMMMMd(Intl.defaultLocale)
-  .format(_visit.date);
+  String get formattedDate => DateFormat.yMMMMd(Intl.defaultLocale).format(_visit.date);
 
-  String get formattedTime => DateFormat
-    .jm(Intl.defaultLocale)
-    .format(_visit.date);
+  String get formattedTime => DateFormat.jm(Intl.defaultLocale).format(_visit.date);
 
   String get visitTypeString => Translation.visitTypeToString[_visit.type];
   VisitType get visitType => _visit.type;
@@ -424,12 +433,14 @@ class VisitCardModel {
   String get notes => _visit.notes ?? "";
 
   String _getPlacementsString() {
-    if(_visit.placements.isEmpty) {
+    if (_visit.placements.isEmpty) {
       return "";
     }
 
-    var s = "${_visit.placements.first.count} ${Translation.placementTypeToString[_visit.placements.first.type]}" + (_visit.placements.first.notes.isEmpty ? "" : ": ${_visit.placements.first.notes}");
-    if(_visit.placements.length > 1) {
+    var s =
+        "${_visit.placements.first.count} ${Translation.placementTypeToString[_visit.placements.first.type]}" +
+            (_visit.placements.first.notes.isEmpty ? "" : ": ${_visit.placements.first.notes}");
+    if (_visit.placements.length > 1) {
       s += " and others";
     }
 

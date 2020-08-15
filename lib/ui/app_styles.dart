@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/mixins/color_mixin.dart';
 
 class AppStyles {
@@ -16,14 +16,12 @@ class AppStyles {
   static Color get speedDialOverlayColor => HexColor.fromHex("#9F9F9F");
 
   // Text Styles
-  static TextStyle get heading1 => TextStyle(
-      fontFamily: "Avenir", fontWeight: FontWeight.w700, fontSize: 34);
-  static TextStyle get heading2 =>
-      TextStyle(fontFamily: "Avenir", fontSize: 20);
-  static TextStyle get heading4 => TextStyle(
-      fontFamily: "Avenir", fontWeight: FontWeight.w100, fontSize: 16);
-  static TextStyle get smallTextStyle =>
-      TextStyle(fontFamily: "Avenir", fontSize: 14);
+  static TextStyle get heading1 =>
+      TextStyle(fontFamily: "Avenir", fontWeight: FontWeight.w700, fontSize: 34);
+  static TextStyle get heading2 => TextStyle(fontFamily: "Avenir", fontSize: 20);
+  static TextStyle get heading4 =>
+      TextStyle(fontFamily: "Avenir", fontWeight: FontWeight.w100, fontSize: 16);
+  static TextStyle get smallTextStyle => TextStyle(fontFamily: "Avenir", fontSize: 14);
 
   // constants
   static double get leftMargin => 24.0;
@@ -35,9 +33,7 @@ class AppStyles {
   // boxes
   static BorderRadiusGeometry get defaultBoxCorner => BorderRadius.all(Radius.circular(15));
   static BoxShadow get defaultBoxShadow => BoxShadow(
-      blurRadius: 15,
-      color: AppStyles.shadowColor,
-      offset: Offset.fromDirection(1.178097, 5));
+      blurRadius: 15, color: AppStyles.shadowColor, offset: Offset.fromDirection(1.178097, 5));
 
   // charts
   static double get defaultChartHeight => 100.0;
@@ -45,8 +41,8 @@ class AppStyles {
 
   // other
   static Map<VisitType, Color> visitTypeToColor = {
-    VisitType.ReturnVisit : AppStyles.primaryColor,
-    VisitType.NotAtHome : Colors.redAccent,
-    VisitType.Study : Colors.deepPurpleAccent,
+    VisitType.ReturnVisit: AppStyles.primaryColor,
+    VisitType.NotAtHome: Colors.redAccent,
+    VisitType.Study: Colors.deepPurpleAccent,
   };
 }

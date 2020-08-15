@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/ui/models/time/time_category_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
@@ -14,8 +14,8 @@ class ReportingService {
   final AppSettingsService _appSettings;
   final ReturnVisitService _rvService;
   final TimeService _timeService;
-  final StreamController<Tuple2<DateTime, DateTime>>
-      _reportsSentStreamController = StreamController.broadcast();
+  final StreamController<Tuple2<DateTime, DateTime>> _reportsSentStreamController =
+      StreamController.broadcast();
 
   int _monthReportSent = 0;
 
@@ -39,22 +39,19 @@ class ReportingService {
   bool get currentMonthReportSent => DateTime.now().month == _monthReportSent;
 
   /// Gets an observable stream of reports that have been sent.
-  Stream<Tuple2<DateTime, DateTime>> get reportSent =>
-      _reportsSentStreamController.stream;
+  Stream<Tuple2<DateTime, DateTime>> get reportSent => _reportsSentStreamController.stream;
 
   void dispose() {
     _reportsSentStreamController.close();
   }
 
-  Future<ReportResult> getTimeReport(
-      {@required DateTime start, @required DateTime end}) async {
+  Future<ReportResult> getTimeReport({@required DateTime start, @required DateTime end}) async {
     assert(end != null);
     assert(start != null);
     assert(start.compareTo(end) >= 0);
 
-    var time =
-        await _timeService.getTimeEntriesByDate(startTime: start, endTime: end);
-    var returnVisits = await _rvService.getVisitsByDate(start: start, end: end);
+    var time = await _timeService.getTimeEntriesByDate(startTime: start, endTime: end);
+    var returnVisits = <ReturnVisit>[]; // await _rvService.getVisitsByDate(start: start, end: end);
 
     return ReportResult(
         startDate: start,
@@ -65,10 +62,9 @@ class ReportingService {
                 .toSet()
                 .map((e) => TimeByCategory(
                     e,
-                    time.where((x) => x.category == e).fold(
-                        0,
-                        (previousValue, element) =>
-                            previousValue + element.totalMinutes)))
+                    time
+                        .where((x) => x.category == e)
+                        .fold(0, (previousValue, element) => previousValue + element.totalMinutes)))
                 .toList(),
             null // TODO: goals needed here.
             ),
@@ -93,8 +89,13 @@ class ReportingService {
                     0,
                     (p1, rv) =>
                         p1 +
-                        rv.visits.fold(0,
-                            (p2, v) => p2 + v.placements.where((p) => p.type == PlacementType.Video).fold(0, (p3, p) => p3 + p.count))),
+                        rv.visits.fold(
+                            0,
+                            (p2, v) =>
+                                p2 +
+                                v.placements
+                                    .where((p) => p.type == PlacementType.Video)
+                                    .fold(0, (p3, p) => p3 + p.count))),
             null // TODO: goals needed here
             ),
         returnVisits: Tuple2(returnVisits.length, null),
@@ -147,8 +148,7 @@ abstract class ReportEntry {
   /// The total time in a `Duration`
   final Duration totalTime;
 
-  const ReportEntry._(
-      {this.totalTime, this.placements, this.videos, this.date});
+  const ReportEntry._({this.totalTime, this.placements, this.videos, this.date});
 
   Future navigate(BuildContext context);
 }

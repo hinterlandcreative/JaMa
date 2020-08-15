@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
 
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:latlong/latlong.dart';
@@ -22,17 +22,18 @@ class ReturnVisitListItemModel {
   final ImageService _imageService;
   String _basePath;
 
-  ReturnVisitListItemModel._(
-    this._returnVisit, 
-    this.distanceFromCurrentLocation, 
-    this.timeSinceColor, 
-    this.timeSinceString, 
-    this._rvService, 
-    this._imageService) {
-      _imageService.documentsDirectory.then((value) => _basePath = value.path);
-    }
-  
-  factory ReturnVisitListItemModel({@required ReturnVisit returnVisit, @required double currentLatitude, @required double currentLongitude, LocationService locationService, ReturnVisitService returnVisitService, ImageService imageService}) {
+  ReturnVisitListItemModel._(this._returnVisit, this.distanceFromCurrentLocation,
+      this.timeSinceColor, this.timeSinceString, this._rvService, this._imageService) {
+    _imageService.documentsDirectory.then((value) => _basePath = value.path);
+  }
+
+  factory ReturnVisitListItemModel(
+      {@required ReturnVisit returnVisit,
+      @required double currentLatitude,
+      @required double currentLongitude,
+      LocationService locationService,
+      ReturnVisitService returnVisitService,
+      ImageService imageService}) {
     assert(returnVisit != null);
     assert(returnVisit.isSaved);
     assert(currentLatitude != null);
@@ -40,64 +41,74 @@ class ReturnVisitListItemModel {
 
     var container = kiwi.Container();
     locationService = locationService ?? container.resolve<LocationService>();
-    
 
     var distance = "";
     Color timeSinceColor = Colors.green;
     var lastVisitDate = returnVisit.lastVisitDate;
     var duration = DateTime.now().difference(lastVisitDate);
-    
-    if(duration.inDays >= 30) {
+
+    if (duration.inDays >= 30) {
       timeSinceColor = Colors.red;
-    } else if(duration.inDays > 13) {
+    } else if (duration.inDays > 13) {
       timeSinceColor = Colors.orange;
-    } 
+    }
 
     var timeSinceString = lastVisitDate.humanizeTimeSince();
 
-    if(returnVisit.address.latitude != null && returnVisit.address.latitude != 0 && returnVisit.address.longitude != null && returnVisit.address.longitude != 0) {
-      var distanceInMiles = locationService.getDistanceBetweenCoordinates(returnVisit.address.latitude, returnVisit.address.longitude, currentLatitude, currentLongitude, LengthUnit.Mile);
-        if(distanceInMiles < 1.0) {
-          var distanceInFeet = (distanceInMiles * 5280).toInt(); 
-          distance = "${distanceInFeet.commaize()} FEET";
-        } else {
-          distance = "${distanceInMiles.toInt().commaize()} MILES";
-        }
+    if (returnVisit.address.latitude != null &&
+        returnVisit.address.latitude != 0 &&
+        returnVisit.address.longitude != null &&
+        returnVisit.address.longitude != 0) {
+      var distanceInMiles = locationService.getDistanceBetweenCoordinates(
+          returnVisit.address.latitude,
+          returnVisit.address.longitude,
+          currentLatitude,
+          currentLongitude,
+          LengthUnit.Mile);
+      if (distanceInMiles < 1.0) {
+        var distanceInFeet = (distanceInMiles * 5280).toInt();
+        distance = "${distanceInFeet.commaize()} FEET";
+      } else {
+        distance = "${distanceInMiles.toInt().commaize()} MILES";
+      }
     }
-    
+
     return ReturnVisitListItemModel._(
-      returnVisit,
-      distance,
-      timeSinceColor,
-      timeSinceString,
-      returnVisitService ?? container.resolve<ReturnVisitService>(),
-      imageService ?? container.resolve<ImageService>());
+        returnVisit,
+        distance,
+        timeSinceColor,
+        timeSinceString,
+        returnVisitService ?? container.resolve<ReturnVisitService>(),
+        imageService ?? container.resolve<ImageService>());
   }
 
   Future delete() async {
-    await _rvService.delete(_returnVisit);
+    await _rvService.deleteReturnVisit(_returnVisit);
   }
 
   bool get hasEmptyName => _returnVisit.name.isEmpty;
-  
-  String get nameOrDescription => _returnVisit.name.isNotEmpty ? _returnVisit.name : _returnVisit.gender == Gender.Male ? "Man" : "Woman";
-  
+
+  String get nameOrDescription => _returnVisit.name.isNotEmpty
+      ? _returnVisit.name
+      : _returnVisit.gender == Gender.Male ? "Man" : "Woman";
+
   Gender get gender => _returnVisit.gender;
-  
+
   String get formattedAddress => _returnVisit.address.toFormattedString(true, false, false);
 
-  String get imagePath => _returnVisit.imagePath.isNotEmpty ? path.join(_basePath, _returnVisit.imagePath) : "";
+  String get imagePath =>
+      _returnVisit.imagePath.isNotEmpty ? path.join(_basePath, _returnVisit.imagePath) : "";
 
   String get searchString => _returnVisit.searchString;
 
   bool get isPinned => _returnVisit.pinned;
 
-  void navigate(BuildContext context) {
-    if(_returnVisit.isSaved) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
+  void navigate(BuildContext context) async {
+    if (_returnVisit.isSaved) {
+      Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => EditReturnVisitScreen(
-            returnVisit: EditReturnVisitModel(_returnVisit),)));
+                returnVisit: EditReturnVisitModel(_returnVisit),
+              )));
     }
   }
 }

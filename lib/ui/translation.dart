@@ -1,12 +1,11 @@
-
-import 'package:jama/data/models/dto/return_visit_model.dart';
-import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 
 class Translation {
   static Map<VisitType, String> visitTypeToString = {
-    VisitType.NotAtHome : "Not At Home",
-    VisitType.ReturnVisit : "Return Visit",
-    VisitType.Study : "Study"
+    VisitType.NotAtHome: "Not At Home",
+    VisitType.ReturnVisit: "Return Visit",
+    VisitType.Study: "Study"
   };
 
   static Map<PlacementType, String> placementTypeToString = {
@@ -24,15 +23,9 @@ class Translation {
     PlacementType.Other: "Other",
   };
 
-  static Map<Gender, String> genderToNounString = {
-    Gender.Male : "Man",
-    Gender.Female : "Woman"
-  };
+  static Map<Gender, String> genderToNounString = {Gender.Male: "Man", Gender.Female: "Woman"};
 
-  static Map<String, Gender> nounToGenderType = {
-    "Man" : Gender.Male,
-    "Woman" : Gender.Female
-  };
+  static Map<String, Gender> nounToGenderType = {"Man": Gender.Male, "Woman": Gender.Female};
 
   static Map<int, String> daysOfTheWeek = {
     0: "Sunday",

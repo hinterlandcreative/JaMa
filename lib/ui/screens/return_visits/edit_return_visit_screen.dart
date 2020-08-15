@@ -5,7 +5,7 @@ import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/ui/transitions/slide_and_fade_transition.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:popup_menu/popup_menu.dart';
@@ -23,8 +23,7 @@ import 'package:jama/ui/app_styles.dart';
 
 class EditReturnVisitScreen extends StatefulWidget {
   final EditReturnVisitModel returnVisit;
-  EditReturnVisitScreen({Key key, @required this.returnVisit})
-      : super(key: key);
+  EditReturnVisitScreen({Key key, @required this.returnVisit}) : super(key: key);
 
   @override
   _EditReturnVisitScreenState createState() => _EditReturnVisitScreenState();
@@ -55,10 +54,8 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
       child: FocusWatcher(
         child: Scaffold(
           floatingActionButton: SpeedDial(
-            marginBottom: MediaQuery.of(context).size.height -
-                200 -
-                MediaQuery.of(context).padding.top -
-                28,
+            marginBottom:
+                MediaQuery.of(context).size.height - 200 - MediaQuery.of(context).padding.top - 28,
             animatedIcon: AnimatedIcons.add_event,
             foregroundColor: AppStyles.primaryColor,
             backgroundColor: Colors.white,
@@ -70,20 +67,20 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                   child: Icon(Icons.thumb_up),
                   label: "add visit",
                   labelStyle: AppStyles.heading4,
-                  onTap: () => widget.returnVisit
-                      .addVisit(context: context, type: VisitType.ReturnVisit)),
+                  onTap: () =>
+                      widget.returnVisit.addVisit(context: context, type: VisitType.ReturnVisit)),
               SpeedDialChild(
                   child: Icon(Icons.library_books),
                   label: "add study",
                   labelStyle: AppStyles.heading4,
-                  onTap: () => widget.returnVisit
-                      .addVisit(context: context, type: VisitType.Study)),
+                  onTap: () =>
+                      widget.returnVisit.addVisit(context: context, type: VisitType.Study)),
               SpeedDialChild(
                   child: Icon(Icons.not_interested),
                   label: "add not at home",
                   labelStyle: AppStyles.heading4,
-                  onTap: () => widget.returnVisit
-                      .addVisit(context: context, type: VisitType.NotAtHome)),
+                  onTap: () =>
+                      widget.returnVisit.addVisit(context: context, type: VisitType.NotAtHome)),
             ],
           ),
           body: Stack(
@@ -118,8 +115,8 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                           ]),
                           initialCameraPosition: CameraPosition(
                             bearing: 360.0,
-                            target: widget.returnVisit.mapPosition
-                                .addOffset(latitudeOffset: -0.0012),
+                            target:
+                                widget.returnVisit.mapPosition.addOffset(latitudeOffset: -0.0012),
                             zoom: _defaultZoom,
                           ),
                         ),
@@ -190,8 +187,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                             labelColor: Colors.black,
                             unselectedLabelColor: Colors.white,
                             indicatorSize: TabBarIndicatorSize.tab,
-                            labelPadding: EdgeInsets.only(
-                                left: 40.0, right: 40.0, bottom: 20.0),
+                            labelPadding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 20.0),
                             indicator: BoxDecoration(
                               color: AppStyles.primaryBackground,
                               boxShadow: [AppStyles.defaultBoxShadow],
@@ -239,14 +235,11 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                         controller: _tabController,
                         children: <Widget>[
                           Consumer<EditReturnVisitModel>(
-                              builder: (context, model, __) =>
-                                  _buildPersonalTab(context)),
-                          Selector<EditReturnVisitModel,
-                                  UnmodifiableListView<VisitCardModel>>(
+                              builder: (context, model, __) => _buildPersonalTab(context)),
+                          Selector<EditReturnVisitModel, UnmodifiableListView<VisitCardModel>>(
                               selector: (_, rv) => rv.visits,
-                              builder: (context, visits, __) => visits.isEmpty
-                                  ? Container()
-                                  : _buildVisitsTab(context, visits))
+                              builder: (context, visits, __) =>
+                                  visits.isEmpty ? Container() : _buildVisitsTab(context, visits))
                         ],
                       ),
                     ),
@@ -265,8 +258,8 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
         onClickMenu: (item) {
           if (item.menuTitle == "Directions") {
             if (model.mapPosition != null) {
-              MapsLauncher.launchCoordinates(model.mapPosition.latitude,
-                  model.mapPosition.longitude, model.formattedAddress);
+              MapsLauncher.launchCoordinates(
+                  model.mapPosition.latitude, model.mapPosition.longitude, model.formattedAddress);
             } else {
               MapsLauncher.launchQuery(model.formattedAddress);
             }
@@ -296,12 +289,10 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                                 color: AppStyles.primaryColor,
                                 textColor: AppStyles.secondaryTextColor,
                                 onPressed: () {
-                                  if (_editRvAddressForm.currentState
-                                      .validate()) {
+                                  if (_editRvAddressForm.currentState.validate()) {
                                     _editRvAddressForm.currentState.save();
                                     widget.returnVisit.save();
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
+                                    Navigator.of(context, rootNavigator: true).pop();
                                   }
                                 },
                                 child: Text("save"),
@@ -320,9 +311,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                 color: Colors.white,
               ),
               title: "Edit"),
-          MenuItem(
-              image: Icon(Icons.navigation, color: Colors.white),
-              title: "Directions")
+          MenuItem(image: Icon(Icons.navigation, color: Colors.white), title: "Directions")
         ]);
     return SingleChildScrollView(
       child: Column(
@@ -337,14 +326,9 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Container(
-                    child: Selector<
-                        EditReturnVisitModel,
-                        Tuple2<
-                            UnmodifiableListView<
-                                charts.Series<dynamic, dynamic>>,
-                            int>>(
-                      selector: (_, rv) =>
-                          Tuple2(rv.visitsByTypeSeries, rv.totalVisits),
+                    child: Selector<EditReturnVisitModel,
+                        Tuple2<UnmodifiableListView<charts.Series<dynamic, dynamic>>, int>>(
+                      selector: (_, rv) => Tuple2(rv.visitsByTypeSeries, rv.totalVisits),
                       builder: (_, tuple, __) => DonutChartWidget(tuple.item1,
                           height: 70,
                           width: 70,
@@ -356,8 +340,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                     padding: EdgeInsets.only(left: AppStyles.leftMargin),
                     child: Text(
                       widget.returnVisit.lastVisitString,
-                      style: AppStyles.smallTextStyle
-                          .copyWith(fontWeight: FontWeight.bold),
+                      style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),
                     ),
                   )
                 ],
@@ -372,8 +355,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                 bestTimeString,
                 maxLines: 3,
                 textAlign: TextAlign.center,
-                style:
-                    AppStyles.heading4.copyWith(color: AppStyles.captionText),
+                style: AppStyles.heading4.copyWith(color: AppStyles.captionText),
               ),
             ),
           ),
@@ -449,8 +431,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                         selector: (_, rv) => rv.lastVisitString,
                         builder: (_, lastVisitDate, __) => Text(
                               widget.returnVisit.lastVisitDate,
-                              style: AppStyles.smallTextStyle
-                                  .copyWith(fontWeight: FontWeight.bold),
+                              style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),
                             )),
                   ],
                 ),
@@ -462,27 +443,26 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                 ),
                 Selector<EditReturnVisitModel, String>(
                   selector: (_, rv) => rv.nextTopicToDsicuss,
-                  builder: (_, nextTopicToDiscuss, __) =>
-                      nextTopicToDiscuss.isEmpty
-                          ? Container()
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 14.0),
-                                  child: Text(
-                                    "Topic To Discuss: ",
-                                    style: AppStyles.smallTextStyle,
-                                  ),
-                                ),
-                                Text(
-                                  nextTopicToDiscuss,
-                                  maxLines: 2,
-                                  style: AppStyles.smallTextStyle,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
+                  builder: (_, nextTopicToDiscuss, __) => nextTopicToDiscuss.isEmpty
+                      ? Container()
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 14.0),
+                              child: Text(
+                                "Topic To Discuss: ",
+                                style: AppStyles.smallTextStyle,
+                              ),
                             ),
+                            Text(
+                              nextTopicToDiscuss,
+                              maxLines: 2,
+                              style: AppStyles.smallTextStyle,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                 )
               ],
             ),
@@ -492,8 +472,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
     );
   }
 
-  Widget _buildVisitsTab(
-      BuildContext context, UnmodifiableListView<VisitCardModel> visitsList) {
+  Widget _buildVisitsTab(BuildContext context, UnmodifiableListView<VisitCardModel> visitsList) {
     var model = Provider.of<EditReturnVisitModel>(context, listen: false);
 
     List<Widget> children = [];
@@ -502,9 +481,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
 
     for (var visit in visitsList) {
       children.add(TimelineTitle(
-          isFirst: visit == first,
-          title: visit.formattedDate,
-          subtitle: visit.formattedTime));
+          isFirst: visit == first, title: visit.formattedDate, subtitle: visit.formattedTime));
       IconData icon;
       Color iconColor;
       if (visit == last && visit.visitType == VisitType.ReturnVisit) {
@@ -533,21 +510,17 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
         isLast: visit == last,
         onTap: () => model.editVisit(context, visit),
         children: visit.visitType == VisitType.NotAtHome ||
-                (visit.placements.isEmpty &&
-                    visit.nextTopic.isEmpty &&
-                    visit.notes.isEmpty)
+                (visit.placements.isEmpty && visit.nextTopic.isEmpty && visit.notes.isEmpty)
             ? null
             : <Widget>[
                 if (visit.placements.isNotEmpty)
                   Text(
                     visit.placements,
-                    style: AppStyles.smallTextStyle
-                        .copyWith(fontWeight: FontWeight.bold),
+                    style: AppStyles.smallTextStyle.copyWith(fontWeight: FontWeight.bold),
                   ),
                 if (visit.nextTopic.isNotEmpty)
                   Text(visit.nextTopic, style: AppStyles.smallTextStyle),
-                if (visit.notes.isNotEmpty)
-                  Text(visit.notes, style: AppStyles.smallTextStyle)
+                if (visit.notes.isNotEmpty) Text(visit.notes, style: AppStyles.smallTextStyle)
               ],
       ));
     }
@@ -569,9 +542,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
 }
 
 extension _LatLngMixin on LatLng {
-  LatLng addOffset(
-      {double latitudeOffset = 0.0, double longitudeOffset = 0.0}) {
-    return LatLng(
-        this.latitude + latitudeOffset, this.longitude + longitudeOffset);
+  LatLng addOffset({double latitudeOffset = 0.0, double longitudeOffset = 0.0}) {
+    return LatLng(this.latitude + latitudeOffset, this.longitude + longitudeOffset);
   }
 }

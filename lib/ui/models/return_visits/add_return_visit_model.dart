@@ -1,20 +1,19 @@
 import 'dart:collection';
 import 'dart:typed_data';
 
-import 'package:jama/data/models/dto/visit_model.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
 import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/dto/return_visit_model.dart';
-import 'package:jama/data/models/placement.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
 import 'package:jama/services/image_service.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 import 'package:jama/ui/controllers/address_controller.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
+import 'package:tuple/tuple.dart';
 
 class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
-
   AddressController _addressController = AddressController();
 
   ReturnVisitService _returnVisitService;
@@ -33,18 +32,17 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   double _longitude;
   bool _pinned = false;
   DateTime _initialCallDate = DateTime.now();
-  List<Placement> _initialCallPlacements = [];
+  List<Tuple3<int, PlacementType, String>> _initialCallPlacements = [];
   String _initialCallNotes = "";
   String _initialCallNextTopic = "";
   Uint8List _image;
-
 
   AddressController get addressController => _addressController;
 
   bool get pinned => _pinned;
 
   set pinned(bool isPinned) {
-    if(_pinned != isPinned) {
+    if (_pinned != isPinned) {
       _pinned = isPinned;
       notifyListeners();
     }
@@ -53,7 +51,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get name => _name ?? "";
 
   set name(String name) {
-    if(_name != name) {
+    if (_name != name) {
       _name = name;
       notifyListeners();
     }
@@ -62,7 +60,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   Gender get gender => _gender == null ? Gender.Male : _gender;
 
   set gender(Gender value) {
-    if(_gender != value) {
+    if (_gender != value) {
       _gender = value;
       notifyListeners();
     }
@@ -73,7 +71,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get street => _street;
 
   set street(String street) {
-    if(_street != street) {
+    if (_street != street) {
       _street = street;
       checkForNewCoordinates();
       notifyListeners();
@@ -83,7 +81,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get city => _city;
 
   set city(String city) {
-    if(_city != city) {
+    if (_city != city) {
       _city = city;
       checkForNewCoordinates();
       notifyListeners();
@@ -93,7 +91,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get state => _state;
 
   set state(String state) {
-    if(_state != state) {
+    if (_state != state) {
       _state = state;
       checkForNewCoordinates();
       notifyListeners();
@@ -103,7 +101,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get postalCode => _postalCode;
 
   set postalCode(String postalCode) {
-    if(_postalCode != postalCode) {
+    if (_postalCode != postalCode) {
       _postalCode = postalCode;
       checkForNewCoordinates();
       notifyListeners();
@@ -113,7 +111,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get country => _country;
 
   set country(String country) {
-    if(_country != country) {
+    if (_country != country) {
       _country = country;
       checkForNewCoordinates();
       notifyListeners();
@@ -123,7 +121,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get notes => _notes ?? "";
 
   set notes(String notes) {
-    if(_notes != notes) {
+    if (_notes != notes) {
       _notes = notes;
       notifyListeners();
     }
@@ -132,7 +130,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   Uint8List get image => _image ?? [];
 
   set image(Uint8List value) {
-    if(_image != value) {
+    if (_image != value) {
       _image = value;
       notifyListeners();
     }
@@ -142,7 +140,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   @override
   set latitude(double lat) {
-    if(_latitude != lat) {
+    if (_latitude != lat) {
       _latitude = lat;
       notifyListeners();
     }
@@ -152,7 +150,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   @override
   set longitude(double long) {
-    if(_longitude != long) {
+    if (_longitude != long) {
       _longitude = long;
       notifyListeners();
     }
@@ -161,18 +159,22 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   DateTime get initialCallDate => _initialCallDate;
 
   set initialCallDate(DateTime date) {
-    if(_initialCallDate == null || (_initialCallDate.day != date.day && _initialCallDate.year != date.year && _initialCallDate.month != date.month)) {
+    if (_initialCallDate == null ||
+        (_initialCallDate.day != date.day &&
+            _initialCallDate.year != date.year &&
+            _initialCallDate.month != date.month)) {
       _initialCallDate = date;
       notifyListeners();
     }
   }
 
-  UnmodifiableListView<Placement> get initialCallPlacements => UnmodifiableListView(_initialCallPlacements);
+  UnmodifiableListView<Tuple3<int, PlacementType, String>> get initialCallPlacements =>
+      UnmodifiableListView(_initialCallPlacements);
 
   String get initialCallNotes => _initialCallNotes;
 
   set initialCallNotes(String notes) {
-    if(_initialCallNotes != notes) {
+    if (_initialCallNotes != notes) {
       _initialCallNotes = notes;
       notifyListeners();
     }
@@ -181,13 +183,14 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
   String get initialCallNextTopic => _initialCallNotes;
 
   set initialCallNextTopic(String topic) {
-    if(_initialCallNextTopic != topic) {
+    if (_initialCallNextTopic != topic) {
       _initialCallNextTopic = topic;
       notifyListeners();
     }
   }
 
-  AddReturnVisitModel([LocationService locationService, ReturnVisitService rvService, ImageService imageService]) {
+  AddReturnVisitModel(
+      [LocationService locationService, ReturnVisitService rvService, ImageService imageService]) {
     var container = kiwi.Container();
 
     _locationService = locationService ?? container.resolve<LocationService>();
@@ -197,77 +200,77 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   /// Add a new placement by indicating the [count] of the placement [type] and include a [description] as needed.
   void addPlacement(int count, PlacementType type, [String description]) {
-    _initialCallPlacements.add(Placement(type: type, count: count, notes: description));
+    _initialCallPlacements.add(Tuple3(count, type, description));
     notifyListeners();
   }
 
   /// Determines whether the return visit contains the minimum information to save it.
   bool validate() {
-    if(!_validateAddress()) {
+    if (!_validateAddress()) {
       return false;
     }
 
-    if(gender == null) {
+    if (gender == null) {
       return false;
     }
 
-    if(!_validateInitialVisit()) {
+    if (!_validateInitialVisit()) {
       return false;
     }
 
     return true;
-    }
-  
-    Future checkForNewCoordinates() async {
-      if(_validateAddress()) {
-        var place = await _locationService.getCoordinatesFromAddress(_getAddress());
-        print("found new coords: ${place.latitude}, ${place.longitude}");
-        if(place != null) {
-          var hasChanged = false;
-          if(_latitude != place.latitude) {
-            _latitude = place.latitude;
-            hasChanged = true;
-          }
-          if(_longitude != place.longitude) {
-            _longitude = place.longitude;
-            hasChanged = true;
-          }
-          if(hasChanged) {
-            _addressController.updateAddress(address);
-          }
+  }
+
+  Future checkForNewCoordinates() async {
+    if (_validateAddress()) {
+      var place = await _locationService.getCoordinatesFromAddress(_getAddress());
+      print("found new coords: ${place.latitude}, ${place.longitude}");
+      if (place != null) {
+        var hasChanged = false;
+        if (_latitude != place.latitude) {
+          _latitude = place.latitude;
+          hasChanged = true;
+        }
+        if (_longitude != place.longitude) {
+          _longitude = place.longitude;
+          hasChanged = true;
+        }
+        if (hasChanged) {
+          _addressController.updateAddress(address);
         }
       }
     }
+  }
 
-    Address _getAddress() => Address(
-      city: _city, 
-      country: _country, 
-      street: _street, 
-      postalCode: _postalCode, 
-      state: _state, 
-      latitude: _latitude == 0.0 ? null : _latitude, 
+  Address _getAddress() => Address(
+      city: _city,
+      country: _country,
+      street: _street,
+      postalCode: _postalCode,
+      state: _state,
+      latitude: _latitude == 0.0 ? null : _latitude,
       longitude: _longitude == 0.0 ? null : longitude);
-      
-    bool _validateAddress() {
-      return _city.isNotEmpty;
-    }
-  
-    bool _validateInitialVisit() {
-      return _initialCallDate != null;
-    }
 
-    void removePlacement(Placement placement) {
-      if(_initialCallPlacements != null 
-         && _initialCallPlacements.contains(placement) 
-         && _initialCallPlacements.remove(placement)) {
-        notifyListeners();
-      }
+  bool _validateAddress() {
+    return _city.isNotEmpty;
+  }
+
+  bool _validateInitialVisit() {
+    return _initialCallDate != null;
+  }
+
+  void removePlacement(Tuple3<int, PlacementType, String> placement) {
+    if (_initialCallPlacements != null &&
+        _initialCallPlacements.contains(placement) &&
+        _initialCallPlacements.remove(placement)) {
+      notifyListeners();
     }
+  }
 
   Future save() async {
-    if(validate()) {
+    if (validate()) {
       String imagePath;
-      if(image != null && image.isNotEmpty) {
+      if (image != null && image.isNotEmpty) {
         imagePath = await _imageService.saveToFile(
           image,
           path: "images/",
@@ -275,31 +278,30 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
       }
 
       var rv = ReturnVisit.create(
-        address: address,
-        name: name,
-        gender: gender,
-        notes: notes,
-        imagePath: imagePath,
-        pinned: pinned
-      );
+          address: address,
+          name: name,
+          gender: gender,
+          notes: notes,
+          imagePath: imagePath,
+          pinned: pinned);
 
-      await _returnVisitService.addNewReturnVisit(
-        rv: rv, 
-        initialCallDate: initialCallDate, 
-        initialCallPlacements: initialCallPlacements, 
-        initialCallNotes: initialCallNotes);
+      await _returnVisitService.addReturnVisit(
+          rv: rv,
+          initialCallDate: initialCallDate,
+          initialCallPlacements: initialCallPlacements,
+          initialCallNotes: initialCallNotes);
     }
   }
 
   @override
   set address(Address address) {
     _street = address.street;
-      _city = address.city;
-      _country = address.country;
-      _postalCode = address.postalCode;
-      _state = address.state;
-      _latitude = address.latitude;
-      _longitude = address.longitude;
-      notifyListeners();
+    _city = address.city;
+    _country = address.country;
+    _postalCode = address.postalCode;
+    _state = address.state;
+    _latitude = address.latitude;
+    _longitude = address.longitude;
+    notifyListeners();
   }
 }

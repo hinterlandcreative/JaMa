@@ -3,23 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 
-import 'package:jama/data/models/dto/return_visit_model.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
 import 'package:jama/ui/models/return_visits/edittable_return_visit_base_model.dart';
 import 'package:jama/ui/translation.dart';
 import 'package:jama/ui/app_styles.dart';
 
 class ReturnVisitPersonalInfoForm extends StatefulWidget {
   final EdittableReturnVisitBaseModel returnVisitModel;
-  ReturnVisitPersonalInfoForm({Key key, this.returnVisitModel})
-      : super(key: key);
+  ReturnVisitPersonalInfoForm({Key key, this.returnVisitModel}) : super(key: key);
 
   @override
-  _ReturnVisitPersonalInfoFormState createState() =>
-      _ReturnVisitPersonalInfoFormState();
+  _ReturnVisitPersonalInfoFormState createState() => _ReturnVisitPersonalInfoFormState();
 }
 
-class _ReturnVisitPersonalInfoFormState
-    extends State<ReturnVisitPersonalInfoForm> {
+class _ReturnVisitPersonalInfoFormState extends State<ReturnVisitPersonalInfoForm> {
   FocusNode _nameFocusNode;
   FocusNode _streetFocusNode;
   TextEditingController _streetTextController;
@@ -72,14 +69,13 @@ class _ReturnVisitPersonalInfoFormState
     return ChangeNotifierProvider.value(
       value: widget.returnVisitModel,
       child: Consumer<EdittableReturnVisitBaseModel>(
-        builder: (_, model, __) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Selector<EdittableReturnVisitBaseModel, String>(
-              selector: (_, m) => m.name,
-              builder: (_, name, __) => Padding(
-                padding: EdgeInsets.only(bottom: 24.0),
-                child: TextFormField(
+        builder: (_, model, __) =>
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+          Selector<EdittableReturnVisitBaseModel, String>(
+            selector: (_, m) => m.name,
+            builder: (_, name, __) => Padding(
+              padding: EdgeInsets.only(bottom: 24.0),
+              child: TextFormField(
                   focusNode: _nameFocusNode,
                   textInputAction: TextInputAction.next,
                   initialValue: name,
@@ -89,44 +85,44 @@ class _ReturnVisitPersonalInfoFormState
                     _nameFocusNode.unfocus();
                     FocusScope.of(context).requestFocus(_streetFocusNode);
                   },
-                  decoration: InputDecoration(
-                    labelText: "Name",
-                    labelStyle: AppStyles.smallTextStyle)),
-              ),
+                  decoration:
+                      InputDecoration(labelText: "Name", labelStyle: AppStyles.smallTextStyle)),
             ),
-            Text(
-              "Gender",
-              style: AppStyles.smallTextStyle.copyWith(color: Colors.black54)),
-            Selector<EdittableReturnVisitBaseModel, Gender>(
-              selector: (_, m) => m.gender,
-              builder: (_, gender, __) => RadioButtonGroup(
-                picked: Translation.genderToNounString[gender],
-                orientation: GroupedButtonsOrientation.HORIZONTAL,
-                labels: [Translation.genderToNounString[Gender.Male], Translation.genderToNounString[Gender.Female]],
-                activeColor: AppStyles.primaryColor,
-                labelStyle: AppStyles.heading4,
-                itemBuilder: (radio, text, i) => Padding(
-                  padding: EdgeInsets.only(right: 45.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[radio, text],
-                  ),
+          ),
+          Text("Gender", style: AppStyles.smallTextStyle.copyWith(color: Colors.black54)),
+          Selector<EdittableReturnVisitBaseModel, Gender>(
+            selector: (_, m) => m.gender,
+            builder: (_, gender, __) => RadioButtonGroup(
+              picked: Translation.genderToNounString[gender],
+              orientation: GroupedButtonsOrientation.HORIZONTAL,
+              labels: [
+                Translation.genderToNounString[Gender.Male],
+                Translation.genderToNounString[Gender.Female]
+              ],
+              activeColor: AppStyles.primaryColor,
+              labelStyle: AppStyles.heading4,
+              itemBuilder: (radio, text, i) => Padding(
+                padding: EdgeInsets.only(right: 45.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[radio, text],
                 ),
-                onSelected: (s) {
-                  model.gender = Translation.nounToGenderType[s];
-                },
               ),
+              onSelected: (s) {
+                model.gender = Translation.nounToGenderType[s];
+              },
             ),
-            Selector<EdittableReturnVisitBaseModel, String>(
-              selector: (_, m) => m.street,
-              builder: (_, street, __) {
-                if (!_streetFocusNode.hasFocus) {
-                  _streetTextController.text = street;
-                }
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 24.0),
-                  child: TextFormField(
+          ),
+          Selector<EdittableReturnVisitBaseModel, String>(
+            selector: (_, m) => m.street,
+            builder: (_, street, __) {
+              if (!_streetFocusNode.hasFocus) {
+                _streetTextController.text = street;
+              }
+              return Padding(
+                padding: EdgeInsets.only(bottom: 24.0),
+                child: TextFormField(
                     focusNode: _streetFocusNode,
                     controller: _streetTextController,
                     textInputAction: TextInputAction.next,
@@ -139,139 +135,133 @@ class _ReturnVisitPersonalInfoFormState
                     },
                     style: AppStyles.heading4,
                     decoration: InputDecoration(
-                      labelText: "Address",
-                      labelStyle: AppStyles.smallTextStyle)),
-                );
-              },
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Selector<EdittableReturnVisitBaseModel, String>(
-                    selector: (_, m) => m.city,
-                    builder: (_, city, __) {
-                      if (!_cityFocusNode.hasFocus) {
-                        _cityTextController.text = city;
-                      }
-                      return Flexible(
+                        labelText: "Address", labelStyle: AppStyles.smallTextStyle)),
+              );
+            },
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Selector<EdittableReturnVisitBaseModel, String>(
+                  selector: (_, m) => m.city,
+                  builder: (_, city, __) {
+                    if (!_cityFocusNode.hasFocus) {
+                      _cityTextController.text = city;
+                    }
+                    return Flexible(
                         child: TextFormField(
-                          focusNode: _cityFocusNode,
-                          controller: _cityTextController,
-                          textInputAction: TextInputAction.next,
-                          validator: (s) {
-                            if (s.isEmpty) {
-                              return "City must not be empty.";
-                            } else {
-                              return null;
-                            }
-                          },
-                          onSaved: (s) => model.city = s,
-                          onChanged: (s) => model.city = s,
-                          onFieldSubmitted: (s) {
-                            model.city = s;
-                            _cityFocusNode.unfocus();
-                            FocusScope.of(context)
-                                .requestFocus(_stateFocusNode);
-                          },
-                          decoration: InputDecoration(
-                            labelText: "City",
-                            labelStyle: AppStyles.smallTextStyle)));
+                            focusNode: _cityFocusNode,
+                            controller: _cityTextController,
+                            textInputAction: TextInputAction.next,
+                            validator: (s) {
+                              if (s.isEmpty) {
+                                return "City must not be empty.";
+                              } else {
+                                return null;
+                              }
+                            },
+                            onSaved: (s) => model.city = s,
+                            onChanged: (s) => model.city = s,
+                            onFieldSubmitted: (s) {
+                              model.city = s;
+                              _cityFocusNode.unfocus();
+                              FocusScope.of(context).requestFocus(_stateFocusNode);
+                            },
+                            decoration: InputDecoration(
+                                labelText: "City", labelStyle: AppStyles.smallTextStyle)));
                   },
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                  ),
-                  Selector<EdittableReturnVisitBaseModel, String>(
-                    selector: (_, m) => m.state,
-                    builder: (_, state, __) {
-                      if (!_stateFocusNode.hasFocus) {
-                        _stateTextController.text = state;
-                      }
-                      return Flexible(
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5.0),
+                ),
+                Selector<EdittableReturnVisitBaseModel, String>(
+                  selector: (_, m) => m.state,
+                  builder: (_, state, __) {
+                    if (!_stateFocusNode.hasFocus) {
+                      _stateTextController.text = state;
+                    }
+                    return Flexible(
                         child: TextFormField(
-                          focusNode: _stateFocusNode,
-                          controller: _stateTextController,
-                          textInputAction: TextInputAction.next,
-                          onSaved: (s) => model.state = s,
-                          onChanged: (s) => model.state = s,
-                          onFieldSubmitted: (s) {
-                            model.state = s;
-                            _stateFocusNode.unfocus();
-                            FocusScope.of(context)
-                                .requestFocus(_postalCodeFocusNode);
-                          },
-                          decoration: InputDecoration(
-                            labelText: "State / Province",
-                            labelStyle: AppStyles.smallTextStyle)));
-                    },
-                  ),
-                ],
-              ),
+                            focusNode: _stateFocusNode,
+                            controller: _stateTextController,
+                            textInputAction: TextInputAction.next,
+                            onSaved: (s) => model.state = s,
+                            onChanged: (s) => model.state = s,
+                            onFieldSubmitted: (s) {
+                              model.state = s;
+                              _stateFocusNode.unfocus();
+                              FocusScope.of(context).requestFocus(_postalCodeFocusNode);
+                            },
+                            decoration: InputDecoration(
+                                labelText: "State / Province",
+                                labelStyle: AppStyles.smallTextStyle)));
+                  },
+                ),
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Selector<EdittableReturnVisitBaseModel, String>(
-                    selector: (_, m) => m.postalCode,
-                    builder: (_, postalCode, __) {
-                      if (!_postalCodeFocusNode.hasFocus) {
-                        _postalCodeTextController.text = postalCode;
-                      }
-                      return Flexible(
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Selector<EdittableReturnVisitBaseModel, String>(
+                  selector: (_, m) => m.postalCode,
+                  builder: (_, postalCode, __) {
+                    if (!_postalCodeFocusNode.hasFocus) {
+                      _postalCodeTextController.text = postalCode;
+                    }
+                    return Flexible(
                         flex: 35,
                         child: TextFormField(
-                          focusNode: _postalCodeFocusNode,
-                          controller: _postalCodeTextController,
-                          textInputAction: TextInputAction.next,
-                          onSaved: (s) => model.postalCode = s,
-                          onChanged: (s) => model.postalCode = s,
-                          onFieldSubmitted: (s) {
-                            model.postalCode = s;
-                            _postalCodeFocusNode.unfocus();
-                            FocusScope.of(context).requestFocus(_countryFocusNode);
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Postal Code",
-                            labelStyle: AppStyles.smallTextStyle)));
-                    },
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                  ),
-                  Selector<EdittableReturnVisitBaseModel, String>(
-                    selector: (_, m) => m.country,
-                    builder: (_, country, __) {
-                      if (!_countryFocusNode.hasFocus) {
-                        _countryTextControlller.text = country;
-                      }
-                      return Flexible(
+                            focusNode: _postalCodeFocusNode,
+                            controller: _postalCodeTextController,
+                            textInputAction: TextInputAction.next,
+                            onSaved: (s) => model.postalCode = s,
+                            onChanged: (s) => model.postalCode = s,
+                            onFieldSubmitted: (s) {
+                              model.postalCode = s;
+                              _postalCodeFocusNode.unfocus();
+                              FocusScope.of(context).requestFocus(_countryFocusNode);
+                            },
+                            decoration: InputDecoration(
+                                labelText: "Postal Code", labelStyle: AppStyles.smallTextStyle)));
+                  },
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5.0),
+                ),
+                Selector<EdittableReturnVisitBaseModel, String>(
+                  selector: (_, m) => m.country,
+                  builder: (_, country, __) {
+                    if (!_countryFocusNode.hasFocus) {
+                      _countryTextControlller.text = country;
+                    }
+                    return Flexible(
                         flex: 65,
                         child: TextFormField(
-                          focusNode: _countryFocusNode,
-                          controller: _countryTextControlller,
-                          textInputAction: TextInputAction.next,
-                          onSaved: (s) => model.country = s,
-                          onChanged: (s) => model.country = s,
-                          onFieldSubmitted: (s) {
-                            model.country = s;
-                            _countryFocusNode.unfocus();
-                            FocusScope.of(context).requestFocus(_notesFocusNode);
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Country",
-                            labelStyle: AppStyles.smallTextStyle)));
-                    },
-                  ),
-                ],
-              ),
+                            focusNode: _countryFocusNode,
+                            controller: _countryTextControlller,
+                            textInputAction: TextInputAction.next,
+                            onSaved: (s) => model.country = s,
+                            onChanged: (s) => model.country = s,
+                            onFieldSubmitted: (s) {
+                              model.country = s;
+                              _countryFocusNode.unfocus();
+                              FocusScope.of(context).requestFocus(_notesFocusNode);
+                            },
+                            decoration: InputDecoration(
+                                labelText: "Country", labelStyle: AppStyles.smallTextStyle)));
+                  },
+                ),
+              ],
             ),
-            Selector<EdittableReturnVisitBaseModel, String>(
-              selector: (_, m) => m.notes,
-              builder: (_, notes, __) => TextFormField(
+          ),
+          Selector<EdittableReturnVisitBaseModel, String>(
+            selector: (_, m) => m.notes,
+            builder: (_, notes, __) => TextFormField(
                 initialValue: notes,
                 focusNode: _notesFocusNode,
                 onSaved: (s) => model.notes = s,
@@ -279,11 +269,11 @@ class _ReturnVisitPersonalInfoFormState
                 keyboardType: TextInputType.multiline,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: "Notes",
-                  alignLabelWithHint: true,
-                  labelStyle: AppStyles.smallTextStyle)),
-            ),
-          ]),
+                    labelText: "Notes",
+                    alignLabelWithHint: true,
+                    labelStyle: AppStyles.smallTextStyle)),
+          ),
+        ]),
       ),
     );
   }

@@ -1,277 +1,261 @@
 import 'dart:async';
 import 'dart:collection';
-import 'package:flutter/foundation.dart';
 
-import 'package:jama/data/core/db/db_collection.dart';
-import 'package:jama/data/core/db/query_package.dart';
-import 'package:jama/data/models/address_model.dart';
-import 'package:jama/data/models/dto/return_visit_model.dart';
-import 'package:jama/data/models/dto/visit_model.dart';
-import 'package:jama/data/models/placement.dart';
+import 'package:flutter/foundation.dart';
 import 'package:jama/services/database_service.dart';
 import 'package:jama/services/image_service.dart';
-
 import 'package:kiwi/kiwi.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:supercharged/supercharged.dart';
 
+import 'package:jama/data/models/address_model.dart';
+import 'package:jama/data/models/dto/return_visit_dto.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
+import 'package:jama/data/models/dto/placement_dto.dart';
+import 'package:tuple/tuple.dart';
+
 class ReturnVisitService {
-  ImageService _imageService;
+  static const String _tableName_ReturnVisits = "ReturnVisit";
+  static const String _tableName_Visits = "Visit";
+  static const String _tableName_Placements = "Placements";
 
-  final String _returnVisitDatabaseName = "returnvisits";
-  final String _visitsDatabaseName = "visits";
-  final Completer<DbCollection> _returnVisitCollection = Completer();
-  final Completer<DbCollection> _visitsCollection = Completer();
-  final StreamController<ReturnVisit> _returnVisitsUpdated = StreamController.broadcast();
+  final ImageService _imageService;
+  final Completer<Database> _dbCompleter;
+  final StreamController<ReturnVisit> _returnVisitsUpdated;
 
-  /// Get the stream of events indicating the return visits have changed.
-  Stream<ReturnVisit> get returnVisitUpdates => _returnVisitsUpdated.stream;
+  const ReturnVisitService._(this._imageService, this._dbCompleter, this._returnVisitsUpdated);
 
-  ReturnVisitService([ImageService imageService, DatabaseService databaseService]) {
-    var container = Container();
+  factory ReturnVisitService([ImageService imageService, DatabaseService databaseService]) {
+    databaseService = databaseService ?? Container().resolve<DatabaseService>();
+    imageService = imageService ?? Container().resolve<ImageService>();
 
-    var dbService = databaseService ?? container.resolve<DatabaseService>();
-    _imageService = imageService ?? container.resolve<ImageService>();
+    final completer = Completer<Database>()..complete(databaseService.getLocalMainStorage());
 
-    var getReturnVisitCollection = () async {
-      final db = await dbService.getMainStorage();
-      return db.collections(_returnVisitDatabaseName);
-    };
-    
-    _returnVisitCollection.complete(getReturnVisitCollection());
-
-    var getVisitsCollection = () async {
-      final db = await dbService.getMainStorage();
-      return db.collections(_visitsDatabaseName);
-    };
-
-    _visitsCollection.complete(getVisitsCollection());
+    return ReturnVisitService._(imageService, completer, StreamController<ReturnVisit>.broadcast());
   }
 
-  /// Add [rv] as a new return visit.
-  /// 
-  /// The [rv] and [initialCallDate] are required.
-  Future<ReturnVisit> addNewReturnVisit({
-    @required ReturnVisit rv, 
-    @required DateTime initialCallDate, 
-    List<Placement> initialCallPlacements, 
-    String initialCallNotes}) async {
+  Stream<ReturnVisit> get returnVisitUpdates => _returnVisitsUpdated.stream;
+
+  /// Gets all the available return visits.
+  /// If [shallow] is true then the visits and placements are not retrieved.
+  /// [shallow] = false is not currently supported.
+  Future<List<ReturnVisit>> getAllReturnVisits({bool shallow = true}) async {
+    final db = await _dbCompleter.future;
+
+    if (shallow) {
+      var items = await db.query(_tableName_ReturnVisits);
+      return items.map((e) => ReturnVisit._shallowDto(ReturnVisitDto.fromMap(e))).toList();
+    } else {
+      throw UnsupportedError("Only shallow queries supported.");
+    }
+  }
+
+  /// Get all the `Visit`s and `Placement`s for the provided [rv].
+  Future<ReturnVisit> getAllVisitsForRv(ReturnVisit rv) async {
+    final db = await _dbCompleter.future;
+
+    var entries = await db.rawQuery(
+        """SELECT * FROM ReturnVisit """ +
+            """LEFT JOIN Visit ON ReturnVisit.ReturnVisitId = Visit.FK_ReturnVisit_Visit_ParentRv """ +
+            """LEFT JOIN Placements ON Visit.VisitId = Placements.FK_Visit_Placement_ParentVisit """ +
+            """WHERE ReturnVisitId = ? """ +
+            """ORDER BY Visit.Date DESC;""",
+        [rv._id]);
+    if (entries == null) return rv;
+
+    var placements = entries
+        .where((map) => map["PlacementId"] != null)
+        .map((e) => Placement._fromDto(dto: PlacementDto.fromMap(e)))
+        .toList();
+
+    var visitIds = entries.map((e) => e["VisitId"]).toList().toSet();
+    var visits = <Visit>[];
+    for (var id in visitIds) {
+      var visitMap = entries.firstWhere((map) => map["VisitId"] == id);
+      var visitsPlacements = placements.where((p) => p._parentVisit == id).toList();
+      visits.add(Visit._fromDto(dto: VisitDto.fromMap(visitMap), placements: visitsPlacements));
+    }
+
+    return ReturnVisit._fromDto(rv._toDto(), visits);
+  }
+
+  /// Add a new `ReturnVisit` with the initial visit information.
+  /// The [rv] must not have been saved and the [rv.visits] must be empty.
+  /// [intialCallDate] must be set.
+  Future<ReturnVisit> addReturnVisit(
+      {@required ReturnVisit rv,
+      @required DateTime initialCallDate,
+      List<Tuple3<int, PlacementType, String>> initialCallPlacements,
+      String initialCallNotes,
+      String initialCallNextTopic}) async {
     assert(initialCallDate != null);
     assert(rv != null);
+    assert(rv._id <= 0);
+    assert(rv.visits.isEmpty);
 
-    var rvDto = rv._toDto();
+    final db = await _dbCompleter.future;
 
-    var returnVisitDb = await _returnVisitCollection.future;
-    var rvId = await returnVisitDb.add(rvDto);
-    assert(rvId != null);
-    assert(rvId >= 0);
-    rvDto = rvDto.copyWith(id: rvId);
-    
-    
-    var initialCall = VisitDto(
-      date: initialCallDate.millisecondsSinceEpoch,
-      parentRvId: rvId,
-      notes: initialCallNotes,
-      type: VisitType.ReturnVisit,
-      placements: initialCallPlacements);
-    
-    var visitsDb = await _visitsCollection.future;
-    
-    var visitId = await visitsDb.add(initialCall);
+    await db.transaction((txn) async {
+      rv._id = await txn.insert(_tableName_ReturnVisits, rv._toMap());
+      var visitDto = VisitDto(
+          parentRvId: rv._id,
+          date: initialCallDate.millisecondsSinceEpoch,
+          notes: initialCallNotes,
+          nextTopic: initialCallNextTopic);
+      var visitId = await txn.insert(_tableName_Visits, visitDto.toMap());
+      visitDto = visitDto.copyWith(id: visitId);
 
-    rvDto = rvDto.copyWith(
-      lastVisitDate: initialCallDate.millisecondsSinceEpoch,
-      lastVisitId: visitId
-    );
+      var initialVisit = Visit._fromDto(dto: visitDto);
+      for (var t in initialCallPlacements) {
+        var p =
+            Placement.create(parent: initialVisit, count: t.item1, type: t.item2, notes: t.item3);
+        p._id = await txn.insert(_tableName_Placements, p._toMap());
+        initialVisit.addPlacement(p);
+      }
 
-    await returnVisitDb.update(rvDto);
+      rv.addVisit(initialVisit);
 
-    _returnVisitsUpdated.add(ReturnVisit.fromDto(rvDto, [initialCall]));
+      await txn.update(_tableName_ReturnVisits, rv._toMap(),
+          where: "ReturnVisitId = ?", whereArgs: [rv._id]);
+    });
+
+    _returnVisitsUpdated.sink.add(rv);
     return rv;
   }
 
-  Future<List<ReturnVisit>> getAllReturnVisits() async {
-    var returnVisitsDb = await _returnVisitCollection.future;
-    var dtoList = await returnVisitsDb.getAll((map) => ReturnVisitDto.fromMap(map));
-    List<ReturnVisit> rvList = [];
-    for(var dto in dtoList) {
-      var visits = await _getAllVisitsForRv(dto);
-      rvList.add(ReturnVisit.fromDto(dto, visits));
-    }
-
-    return rvList;
-  }
-
-  Future<List<VisitDto>> _getAllVisitsForRv(ReturnVisitDto rv) async {
-    var visitsDb = await _visitsCollection.future;
-    return await visitsDb.query([
-      QueryPackage(
-        key: "parentRvId",
-        value: rv.id,
-        filter: FilterType.EqualTo)
-    ],  
-    (map) => VisitDto.fromMap(map));
-  }
-
-  Future delete(ReturnVisit rv) async {
+  /// Delete the [rv] and all associated `Visit` and `Placement` entries.
+  Future deleteReturnVisit(ReturnVisit rv) async {
     assert(rv != null);
     assert(rv._id > 0);
-    var dto = rv._toDto();
-    var returnVisitsDb = await _returnVisitCollection.future;
-    await returnVisitsDb.deleteFromDto(dto);
 
-    var visits = await _getAllVisitsForRv(dto);
-    var visitsDb = await _visitsCollection.future;
-    for(var visit in visits) {
-      await visitsDb.deleteFromDto(visit);
+    final db = await _dbCompleter.future;
+
+    var rvId = rv._id;
+
+    await db.transaction((txn) async {
+      var results = await txn.rawQuery(
+          """SELECT VisitId FROM Visit WHERE FK_ReturnVisit_Visit_ParentRv = ?;""", [rvId]);
+      if (results.length > 0) {
+        String visitMatcher = results.length > 1
+            ? "IN (${results.map((e) => e["VisitId"]).join(", ")})"
+            : "= ${results.first["VisitId"]}";
+
+        await txn.rawDelete(
+            """DELETE FROM Placements WHERE FK_Visit_Placement_ParentVisit $visitMatcher;""");
+        await txn.rawDelete("""DELETE FROM Visit WHERE VisitID $visitMatcher;""");
+      }
+      await txn.rawDelete("""DELETE FROM ReturnVisit WHERE ReturnVisitId = ?""", [rvId]);
+    });
+
+    if (rv.imagePath.isNotEmpty) {
+      var image = await _imageService.getImageFile(rv.imagePath);
+      await image.delete();
     }
 
-    if(rv.imagePath.isNotEmpty) {
-      var imageFile = await _imageService.getImageFile(rv.imagePath);
-      await imageFile.delete();
-    }
-
-    _returnVisitsUpdated.add(rv);
+    _returnVisitsUpdated.sink.add(null);
   }
 
+  /// Updates an existing [rv].
+  /// Does not update the `Visit` or `Placement` of the RV.
+  /// Use the `updateVisit()` method to update those.
   Future updateReturnVisit(ReturnVisit rv) async {
     assert(rv != null);
     assert(rv._id > 0);
-    assert(rv.lastVisitDate != null);
-    assert(rv.lastVisit._id > 0);
 
-    var returnVisitsDb = await _returnVisitCollection.future;
-    await returnVisitsDb.update(rv._toDto());
+    final db = await _dbCompleter.future;
 
-    _returnVisitsUpdated.add(rv);
+    await db.update(_tableName_ReturnVisits, rv._toMap(),
+        where: "ReturnVisitId = ?", whereArgs: [rv._id]);
+
+    _returnVisitsUpdated.sink.add(rv);
   }
 
-  Future addVisit(Visit visit) async {
+  /// Add the [visit] to an existing `ReturnVisit`.
+  /// If the [visit] is the lastest visit it will update the `ReturnVisit`.
+  Future<Visit> addVisit(Visit visit) async {
     assert(visit != null);
     assert(visit._parentId > 0);
     assert(visit.date != null);
-    if(visit._id > 0) return await updateVisit(visit);
-    var dto = visit._toDto();
+    if (visit._id > 0) return await updateVisit(visit);
 
-    var rvDb = await _returnVisitCollection.future;
-    var rv = await rvDb.getOne(visit._parentId, itemCreator: (map) => ReturnVisitDto.fromMap(map));
-    
-    var visitsDb = await _visitsCollection.future;
+    final db = await _dbCompleter.future;
 
-    var id = await visitsDb.add(dto);
-    dto = dto.copyWith(id: id);
+    visit._id = await db.insert(_tableName_Visits, visit._toMap());
 
-    if(visit.type != VisitType.NotAtHome && visit.date.millisecondsSinceEpoch > rv.lastVisitDate) {
+    if (visit.type != VisitType.NotAtHome) {
+      var rv = await _getSingleRVDto(db, visit._parentId);
 
-      rv = rv.copyWith(
-        lastVisitDate: dto.date,
-        lastVisitId: id
-      );
-      
-      await rvDb.update(rv);
-      var visits = await _getAllVisitsForRv(rv);
+      if (rv.lastVisitDate < visit._date) {
+        rv = rv.copyWith(lastVisitId: visit._id, lastVisitDate: visit._date);
 
-      _returnVisitsUpdated.add(ReturnVisit.fromDto(rv, visits));
+        await db.update(_tableName_ReturnVisits, rv.toMap(),
+            where: "ReturnVisitId = ?", whereArgs: [rv.id]);
+      }
+
+      await _updatePlacements(visit, db);
     }
+
+    return visit;
   }
 
-  Future updateVisit(Visit visit) async {
-    assert(visit._parentId >= 0);
-    assert(visit.date != null);
+  /// Updates an existing [visit].
+  /// If the [visit] is the lastest visit it will update the `ReturnVisit`.
+  Future<Visit> updateVisit(Visit visit) async {
+    assert(visit != null);
+    assert(visit._parentId > 0);
+    if (visit._id <= 0) return await addVisit(visit);
 
-    if(visit._id <= 0) return await addVisit(visit);
+    final db = await _dbCompleter.future;
 
-    var rvDb = await _returnVisitCollection.future;
-    var rv = await rvDb.getOne(visit._parentId, itemCreator: (map) => ReturnVisitDto.fromMap(map));
-    var dto = visit._toDto();
+    if (visit.type != VisitType.NotAtHome) {
+      var rv = await _getSingleRVDto(db, visit._parentId);
 
-    assert(rv != null);
+      if (rv.lastVisitDate < visit._date) {
+        rv = rv.copyWith(lastVisitDate: visit._date, lastVisitId: visit._id);
 
-    var visitsDb = await _visitsCollection.future;
+        await db.update(_tableName_ReturnVisits, rv.toMap(),
+            where: "ReturnVisitId = ?", whereArgs: [rv.id]);
+      }
 
-    var id = await visitsDb.update(dto);
-    dto = dto.copyWith(id: id);
+      await _updatePlacements(visit, db);
 
-    // TODO: this needs lots of tests.
-    if((rv.lastVisitId == id && dto.date != rv.lastVisitDate)
-      || (dto.date > rv.lastVisitDate)) {
-
-      var visits = await _getAllVisitsForRv(rv);
-      var latestVisit = visits
-        .where((element) => element.type != VisitType.NotAtHome)
-        .maxBy((a, b) => a.date.compareTo(b.date));
-
-      rv = rv.copyWith(
-        lastVisitDate: latestVisit.date,
-        lastVisitId: latestVisit.id
-      );
-      await rvDb.update(rv);
-      _returnVisitsUpdated.add(ReturnVisit.fromDto(rv, visits));
+      await db
+          .update(_tableName_Visits, visit._toMap(), where: "VisitId = ?", whereArgs: [visit._id]);
     }
+
+    return visit;
   }
 
+  /// Delete an existing [visit] and all it's associated `Placement`s.
   Future deleteVisit(Visit visit) async {
-    assert(visit._parentId >= 0);
-    assert(visit.date != null);
+    assert(visit != null);
+    assert(visit._id > 0);
 
-    var rvDb = await _returnVisitCollection.future;
-    var rv = await rvDb.getOne(
-      visit._parentId, 
-      itemCreator: (map) => ReturnVisitDto.fromMap(map));
+    final db = await _dbCompleter.future;
 
-    assert(rv != null);
+    await db.transaction((txn) async {
+      await txn.rawDelete(
+          """DELETE FROM Placements WHERE FK_Visit_Placement_ParentVisit = ?;""", [visit._id]);
+      await txn.rawDelete("""DELETE FROM Visit WHERE VisitID = ?;""", [visit._id]);
+    });
+  }
 
-    var visitsDb = await _visitsCollection.future;
-
-    await visitsDb.deleteFromId(visit._id);
-
-    if(rv.lastVisitId == visit._id) {
-      var visits = await _getAllVisitsForRv(rv);
-      var last = visits
-        .where((v) => v.type != VisitType.NotAtHome)
-        .maxBy((a, b) => a.date.compareTo(b.date));
-      
-      rv = rv.copyWith(
-        lastVisitDate: last.date,
-        lastVisitId: last.id
-      );
-
-      await rvDb.update(rv);
-      _returnVisitsUpdated.add(ReturnVisit.fromDto(rv, visits));
+  Future _updatePlacements(Visit visit, Database db) async {
+    for (var placement in visit.placements) {
+      if (placement._id > 0) {
+        await db.update(_tableName_Placements, placement._toMap(),
+            where: "PlacementId = ?", whereArgs: [placement._id]);
+      } else {
+        placement._id = await db.insert(_tableName_Placements, placement._toMap());
+      }
     }
   }
 
-  Future<List<ReturnVisit>> getVisitsByDate({DateTime start, DateTime end}) async {
-    assert(end != null);
-    assert(start != null);
-    assert(start.isAfter(end));
-    
-    var visitDb = await _visitsCollection.future;
-    var rvDb = await _returnVisitCollection.future;
-
-    var visits = await visitDb.query([
-      QueryPackage(
-        filter: FilterType.GreaterThanOrEqualTo,
-        key: "date",
-        value: start.millisecondsSinceEpoch
-      ),
-      QueryPackage(
-        filter: FilterType.LessThanOrEqualTo,
-        key: "date",
-        value: end.millisecondsSinceEpoch
-      )], 
-      (map) => VisitDto.fromMap(map)); 
-
-    var rvIds = visits.map((e) => e.parentRvId).toSet();
-
-    var returnVisits = <ReturnVisit>[];
-    for(var id in rvIds) {
-      var rv = await rvDb.getOne(id, itemCreator: (map) => ReturnVisitDto.fromMap(map));
-      returnVisits.add(ReturnVisit.fromDto(
-        rv, 
-        visits.where((element) => element.parentRvId == id)));
-    }
-
-    return returnVisits;
+  Future<ReturnVisitDto> _getSingleRVDto(Database db, int id) async {
+    var rvMap =
+        await db.rawQuery("""SELECT * FROM ReturnVisit WHERE ReturnVisitId = ? LIMIT 1;""", [id]);
+    var rv = ReturnVisitDto.fromMap(rvMap.first);
+    return rv;
   }
 }
 
@@ -282,93 +266,128 @@ class ReturnVisit {
   Gender _gender;
   String _notes;
   String _imagePath;
-  int _lastVisitId;
+  DateTime _lastVisitDate;
   bool _pinned;
-  List<Visit> _visits;
+  List<Visit> _visits = [];
+  bool _isShallow = false;
 
   ReturnVisit._(
-    this._id, 
-    this._address, 
-    this._name, 
-    this._gender, 
-    this._imagePath,
-    this._lastVisitId, 
-    this._notes, 
-    this._pinned);
+      [this._id,
+      this._address,
+      this._name,
+      this._gender,
+      this._imagePath,
+      this._notes,
+      this._pinned,
+      this._isShallow,
+      this._visits,
+      this._lastVisitDate]) {
+    _visits = _visits ?? <Visit>[];
+  }
 
-  factory ReturnVisit.fromDto(ReturnVisitDto dto, List<VisitDto> visits) {
-    var rv = ReturnVisit._(dto.id, dto.address, dto.name, dto.gender, dto.imagePath, dto.lastVisitId, dto.notes, dto.pinned);
-    rv._visits = visits
-      .map((e) => Visit.fromDto(dto: e, parent: rv))
-      .toList();
-    
+  factory ReturnVisit._shallowDto(ReturnVisitDto dto) {
+    return ReturnVisit._(
+        dto.id,
+        Address(
+            street: dto.street,
+            city: dto.city,
+            state: dto.state,
+            postalCode: dto.postalCode,
+            country: dto.country,
+            latitude: dto.latitude ?? 0.0,
+            longitude: dto.longitude ?? 0.0),
+        dto.name,
+        dto.gender,
+        dto.imagePath,
+        dto.notes,
+        dto.pinned,
+        true,
+        [],
+        DateTime.fromMillisecondsSinceEpoch(dto.lastVisitDate));
+  }
+
+  factory ReturnVisit._fromDto(ReturnVisitDto dto, List<Visit> visits) {
+    var rv = ReturnVisit._(
+        dto.id,
+        Address(
+            street: dto.street,
+            city: dto.city,
+            state: dto.state,
+            postalCode: dto.postalCode,
+            country: dto.country,
+            latitude: dto.latitude ?? 0.0,
+            longitude: dto.longitude ?? 0.0),
+        dto.name,
+        dto.gender,
+        dto.imagePath,
+        dto.notes,
+        dto.pinned,
+        false,
+        visits);
+
     return rv;
   }
 
   factory ReturnVisit.create(
-    {Address address,
-    String name,
-    Gender gender,
-    String notes,
-    String imagePath,
-    bool pinned}
-  ) {
-    return ReturnVisit._(
-      -1, 
-      address ?? Address(), 
-      name ?? "", 
-      gender ?? Gender.Male, 
-      imagePath ?? "", 
-      null, 
-      notes ?? "", 
-      pinned ?? false);
+      {Address address,
+      String name,
+      Gender gender,
+      String notes,
+      String imagePath,
+      bool pinned,
+      DateTime initialVisitDate}) {
+    return ReturnVisit._(-1, address ?? Address(), name ?? "", gender ?? Gender.Male,
+        imagePath ?? "", notes ?? "", pinned ?? false, false, <Visit>[], initialVisitDate);
   }
-  
+
   bool get isSaved => _id > 0;
+  bool get isShallow => _isShallow;
   bool get pinned => _pinned;
   Address get address => _address;
   String get name => _name;
   String get notes => _notes;
   Gender get gender => _gender;
   String get imagePath => _imagePath;
-  DateTime get lastVisitDate => _visits.maxBy((a, b) => a.date.compareTo(b.date)).date;
-  Visit get lastVisit => _visits.firstWhere((element) => element._id == _lastVisitId);
+  DateTime get lastVisitDate => (_isShallow && _visits.isEmpty)
+      ? _lastVisitDate
+      : _visits.maxBy((a, b) => a.date.compareTo(b.date)).date;
+  Visit get lastVisit => _visits.maxBy((a, b) => a.date.compareTo(b.date));
   Visit get initialVisit => _visits.minBy((a, b) => a.date.compareTo(b.date));
-  UnmodifiableListView<Visit> get visits => UnmodifiableListView(_visits);
+  UnmodifiableListView<Visit> get visits => UnmodifiableListView(_visits ?? <Visit>[]);
   String get searchString => _toDto().createSearchString();
 
   set address(Address value) {
-    if(_address != value) {
+    if (_address != value) {
       _address = value;
     }
   }
 
   set name(String value) {
-    if(_name != value) {
+    if (_name != value) {
       _name = value;
     }
   }
 
   set notes(String value) {
-    if(_notes != value) {
+    if (_notes != value) {
       _notes = value;
     }
   }
 
   set gender(Gender value) {
-    if(_gender != value) {
+    if (_gender != value) {
       _gender = value;
     }
   }
 
   set imagePath(String value) {
-    if(_imagePath != value) {
+    if (_imagePath != value) {
       _imagePath = value;
     }
   }
 
   set pinned(bool value) {
-    if(_pinned != value) {
+    if (_pinned != value) {
       _pinned = value;
     }
   }
@@ -387,15 +406,23 @@ class ReturnVisit {
   void deleteVisit(Visit visit) => _visits.removeWhere((element) => element._id == visit._id);
 
   ReturnVisitDto _toDto() => ReturnVisitDto(
-      address: address,
+      id: _id,
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      postalCode: address.postalCode,
+      country: address.country,
+      latitude: address.latitude,
+      longitude: address.longitude,
       name: name,
       gender: gender,
       notes: notes,
       imagePath: imagePath,
-      lastVisitId: lastVisit._id,
-      lastVisitDate: lastVisit._date,
-      pinned: pinned
-    );
+      lastVisitId: lastVisit != null ? lastVisit._id : null,
+      lastVisitDate: lastVisit != null ? lastVisit._date : null,
+      pinned: pinned);
+
+  Map<String, dynamic> _toMap() => _toDto().toMap();
 }
 
 class Visit {
@@ -407,37 +434,16 @@ class Visit {
   String _nextTopic;
   int _parentId;
 
-  Visit._(
-    this._id,
-    this._date,
-    this._nextTopic,
-    this._notes,
-    this._parentId,
-    this._placements,
-    this._type
-  );
+  Visit._(this._id, this._date, this._nextTopic, this._notes, this._parentId, this._placements,
+      this._type);
 
-  factory Visit.fromDto({VisitDto dto, ReturnVisit parent}) => Visit._(
-    dto.id, 
-    dto.date, 
-    dto.nextTopic, 
-    dto.notes, 
-    parent._id, 
-    dto.placements, 
-    dto.type);
+  factory Visit._fromDto({VisitDto dto, List<Placement> placements}) => Visit._(
+      dto.id, dto.date, dto.nextTopic ?? "", dto.notes ?? "", dto.parentRvId, placements, dto.type);
 
-  factory Visit.create({
-    @required ReturnVisit parent, 
-    @required DateTime date, 
-    @required VisitType type}) => Visit._(
-    -1, 
-    date.millisecondsSinceEpoch, 
-    "", 
-    "", 
-    parent._id, 
-    [], 
-    type);
-  
+  factory Visit.create(
+          {@required ReturnVisit parent, @required DateTime date, @required VisitType type}) =>
+      Visit._(-1, date.millisecondsSinceEpoch, "", "", parent._id, [], type);
+
   bool get isSaved => _id > 0;
   DateTime get date => DateTime.fromMillisecondsSinceEpoch(_date);
   String get notes => _notes;
@@ -446,25 +452,25 @@ class Visit {
   String get nextTopic => _nextTopic;
 
   set date(DateTime value) {
-    if(_date != value.millisecondsSinceEpoch) {
+    if (_date != value.millisecondsSinceEpoch) {
       _date = value.millisecondsSinceEpoch;
     }
   }
 
   set notes(String value) {
-    if(_notes != value) {
+    if (_notes != value) {
       _notes = value;
     }
   }
 
   set type(VisitType value) {
-    if(_type != value) {
+    if (_type != value) {
       _type = value;
     }
   }
 
   set nextTopic(String value) {
-    if(_nextTopic != value) {
+    if (_nextTopic != value) {
       _nextTopic = value;
     }
   }
@@ -486,7 +492,63 @@ class Visit {
       date: date.millisecondsSinceEpoch,
       notes: notes,
       type: type,
-      placements: placements, 
-      nextTopic: nextTopic
-    );
+      nextTopic: nextTopic);
+
+  Map<String, dynamic> _toMap() => _toDto().toMap();
+}
+
+class Placement {
+  int _id;
+  int _count;
+  String _notes;
+  PlacementType _type;
+  int _parentVisit;
+
+  Placement._(this._id, this._count, this._notes, this._parentVisit, this._type);
+
+  /// Creates a new `Placement` from a `DTO`
+  factory Placement._fromDto({PlacementDto dto}) =>
+      Placement._(dto.id, dto.count, dto.notes, dto.parentVisit, dto.type);
+
+  factory Placement.create(
+          {@required Visit parent,
+          @required int count,
+          @required PlacementType type,
+          String notes}) =>
+      Placement._(-1, count, notes, parent._id, type);
+
+  /// The [count] of the placements.
+  int get count => _count;
+
+  /// The [notes] of the placement.
+  String get notes => _notes;
+
+  /// The [type] of the placement.
+  PlacementType get type => _type;
+
+  /// The [count] of the placements.
+  set count(int value) {
+    if (value != _count) {
+      _count = value;
+    }
+  }
+
+  /// The [notes] of the placement.
+  set notes(String value) {
+    if (value != _notes) {
+      _notes = value;
+    }
+  }
+
+  /// The [type] of the placement.
+  set type(PlacementType value) {
+    if (value != _type) {
+      _type = value;
+    }
+  }
+
+  PlacementDto _toDto() =>
+      PlacementDto(id: _id, count: _count, type: _type, notes: _notes, parentVisit: _parentVisit);
+
+  Map<String, dynamic> _toMap() => _toDto().toMap();
 }
