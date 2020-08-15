@@ -1,9 +1,9 @@
-// import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-// import 'package:jama/data/models/dto/visit_dto.dart';
-// import 'package:jama/data/models/dto/placement_dto.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
+import 'package:jama/data/models/dto/placement_dto.dart';
 
-// void main() {
+void main() {
 //   group("Visit model tests:", () {
 //     test("toMap() works.", () {
 //       var placement =
@@ -89,4 +89,4 @@
 //       expect(visit.placements, equals(visitCopy.placements));
 //     });
 //   });
-// }
+}
