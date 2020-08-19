@@ -14,13 +14,23 @@ class AppStyles {
   static Color get secondaryTextColor => Colors.white;
   static Color get shadowColor => HexColor.fromHex("#20000000");
   static Color get speedDialOverlayColor => HexColor.fromHex("#9F9F9F");
+  static Color get chartsUnusedColor => HexColor.fromHex("#CEEDF2");
 
   // Text Styles
   static TextStyle get heading1 =>
       TextStyle(fontFamily: "Avenir", fontWeight: FontWeight.w700, fontSize: 34);
   static TextStyle get heading2 => TextStyle(fontFamily: "Avenir", fontSize: 20);
+  static TextStyle get heading3 => TextStyle(
+        fontFamily: "Avenir",
+        fontSize: 14,
+        letterSpacing: 1.9,
+      );
   static TextStyle get heading4 =>
       TextStyle(fontFamily: "Avenir", fontWeight: FontWeight.w100, fontSize: 16);
+  static TextStyle get paragraph => TextStyle(
+        fontFamily: "Avenir",
+        fontSize: 16,
+      );
   static TextStyle get smallTextStyle => TextStyle(fontFamily: "Avenir", fontSize: 14);
 
   // constants

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jama/data/models/dto/return_visit_dto.dart';
+import 'package:jama/ui/models/navigatable.dart';
 
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:latlong/latlong.dart';
@@ -13,7 +14,7 @@ import 'package:jama/ui/screens/return_visits/edit_return_visit_screen.dart';
 import 'package:jama/mixins/date_mixin.dart';
 import 'package:jama/mixins/num_mixin.dart';
 
-class ReturnVisitListItemModel {
+class ReturnVisitListItemModel extends ChangeNotifier with Navigatable {
   final ReturnVisit _returnVisit;
   final String distanceFromCurrentLocation;
   final Color timeSinceColor;
@@ -24,7 +25,13 @@ class ReturnVisitListItemModel {
 
   ReturnVisitListItemModel._(this._returnVisit, this.distanceFromCurrentLocation,
       this.timeSinceColor, this.timeSinceString, this._rvService, this._imageService) {
-    _imageService.documentsDirectory.then((value) => _basePath = value.path);
+    _loadBaseImagePath();
+  }
+
+  Future _loadBaseImagePath() async {
+    var dir = await _imageService.documentsDirectory;
+    _basePath = dir.path;
+    notifyListeners();
   }
 
   factory ReturnVisitListItemModel(
@@ -96,16 +103,18 @@ class ReturnVisitListItemModel {
 
   String get formattedAddress => _returnVisit.address.toFormattedString(true, false, false);
 
-  String get imagePath =>
-      _returnVisit.imagePath.isNotEmpty ? path.join(_basePath, _returnVisit.imagePath) : "";
+  String get imagePath => _returnVisit.imagePath.isNotEmpty && _basePath != null
+      ? path.join(_basePath, _returnVisit.imagePath)
+      : "";
 
   String get searchString => _returnVisit.searchString;
 
   bool get isPinned => _returnVisit.pinned;
 
-  void navigate(BuildContext context) async {
+  @override
+  Future navigate(BuildContext context) async {
     if (_returnVisit.isSaved) {
-      Navigator.of(context).push(MaterialPageRoute(
+      await Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => EditReturnVisitScreen(
                 returnVisit: EditReturnVisitModel(_returnVisit),
               )));
