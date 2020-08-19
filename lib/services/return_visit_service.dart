@@ -46,12 +46,36 @@ class ReturnVisitService {
       var items = await db.query(_tableName_ReturnVisits);
       return items.map((e) => ReturnVisit._shallowDto(ReturnVisitDto.fromMap(e))).toList();
     } else {
-      throw UnsupportedError("Only shallow queries supported.");
+      var entries = await db.rawQuery("""SELECT * FROM ReturnVisit """ +
+          """LEFT JOIN Visit ON ReturnVisit.ReturnVisitId = Visit.FK_ReturnVisit_Visit_ParentRv """ +
+          """LEFT JOIN Placements ON Visit.VisitId = Placements.FK_Visit_Placement_ParentVisit """ +
+          """ORDER BY ReturnVisitId DESC""");
+      if (entries.isEmpty) return <ReturnVisit>[];
+
+      var rvList = <ReturnVisit>[];
+      var mapList = <Map<String, dynamic>>[];
+      var currentRvId = entries.first["ReturnVisitId"];
+
+      for (var map in entries) {
+        var id = map["ReturnVisitId"];
+        if (id != currentRvId) {
+          rvList.add(_parseReturnVisitDtos(mapList));
+          mapList.clear();
+          mapList.add(map);
+          currentRvId = id;
+        } else {
+          mapList.add(map);
+        }
+      }
+      rvList.add(_parseReturnVisitDtos(mapList));
+
+      return rvList;
     }
   }
 
   /// Get all the `Visit`s and `Placement`s for the provided [rv].
   Future<ReturnVisit> getAllVisitsForRv(ReturnVisit rv) async {
+    assert(rv._id > 0);
     final db = await _dbCompleter.future;
 
     var entries = await db.rawQuery(
@@ -63,6 +87,35 @@ class ReturnVisitService {
         [rv._id]);
     if (entries == null) return rv;
 
+    return _parseReturnVisitDtos(entries);
+  }
+
+  // Gets all the `ReturnVisit`s that have a visit after [start] and before [end].
+  // Future<List<ReturnVisit>> getAllReturnVisitsWithVisitsInDateRange(
+  //     {DateTime start, DateTime end}) async {
+  //   assert(start.compareTo(end) <= 0);
+
+  //   var db = await _dbCompleter.future;
+
+  //   final rvIds = await db.rawQuery("""SELECT FK_ReturnVisit_Visit_ParentRv FROM Visit """ +
+  //       """WHERE Date > 0 """ +
+  //       """ORDER BY Date DESC;""");
+
+  //   final rvIdParam = "(${rvIds.toSet().join(", ")})";
+
+  //   if (rvIds.isEmpty) return <ReturnVisit>[];
+
+  //   var entries = await db.rawQuery(
+  //       """SELECT * FROM ReturnVisit """ +
+  //           """LEFT JOIN Visit ON ReturnVisit.ReturnVisitId = Visit.FK_ReturnVisit_Visit_ParentRv """ +
+  //           """LEFT JOIN Placements ON Visit.VisitId = Placements.FK_Visit_Placement_ParentVisit """ +
+  //           """WHERE ReturnVisitId IN ? """ +
+  //           """ORDER BY Visit.Date DESC;""",
+  //       [rvIdParam]);
+
+  // }
+
+  ReturnVisit _parseReturnVisitDtos(List<Map<String, dynamic>> entries) {
     var placements = entries
         .where((map) => map["PlacementId"] != null)
         .map((e) => Placement._fromDto(dto: PlacementDto.fromMap(e)))
@@ -76,7 +129,7 @@ class ReturnVisitService {
       visits.add(Visit._fromDto(dto: VisitDto.fromMap(visitMap), placements: visitsPlacements));
     }
 
-    return ReturnVisit._fromDto(rv._toDto(), visits);
+    return ReturnVisit._fromDto(ReturnVisitDto.fromMap(entries.first), visits);
   }
 
   /// Add a new `ReturnVisit` with the initial visit information.

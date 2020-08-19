@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jama/data/models/dto/visit_dto.dart';
-import 'package:jama/ui/models/time/time_category_model.dart';
+import 'package:jama/ui/models/reporting/time_by_category.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 
 import 'package:jama/services/app_settings_service.dart';
@@ -48,23 +48,30 @@ class ReportingService {
   Future<ReportResult> getTimeReport({@required DateTime start, @required DateTime end}) async {
     assert(end != null);
     assert(start != null);
-    assert(start.compareTo(end) >= 0);
+    assert(start.compareTo(end) <= 0);
 
     var time = await _timeService.getTimeEntriesByDate(startTime: start, endTime: end);
-    var returnVisits = <ReturnVisit>[]; // await _rvService.getVisitsByDate(start: start, end: end);
+    var returnVisits = await _rvService.getAllReturnVisits(shallow: false);
+
+    Map<DateTime, List<Time>> timeEntries = {};
+
+    for (var t in time) {
+      if (timeEntries[t.date] == null) timeEntries[t.date] = <Time>[];
+      timeEntries[t.date]..add(t);
+    }
 
     return ReportResult(
-        startDate: start,
-        endDate: end,
+        startDateInt: start.millisecondsSinceEpoch,
+        endDateInt: end.millisecondsSinceEpoch,
         hours: Tuple2(
             time
                 .map((e) => e.category)
                 .toSet()
-                .map((e) => TimeByCategory(
+                .map((e) => DurationByCategory(
                     e,
-                    time
-                        .where((x) => x.category == e)
-                        .fold(0, (previousValue, element) => previousValue + element.totalMinutes)))
+                    Duration(
+                        minutes: time.where((x) => x.category == e).fold(
+                            0, (previousValue, element) => previousValue + element.totalMinutes))))
                 .toList(),
             null // TODO: goals needed here.
             ),
@@ -99,13 +106,22 @@ class ReportingService {
             null // TODO: goals needed here
             ),
         returnVisits: Tuple2(returnVisits.length, null),
-        entries: Map.fromEntries(time.map((e) => MapEntry(e.date, _TimeReportEntry(e)))));
+        timeEntries: timeEntries,
+        rvEntries: returnVisits);
   }
 }
 
 class ReportResult {
+  static const ReportResult empty = ReportResult(
+      hours: Tuple2<List<DurationByCategory>, int>([], null),
+      placements: Tuple2<int, int>(0, null),
+      videos: Tuple2<int, int>(0, null),
+      returnVisits: Tuple2<int, int>(0, null),
+      startDateInt: 0,
+      endDateInt: 0);
+
   /// The total [hours]. [hours.item1] is a list of hours by `TimeCategory` and [hours.item2] is the goal. If goals are not being used [hours.item2] will be null.
-  final Tuple2<List<TimeByCategory>, int> hours;
+  final Tuple2<List<DurationByCategory>, int> hours;
 
   /// The total [placements]. [placements.item1] is the value, [placements.item2] is the goal. If goals are not being used, [placements.item2] will be null.
   final Tuple2<int, int> placements;
@@ -116,63 +132,32 @@ class ReportResult {
   /// The total [returnVisits]. [returnVisits.item1] is the value, [returnVisits.item2] is the goal. If goals are not being used, [returnVisits.item2] will be null.
   final Tuple2<int, int> returnVisits;
 
-  /// The [startDate] of the report.
-  final DateTime startDate;
+  /// The [startDate] of the report as an int (fromMillisecondsSinceEpoch).
+  final int startDateInt;
 
-  /// The [endDate] of the report.
-  final DateTime endDate;
+  /// The [endDate] of the report as an int (fromMillisecondsSinceEpoch).
+  final int endDateInt;
 
-  /// The [entries] that make up this report organized by date of the entry.
-  final Map<DateTime, ReportEntry> entries;
+  /// The [timeEntries] that make up this report organized by date of the entry.
+  final Map<DateTime, List<Time>> timeEntries;
 
-  ReportResult(
-      {this.hours,
-      this.placements,
-      this.videos,
-      this.returnVisits,
-      this.startDate,
-      this.endDate,
-      this.entries});
-}
+  /// The [rvEntries] that make up this report.
+  final List<ReturnVisit> rvEntries;
 
-abstract class ReportEntry {
-  /// The total [placements].
-  final int placements;
+  const ReportResult({
+    this.hours,
+    this.placements,
+    this.videos,
+    this.returnVisits,
+    this.startDateInt,
+    this.endDateInt,
+    this.timeEntries,
+    this.rvEntries,
+  });
 
-  /// The total [videos].
-  final int videos;
+  /// The [startDate] of the report as an int (fromMillisecondsSinceEpoch).
+  DateTime get startDate => DateTime.fromMillisecondsSinceEpoch(startDateInt);
 
-  /// The [date].
-  final DateTime date;
-
-  /// The total time in a `Duration`
-  final Duration totalTime;
-
-  const ReportEntry._({this.totalTime, this.placements, this.videos, this.date});
-
-  Future navigate(BuildContext context);
-}
-
-class _TimeReportEntry implements ReportEntry {
-  final Time time;
-
-  @override
-  Duration get totalTime => Duration(minutes: time.totalMinutes);
-
-  @override
-  DateTime get date => time.date;
-
-  @override
-  int get placements => time.placements;
-
-  @override
-  int get videos => time.videos;
-
-  const _TimeReportEntry(this.time);
-
-  @override
-  Future navigate(BuildContext context) {
-    // TODO: implement navigate
-    throw UnimplementedError();
-  }
+  /// The [endDate] of the report as an int (fromMillisecondsSinceEpoch).
+  DateTime get endDate => DateTime.fromMillisecondsSinceEpoch(endDateInt);
 }

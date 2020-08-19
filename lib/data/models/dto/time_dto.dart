@@ -49,7 +49,7 @@ class TimeDto extends DTO {
             category: TimeCategoryDto.fromMap(map),
             notes: map[_notesColumnName],
             placements: map[_placementsColumnName],
-            videos: map[_placementsColumnName]);
+            videos: map[_videosColumnName]);
 
   @override
   Map<String, dynamic> toMap() {

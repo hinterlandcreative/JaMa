@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:jama/ui/screens/reports/reports_screen.dart';
 import 'package:line_icons/line_icons.dart';
 
 import 'package:jama/ui/app_styles.dart';
@@ -25,10 +27,11 @@ class _TabbedControllerState extends State<TabbedController> {
   final List<Widget> _children = [
     HomeScreen(),
     TimeListScreen(
-      startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
-      endDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 1)
-          .subtract(Duration(milliseconds: 1))),
-    AllReturnVisitsScreen()
+        startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
+        endDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 1)
+            .subtract(Duration(milliseconds: 1))),
+    AllReturnVisitsScreen(),
+    ReportsScreen()
   ];
 
   @override
@@ -68,16 +71,26 @@ class _TabbedControllerState extends State<TabbedController> {
     ));
 
     tabs.add(GButton(
-      gap: gap,
-      iconActiveColor: iconInactiveColor,
-      iconColor: iconColor,
-      textColor: textColor,
-      color: color,
-      iconSize: iconSize,
-      padding: padding,
-      icon: LineIcons.map_marker,
-      text: "Return Visits"
-    ));
+        gap: gap,
+        iconActiveColor: iconInactiveColor,
+        iconColor: iconColor,
+        textColor: textColor,
+        color: color,
+        iconSize: iconSize,
+        padding: padding,
+        icon: LineIcons.map_marker,
+        text: "Return Visits"));
+
+    tabs.add(GButton(
+        gap: gap,
+        iconActiveColor: iconInactiveColor,
+        iconColor: iconColor,
+        textColor: textColor,
+        color: color,
+        iconSize: iconSize,
+        padding: padding,
+        icon: FeatherIcons.barChart2,
+        text: "Reports"));
   }
 
   @override
@@ -107,8 +120,7 @@ class _TabbedControllerState extends State<TabbedController> {
           child: SafeArea(
             child: Container(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
                 child: GNav(
                     tabs: tabs,
                     selectedIndex: selectedIndex,
