@@ -6,46 +6,43 @@ import 'package:jama/ui/app_styles.dart';
 import 'package:jama/mixins/duration_mixin.dart';
 import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class TimeCard extends StatelessWidget {
   final TimeModificationModel item;
   final bool isLast;
   final Function() onItemDeleted;
-  
+
   const TimeCard({
-    Key key, 
-    @required this.item, 
-    @required this.isLast, 
+    Key key,
+    @required this.item,
+    @required this.isLast,
     @required this.onItemDeleted,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    AddEditTimeScreen.edit(item))),
+      onTap: () => showBarModalBottomSheet(
+          context: context, builder: (context, _) => AddEditTimeScreen.edit(item)),
       child: Slidable(
         closeOnScroll: true,
         actionPane: SlidableDrawerActionPane(),
         actionExtentRatio: 0.25,
         secondaryActions: <Widget>[
-            IconSlideAction(
-              icon: Icons.delete_outline,
-              color: Colors.red,
-              caption: "delete",
-              onTap: () => onItemDeleted(),
-            )
-          ],
+          IconSlideAction(
+            icon: Icons.delete_outline,
+            color: Colors.red,
+            caption: "delete",
+            onTap: () => onItemDeleted(),
+          )
+        ],
         child: Column(
           children: <Widget>[
             Container(
               alignment: Alignment.topLeft,
               height: 80,
-              padding: EdgeInsets.only(
-                  left: AppStyles.leftMargin, top: AppStyles.leftMargin),
+              padding: EdgeInsets.only(left: AppStyles.leftMargin, top: AppStyles.leftMargin),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -55,8 +52,7 @@ class TimeCard extends StatelessWidget {
                       height: 18,
                       width: 18,
                       decoration: BoxDecoration(
-                          border: Border.all(
-                              width: 1, color: AppStyles.captionText),
+                          border: Border.all(width: 1, color: AppStyles.captionText),
                           color: item.category.color),
                     ),
                   ),
@@ -94,9 +90,7 @@ class TimeCard extends StatelessWidget {
                   decoration: BoxDecoration(
                       border: isLast
                           ? null
-                          : Border(
-                              bottom: BorderSide(
-                                  width: 1, color: Colors.grey[300])))),
+                          : Border(bottom: BorderSide(width: 1, color: Colors.grey[300])))),
             )
           ],
         ),

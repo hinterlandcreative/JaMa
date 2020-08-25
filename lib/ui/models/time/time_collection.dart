@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:flutter/material.dart';
 import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:tuple/tuple.dart';
@@ -9,7 +8,6 @@ import 'package:tuple/tuple.dart';
 import 'package:jama/ui/models/collection_base_model.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/time/time_category_model.dart';
-import 'package:jama/ui/screens/reports/time_report_screen.dart';
 
 import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/mixins/date_mixin.dart';
@@ -36,14 +34,15 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
   TimeCollectionModel(this.startDate, this.endDate, [TimeService timeService]) {
     var container = kiwi.Container();
-  
+
     _timeService = timeService ?? container.resolve<TimeService>();
     _subscription = _timeService.timeUpdatedStream.listen((time) {
-      if(time == null || (time.date.compareTo(startDate) >= 0 && time.date.compareTo(endDate) <= 0)) {
+      if (time == null ||
+          (time.date.compareTo(startDate) >= 0 && time.date.compareTo(endDate) <= 0)) {
         loadChildren();
       }
     });
-  loadChildren();
+    loadChildren();
   }
 
   @override
@@ -51,28 +50,28 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
   @override
   Future loadChildren() async {
-    var timeEntries = await _timeService.getTimeEntriesByDate(
-      startTime: startDate, 
-      endTime: endDate);
-    
+    var timeEntries = await _timeService.getTimeEntriesByDate(start: startDate, end: endDate);
+
     var dates = timeEntries.map((t) => t.date.dropTime()).toList();
     dates = dates.toSet().toList();
-    _items = dates.map((date) => TimeByDateModel(
-      timeEntries
-        .where((t) => t.date.dropTime() == date)
-        .map((t) => TimeModificationModel.edit(time: t))
-        .toList(), 
-      date)
-    ).toList();
-    
+    _items = dates
+        .map((date) => TimeByDateModel(
+            timeEntries
+                .where((t) => t.date.dropTime() == date)
+                .map((t) => TimeModificationModel.edit(time: t))
+                .toList(),
+            date))
+        .toList();
+
     var categories = await _timeService.getCategories();
 
-    var totals = <Tuple2<TimeCategory, int>>[];    
+    var totals = <Tuple2<TimeCategory, int>>[];
 
-    for(var category in categories) {
+    for (var category in categories) {
       var entries = timeEntries.where((t) => t.category == category);
-      if(entries.isNotEmpty) {
-        totals.add(Tuple2<TimeCategory,int>(category, entries.map((t) => t.totalMinutes).reduce((a, b) => a + b)));
+      if (entries.isNotEmpty) {
+        totals.add(Tuple2<TimeCategory, int>(
+            category, entries.map((t) => t.totalMinutes).reduce((a, b) => a + b)));
       }
     }
 
@@ -80,7 +79,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
 
     _goalHours = 0;
 
-    if(timeEntries.isNotEmpty) {
+    if (timeEntries.isNotEmpty) {
       _videos = timeEntries.map((t) => t.videos).reduce((a, b) => a + b);
       _placements = timeEntries.map((t) => t.placements).reduce((a, b) => a + b);
     }
@@ -99,13 +98,5 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
     await _timeService.deleteTime(time);
 
     notifyListeners();
-  }
-
-  Future navigateToLastMonthsReport(BuildContext context) async {
-    var now = DateTime.now();
-    await Navigator.of(context).push(MaterialPageRoute(builder: (c) => TimeReportScreen(
-          start: DateTime(now.year, now.month -1, 1),
-          end: DateTime(now.year, now.month, 1).subtract(Duration(milliseconds: 1))
-        )));
   }
 }

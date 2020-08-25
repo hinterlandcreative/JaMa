@@ -4,6 +4,13 @@ import 'package:commons/commons.dart';
 
 class AppSettingsService {
   static const String last_report_sent = "last_report_sent";
+  static const String goals_enabled = "goals_are_enabled";
+  static const String goals_monthly_hours = "goals_monthly_hours";
+  static const String goals_monthly_videos = "goals_monthly_videos";
+  static const String goals_monthly_placements = "goals_monthly_placements";
+  static const String include_details_in_report = "include_details_in_report";
+  static const String include_signature_in_report = "include_signature";
+  static const String signature = "signature";
 
   Completer<SharedPreferences> _prefs = Completer();
 
@@ -13,12 +20,7 @@ class AppSettingsService {
 
   Future<String> getSettingString(String key, [String defaultValue = ""]) async {
     var prefs = await _prefs.future;
-    return await _getSetting(
-      prefs,
-      key, 
-      defaultValue, 
-      prefs.getString,
-      prefs.setString);
+    return await _getSetting(prefs, key, defaultValue, prefs.getString, prefs.setString);
   }
 
   void setSettingString(String key, String value) {
@@ -28,12 +30,7 @@ class AppSettingsService {
   Future<List<String>> getSettingListString(String key, [List<String> defaultValue]) async {
     defaultValue = defaultValue ?? [];
     var prefs = await _prefs.future;
-    return await _getSetting(
-      prefs,
-      key, 
-      defaultValue, 
-      prefs.getStringList,
-      prefs.setStringList);
+    return await _getSetting(prefs, key, defaultValue, prefs.getStringList, prefs.setStringList);
   }
 
   void setSettingsStringList(String key, List<String> value) {
@@ -42,25 +39,25 @@ class AppSettingsService {
 
   Future<int> getSettingInt(String key, [int defaultValue = 0]) async {
     var prefs = await _prefs.future;
-    return await _getSetting(
-      prefs,
-      key, 
-      defaultValue, 
-      prefs.getInt,
-      prefs.setInt);
+    return await _getSetting(prefs, key, defaultValue, prefs.getInt, prefs.setInt);
   }
 
   void setSettingInt(String key, int value) {
     _prefs.future.then((prefs) => prefs.setInt(key, value));
   }
 
-  Future<T> _getSetting<T>(
-    SharedPreferences prefs,
-    String key, 
-    T defaultValue,
-    T Function(String) getValue,
-    Future<bool> Function(String, T) setValue) async {
-    if(!prefs.containsKey(key)) {
+  Future<bool> getSettingBool(String key, [bool defaultValue = false]) async {
+    var prefs = await _prefs.future;
+    return await _getSetting(prefs, key, defaultValue, prefs.getBool, prefs.setBool);
+  }
+
+  void setSettingBool(String key, bool value) {
+    _prefs.future.then((prefs) => prefs.setBool(key, value));
+  }
+
+  Future<T> _getSetting<T>(SharedPreferences prefs, String key, T defaultValue,
+      T Function(String) getValue, Future<bool> Function(String, T) setValue) async {
+    if (!prefs.containsKey(key)) {
       await setValue(key, defaultValue);
       return defaultValue;
     } else {

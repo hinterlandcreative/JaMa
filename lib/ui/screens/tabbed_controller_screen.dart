@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:jama/ui/screens/reports/reports_screen.dart';
+import 'package:jama/ui/screens/settings_screen.dart';
+import 'package:jama/ui/screens/time/root_time_screen.dart';
 import 'package:line_icons/line_icons.dart';
-
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/screens/return_visits/all_return_visits_screen.dart';
 import 'package:jama/ui/screens/home_screen.dart';
-import 'package:jama/ui/screens/time/root_time_screen.dart';
 
 class TabbedController extends StatefulWidget {
   TabbedController({Key key, this.title}) : super(key: key);
@@ -26,12 +26,10 @@ class _TabbedControllerState extends State<TabbedController> {
   List<GButton> tabs = new List();
   final List<Widget> _children = [
     HomeScreen(),
-    TimeListScreen(
-        startDate: DateTime(DateTime.now().year, DateTime.now().month, 1),
-        endDate: DateTime(DateTime.now().year, DateTime.now().month + 1, 1)
-            .subtract(Duration(milliseconds: 1))),
+    RootTimeScreen(),
     AllReturnVisitsScreen(),
-    ReportsScreen()
+    ReportsScreen(),
+    SettingsScreen()
   ];
 
   @override
@@ -45,13 +43,16 @@ class _TabbedControllerState extends State<TabbedController> {
     final textColor = AppStyles.primaryColor;
     final color = AppStyles.lightGrey;
     final double iconSize = 24;
+    final textStyle = AppStyles.smallTextStyle
+        .copyWith(color: AppStyles.primaryColor, fontWeight: FontWeight.bold);
 
     tabs.add(GButton(
       gap: gap,
       iconActiveColor: iconInactiveColor,
       iconColor: iconColor,
       textColor: textColor,
-      color: color,
+      textStyle: textStyle,
+      backgroundColor: color,
       iconSize: iconSize,
       padding: padding,
       icon: LineIcons.home,
@@ -63,7 +64,8 @@ class _TabbedControllerState extends State<TabbedController> {
       iconActiveColor: iconInactiveColor,
       iconColor: iconColor,
       textColor: textColor,
-      color: color,
+      textStyle: textStyle,
+      backgroundColor: color,
       iconSize: iconSize,
       padding: padding,
       icon: LineIcons.clock_o,
@@ -75,7 +77,8 @@ class _TabbedControllerState extends State<TabbedController> {
         iconActiveColor: iconInactiveColor,
         iconColor: iconColor,
         textColor: textColor,
-        color: color,
+        textStyle: textStyle,
+        backgroundColor: color,
         iconSize: iconSize,
         padding: padding,
         icon: LineIcons.map_marker,
@@ -86,11 +89,24 @@ class _TabbedControllerState extends State<TabbedController> {
         iconActiveColor: iconInactiveColor,
         iconColor: iconColor,
         textColor: textColor,
-        color: color,
+        textStyle: textStyle,
+        backgroundColor: color,
         iconSize: iconSize,
         padding: padding,
         icon: FeatherIcons.barChart2,
         text: "Reports"));
+
+    tabs.add(GButton(
+        gap: gap,
+        iconActiveColor: iconInactiveColor,
+        iconColor: iconColor,
+        textColor: textColor,
+        textStyle: textStyle,
+        backgroundColor: color,
+        iconSize: iconSize,
+        padding: padding,
+        icon: Icons.settings,
+        text: "Settings"));
   }
 
   @override
@@ -122,6 +138,7 @@ class _TabbedControllerState extends State<TabbedController> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
                 child: GNav(
+                    gap: 4.0,
                     tabs: tabs,
                     selectedIndex: selectedIndex,
                     onTabChange: (index) {

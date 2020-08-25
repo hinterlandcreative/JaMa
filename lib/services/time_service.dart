@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import 'package:quiver/core.dart';
+import 'package:quiver/time.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
@@ -136,18 +138,18 @@ SELECT * FROM TimeEntries
   }
 
   Future<List<Time>> getTimeEntriesByDate(
-      {DateTime startTime, DateTime endTime, bool dropTime = true}) async {
-    if (startTime == null && endTime == null) {
+      {DateTime start, DateTime end, bool dropTime = true}) async {
+    if (start == null && end == null) {
       return await getAllTimeEntries();
-    } else if ((startTime != null && endTime != null) && startTime.compareTo(endTime) > 0) {
+    } else if ((start != null && end != null) && start.compareTo(end) > 0) {
       throw ArgumentError("[start] cannot be after [end]");
     }
 
     final db = await _databaseCompleter.future;
 
     if (dropTime) {
-      startTime = startTime.dropTime();
-      endTime = endTime.dropTime().add(1.days).subtract(1.milliseconds);
+      start = start.dropTime();
+      end = end.dropTime().add(1.days).subtract(1.milliseconds);
     }
 
     var baseQuery = """
@@ -155,19 +157,19 @@ SELECT * FROM TimeEntries
 	INNER JOIN TimeCategory ON TimeEntries.FK_TimeCategory_Time = TimeCategory.TimeCategoryId
 	WHERE""";
     var arguments = [];
-    if (startTime != null) {
+    if (start != null) {
       baseQuery = "$baseQuery Date >= ?";
-      arguments.add(startTime.millisecondsSinceEpoch);
-      if (endTime != null) {
+      arguments.add(start.millisecondsSinceEpoch);
+      if (end != null) {
         baseQuery = "$baseQuery AND Date <= ?";
-        arguments.add(endTime.millisecondsSinceEpoch);
+        arguments.add(end.millisecondsSinceEpoch);
       }
-    } else if (endTime != null) {
+    } else if (end != null) {
       baseQuery = "$baseQuery Date <= ?";
-      arguments.add(endTime.millisecondsSinceEpoch);
+      arguments.add(end.millisecondsSinceEpoch);
     }
 
-    baseQuery = "$baseQuery;";
+    baseQuery = "$baseQuery ORDER BY Date DESC;";
 
     var entries = await db.rawQuery(baseQuery, arguments);
 
@@ -199,6 +201,7 @@ SELECT * FROM TimeEntries
     return timeData;
   }
 
+  /// Delete the [timeData].
   Future deleteTime(Time timeData) async {
     if (timeData.id <= 0) {
       return;
@@ -209,6 +212,50 @@ SELECT * FROM TimeEntries
     await db.delete(_timeTable, where: "TimeEntryId = ?", whereArgs: [timeData.id]);
 
     _timeUpdatedController.add(null);
+  }
+
+  /// Forward any time over 60 minutes from every category to the next month.
+  /// Returns a list of categories that could not be updated.
+  Future<List<TimeCategory>> forwardTime(final DateTime startDate) async {
+    final start = startDate.toFirstDayOfMonth();
+    final end = startDate.toLastDayOfMonth();
+
+    var entries = await getTimeEntriesByDate(start: start, end: end);
+    var categories = await getCategories();
+
+    Map<TimeCategory, List<Time>> timeByCategory = {};
+    categories.forEach((e) => timeByCategory[e] = <Time>[]);
+    entries.forEach((e) => timeByCategory[e.category].add(e));
+    List<TimeCategory> failedCategories = [];
+    for (var category in categories) {
+      var totalForCategory = timeByCategory[category].fold(0, (p, e) => p + e.totalMinutes);
+      var amountNeeded = totalForCategory % 60;
+      if (timeByCategory[category].isNotEmpty && amountNeeded > 0) {
+        bool didDoUpdate = false;
+        for (var entry in entries) {
+          if (entry.totalMinutes > amountNeeded + 15) {
+            entry.totalMinutes -= amountNeeded;
+            entry.notes = "Moved $amountNeeded minutes to the next month.\n${entry.notes}";
+            await saveOrAddTime(entry);
+            var date = startDate.toLastDayOfMonth().add(aDay).dropTime();
+            var newTime = Time.create(
+                date: date,
+                totalMinutes: amountNeeded,
+                category: category,
+                notes: "Moved from ${DateFormat.yMMMM(Intl.systemLocale).format(date)}.");
+            await saveOrAddTime(newTime);
+            didDoUpdate = true;
+            break;
+          }
+        }
+
+        if (!didDoUpdate) {
+          failedCategories.add(category);
+        }
+      }
+    }
+
+    return failedCategories;
   }
 }
 

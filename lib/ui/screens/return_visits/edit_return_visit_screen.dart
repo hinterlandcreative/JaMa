@@ -128,7 +128,7 @@ class _EditReturnVisitScreenState extends State<EditReturnVisitScreen>
                 child: Row(
                   children: <Widget>[
                     IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
+                      icon: Icon(Icons.close),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     Selector<EditReturnVisitModel, String>(

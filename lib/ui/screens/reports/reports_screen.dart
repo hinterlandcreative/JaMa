@@ -6,10 +6,10 @@ import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/models/reporting/reporting_page_model.dart';
 import 'package:jama/ui/models/time/time_by_date_model.dart';
 import 'package:jama/ui/models/time/time_modification_model.dart';
-import 'package:jama/ui/screens/time/root_time_screen.dart';
 import 'package:jama/ui/widgets/donut_chart_widget.dart';
 import 'package:jama/ui/widgets/hours_by_day_chart.dart';
 import 'package:jama/ui/widgets/spacer.dart';
+import 'package:jama/ui/widgets/time_card_collection.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:jama/mixins/date_mixin.dart';
@@ -39,16 +39,27 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ReportingPageModel.currentMonth(),
-      child: Scaffold(
-        backgroundColor: AppStyles.primaryBackground,
-        appBar: AppBar(
+      child: Consumer<ReportingPageModel>(
+        builder: (context, model, _) => Scaffold(
           backgroundColor: AppStyles.primaryBackground,
-          elevation: 0,
-          title: Text("Report", style: AppStyles.heading1.copyWith(color: Colors.black)),
-          centerTitle: false,
-        ),
-        body: Consumer<ReportingPageModel>(
-          builder: (context, model, _) => model.isLoading
+          floatingActionButton: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 20.0),
+            child: FloatingActionButton(
+              backgroundColor: Colors.white,
+              onPressed: () => model.sendCurrentReport(context),
+              child: Icon(
+                Icons.send,
+                color: AppStyles.primaryColor,
+              ),
+            ),
+          ),
+          appBar: AppBar(
+            backgroundColor: AppStyles.primaryBackground,
+            elevation: 0,
+            title: Text("Report", style: AppStyles.heading1.copyWith(color: Colors.black)),
+            centerTitle: false,
+          ),
+          body: model.isLoading
               ? _buildLoading()
               : !model.hasReport
                   ? _buildEmptyState(context)
@@ -300,11 +311,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 3.0),
-                              child: Image(
-                                width: 20,
-                                height: 20,
-                                image: AssetImage(rv.iconPath),
-                              ),
+                              child: rv.icon != null
+                                  ? Icon(rv.icon, size: 20.0)
+                                  : Image(
+                                      width: 20,
+                                      height: 20,
+                                      image: AssetImage(rv.iconPath),
+                                    ),
                             ),
                             HorizontalSpace(10.0),
                             Column(
