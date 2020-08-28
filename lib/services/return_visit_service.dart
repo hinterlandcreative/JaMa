@@ -310,6 +310,24 @@ class ReturnVisitService {
     var rv = ReturnVisitDto.fromMap(rvMap.first);
     return rv;
   }
+
+  Future<List<Placement>> getPlacementsFromDates({DateTime start, DateTime end}) async {
+    assert(start != null);
+    assert(end != null);
+    assert(start.isBefore(end));
+
+    final db = await _dbCompleter.future;
+
+    var placementsMap = await db.rawQuery(
+        "SELECT * FROM Placements " +
+            "WHERE FK_Visit_Placement_ParentVisit IN " +
+            "(SELECT VisitId FROM Visit " +
+            "WHERE Date >= ? AND Date <= ?);",
+        [start.millisecondsSinceEpoch, end.millisecondsSinceEpoch]);
+    return placementsMap == null || placementsMap.isEmpty
+        ? <Placement>[]
+        : placementsMap.map((e) => Placement._fromDto(dto: PlacementDto.fromMap(e))).toList();
+  }
 }
 
 class ReturnVisit {

@@ -10,10 +10,18 @@ import 'package:jama/ui/screens/scrollable_base_screen.dart';
 import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
 import 'package:jama/ui/widgets/goal_widget.dart';
 import 'package:jama/ui/widgets/time_report_widget.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:slider_button/slider_button.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
@@ -27,11 +35,9 @@ class HomeScreen extends StatelessWidget {
                         label: "add time",
                         labelStyle: AppStyles.heading4,
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddEditTimeScreen.create()));
+                          showBarModalBottomSheet(
+                              context: context,
+                              builder: (context, _) => AddEditTimeScreen.create());
                         }),
                     SpeedDialChild(
                         child: Icon(Icons.access_alarms),
@@ -42,19 +48,15 @@ class HomeScreen extends StatelessWidget {
                         label: "add return visit",
                         labelStyle: AppStyles.heading4,
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AddReturnVisitScreen()));
+                          showBarModalBottomSheet(
+                              context: context, builder: (context, _) => AddReturnVisitScreen());
                         }),
                   ],
                   headerWidget: PreferredSize(
                     preferredSize: Size.fromHeight(66.0),
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        top: AppStyles.topMargin,
-                        left: AppStyles.leftMargin),
+                      padding:
+                          EdgeInsets.only(top: AppStyles.topMargin, left: AppStyles.leftMargin),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -63,19 +65,19 @@ class HomeScreen extends StatelessWidget {
                             style: AppStyles.heading1.copyWith(color: Colors.white),
                           ),
                           Text(DateFormat("MMMM y").format(DateTime.now()),
-                              style:
-                                  AppStyles.heading4.copyWith(color: Colors.white))
+                              style: AppStyles.heading4.copyWith(color: Colors.white))
                         ],
                       ),
                     ),
                   ),
                   hideFloatingWidgetOnScroll: true,
                   floatingWidget: PreferredSize(
-                    preferredSize: Size(MediaQuery.of(context).size.width, AppStyles.timeHeaderBoxHeight),
+                    preferredSize:
+                        Size(MediaQuery.of(context).size.width, AppStyles.timeHeaderBoxHeight),
                     child: Padding(
                       padding: EdgeInsets.only(
-                        left: AppStyles.leftMargin, 
-                        right: MediaQuery.of(context).size.width - 211.0 - AppStyles.leftMargin),
+                          left: AppStyles.leftMargin,
+                          right: MediaQuery.of(context).size.width - 211.0 - AppStyles.leftMargin),
                       child: TimeReportWidget(
                         allHours: model.allHours,
                         goalHours: model.goalHours,
@@ -87,29 +89,24 @@ class HomeScreen extends StatelessWidget {
                   ),
                   body: Padding(
                     padding: EdgeInsets.only(
-                      top: 35.0,
-                      left: AppStyles.leftMargin, 
-                      right: AppStyles.leftMargin),
+                        top: 35.0, left: AppStyles.leftMargin, right: AppStyles.leftMargin),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         ChangeNotifierProvider<SendCurrentReportModel>(
                           create: (_) => SendCurrentReportModel(),
                           child: Consumer<SendCurrentReportModel>(
-                            builder: (_,sendReportModel,__) => SliderButton(
+                            builder: (_, sendReportModel, __) => SliderButton(
                               backgroundColor: AppStyles.secondaryBackground,
                               shimmer: false,
                               dismissible: false,
                               buttonColor: Colors.white,
                               highlightedColor: Colors.white,
                               baseColor: Colors.white,
-                              width: MediaQuery.of(context).size.width -
-                                  (AppStyles.leftMargin * 2),
+                              width: MediaQuery.of(context).size.width - (AppStyles.leftMargin * 2),
                               action: sendReportModel.sendReport,
-                              label: Text(
-                                  sendReportModel.lastReportString,
-                                  style: AppStyles.heading2
-                                      .copyWith(color: Colors.white)),
+                              label: Text(sendReportModel.lastReportString,
+                                  style: AppStyles.heading2.copyWith(color: Colors.white)),
                               icon: Center(
                                 child: Icon(
                                   Icons.send,
@@ -128,18 +125,17 @@ class HomeScreen extends StatelessWidget {
                                 },
                               )
                             : Center(
-                              heightFactor: 2.0,
+                                heightFactor: 2.0,
                                 child: FlatButton(
-                              color: AppStyles.lightGrey,
-                              child: Text(
-                                "add some goals",
-                                style: AppStyles.heading4
-                                    .copyWith(color: Colors.black),
-                              ),
-                              onPressed: () {
-                                // TODO: how to enable goals?
-                              },
-                            ))
+                                  color: AppStyles.lightGrey,
+                                  child: Text(
+                                    "add some goals",
+                                    style: AppStyles.heading4.copyWith(color: Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    // TODO: how to enable goals?
+                                  },
+                                ))
                       ],
                     ),
                   ),

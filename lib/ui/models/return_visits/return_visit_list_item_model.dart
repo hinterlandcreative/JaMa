@@ -4,6 +4,7 @@ import 'package:jama/ui/models/navigatable.dart';
 
 import 'package:kiwi/kiwi.dart' as kiwi;
 import 'package:latlong/latlong.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:jama/services/image_service.dart';
@@ -114,10 +115,11 @@ class ReturnVisitListItemModel extends ChangeNotifier with Navigatable {
   @override
   Future navigate(BuildContext context) async {
     if (_returnVisit.isSaved) {
-      await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => EditReturnVisitScreen(
+      await showBarModalBottomSheet(
+          context: context,
+          builder: (context, _) => EditReturnVisitScreen(
                 returnVisit: EditReturnVisitModel(_returnVisit),
-              )));
+              ));
     }
   }
 }

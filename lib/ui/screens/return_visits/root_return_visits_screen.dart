@@ -10,14 +10,22 @@ import 'package:jama/ui/screens/generic_collection_screen.dart';
 import 'package:jama/ui/screens/scrollable_base_screen.dart';
 import 'package:jama/ui/widgets/grouped_return_visit_list_view.dart';
 import 'package:jama/ui/widgets/return_visit_card_widget.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:search_widget/search_widget.dart';
 
 import 'add_return_visit_screen.dart';
 
-class AllReturnVisitsScreen extends StatelessWidget {
-  AllReturnVisitsScreen({Key key}) : super(key: key);
+class RootReturnVisitsScreen extends StatefulWidget {
+  RootReturnVisitsScreen({Key key}) : super(key: key);
 
+  @override
+  _RootReturnVisitsScreenState createState() => _RootReturnVisitsScreenState();
+}
+
+class _RootReturnVisitsScreenState extends State<RootReturnVisitsScreen>
+    with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -31,8 +39,8 @@ class AllReturnVisitsScreen extends StatelessWidget {
                 label: "add return visit",
                 labelStyle: AppStyles.heading4,
                 onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => AddReturnVisitScreen()));
+                  showBarModalBottomSheet(
+                      context: context, builder: (context, _) => AddReturnVisitScreen());
                 }),
           ],
           headerWidget: _buildHeaderWidget(),

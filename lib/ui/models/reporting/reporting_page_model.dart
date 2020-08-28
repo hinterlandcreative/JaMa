@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
+import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/time_service.dart';
 import 'package:kiwi/kiwi.dart' as kiwi;
@@ -42,13 +44,16 @@ class ReportingPageModel extends ChangeNotifier {
   List<double> _timeByDayChartData = [0, 0, 0, 0, 0, 0, 0];
   StreamSubscription<Time> _timeServiceSubscription;
   DateTime _start, _end;
+  bool _ignoreUpdates = false;
 
   ReportingPageModel._(this._mode, this._reportingService, this._locationService, this._timeService,
       [DateTime start, DateTime end]) {
     _start = start;
     _end = end;
     _timeServiceSubscription = _timeService.timeUpdatedStream.listen((event) {
-      _loadData(_start, _end);
+      if (!_ignoreUpdates) {
+        _loadData(_start, _end);
+      }
     });
     _loadData(_start, _end);
   }
@@ -118,7 +123,8 @@ class ReportingPageModel extends ChangeNotifier {
     }
   }
 
-  bool get hasReport => _results.hours.item1.length > 0 || _results.returnVisits.item1 > 0;
+  bool get hasReport =>
+      _results.durationByCategories.item1.length > 0 || _results.returnVisits.item1 > 0;
 
   /// Gets a value indicating the [startDate].
   DateTime get startDate => _results.startDate;
@@ -127,22 +133,23 @@ class ReportingPageModel extends ChangeNotifier {
   DateTime get endDate => _results.endDate;
 
   /// Gets a value indicating the total time the user has for the period.
-  String get timeTotal =>
-      _results.hours.item1.fold<Duration>(Duration.zero, (p, e) => p + e.time).toShortString();
+  String get timeTotal => _results.durationByCategories.item1
+      .fold<Duration>(Duration.zero, (p, e) => p + e.time)
+      .toShortString();
 
   /// Gets a value indicating whether the user has time goals enabled.
-  bool get timeHasGoal => _results.hours.item2 != null;
+  bool get timeHasGoal => _results.durationByCategories.item2 != null;
 
   /// Gets a value indicating the user's time goal.
   String get timeGoal => timeHasGoal
-      ? Duration(minutes: _results.hours.item2).toShortString()
+      ? Duration(hours: _results.durationByCategories.item2).toShortString()
       : Duration.zero.toShortString();
 
   /// Gets the entry message.
   String get entryMessage => "Great work $_name! Here’s how your ministry is looking.";
 
   /// Gets the time for each `TimeCategory`.
-  List<DurationByCategory> get timeGoalsByCategory => _results.hours.item1;
+  List<DurationByCategory> get timeGoalsByCategory => _results.durationByCategories.item1;
 
   /// Gets a value indicating whether the user has placements goals enabled.
   bool get placementsHasGoal => _results.placements.item2 != null;
@@ -198,7 +205,7 @@ class ReportingPageModel extends ChangeNotifier {
         break;
       case ReportingMode.LastMonth:
         _start = DateTime(now.year, now.month - 1, 1);
-        _end = start.toLastDayOfMonth();
+        _end = _start.toLastDayOfMonth();
         break;
       case ReportingMode.ServiceYear:
         if (now.month >= 9) {
@@ -216,6 +223,7 @@ class ReportingPageModel extends ChangeNotifier {
     }
 
     _results = await _reportingService.getTimeReport(start: _start, end: _end);
+
     await _buildReturnVisitSummaries(_start, _end);
 
     _buildPlacementsChartData();
@@ -306,7 +314,31 @@ class ReportingPageModel extends ChangeNotifier {
                     ));
           }
         });
+
     _rvSummaryItems = [visitsMadeSummary, newVisitsSummary, noVisitsSummary];
+
+    var bibleStudies = _results.rvEntries.where((rv) => rv.visits.any((visit) =>
+        visit.type == VisitType.Study && visit.date.isAfter(start) && visit.date.isBefore(end)));
+
+    if (bibleStudies.isNotEmpty) {
+      _rvSummaryItems.add(ReturnVisitSummaryItem(
+          summary: "bible studies",
+          count: bibleStudies.length,
+          icon: Icons.library_books,
+          onNavigate: (context) => showBarModalBottomSheet(
+              context: context,
+              builder: (_, __) => GenericCollectionScreen(
+                    title: "Bible Studies",
+                    itemPadding: padding,
+                    items: bibleStudies,
+                    itemBuilder: (rv) => ReturnVisitCard(
+                      returnVisit: ReturnVisitListItemModel(
+                          returnVisit: rv,
+                          currentLatitude: position.latitude,
+                          currentLongitude: position.longitude),
+                    ),
+                  ))));
+    }
   }
 
   void _buildPlacementsChartData() {
@@ -371,6 +403,44 @@ class ReportingPageModel extends ChangeNotifier {
     _mode = ReportingMode.Custom;
     _loadData(start, end);
   }
+
+  Future sendCurrentReport(BuildContext context) async {
+    if (_results.isSingleMonth &&
+        (_results.totalDuration.inMinutes % 60 != 0 ||
+            _results.durationByCategories.item1.any((e) => e.time.inMinutes % 60 != 0))) {
+      await confirmationDialog(
+          context,
+          "You currently have " +
+              "${_results.durationByCategories.item1.firstWhere((e) => e.category.isMinistry)?.timeString} " +
+              "Ministry hours and ${_results.totalDuration.toShortString()} total hours.\n\n " +
+              "Do you want to forward the extra time to the next month?",
+          title: "Forward time",
+          positiveText: "Yes",
+          positiveAction: () async {
+            _ignoreUpdates = true;
+            var failedCategories = await _timeService.forwardTime(_results.startDate);
+            if (failedCategories.isNotEmpty) {
+              await infoDialog(
+                  context,
+                  "Could not update the follow categories because they did not have enough time:\n" +
+                      failedCategories.fold("", (p, e) => p + "${e.name}") +
+                      "\n");
+            }
+
+            _ignoreUpdates = false;
+            await _loadData(_start, _end);
+
+            await _reportingService.sendExistingReport(_results);
+          },
+          negativeText: "No",
+          negativeAction: () => _reportingService.sendExistingReport(_results),
+          showNeutralButton: false,
+          confirm: false);
+      return;
+    } else {
+      _reportingService.sendExistingReport(_results);
+    }
+  }
 }
 
 enum ReportingMode { CurrentMonth, LastMonth, ServiceYear, Custom }
@@ -385,12 +455,16 @@ class ReturnVisitSummaryItem extends Navigatable {
   /// The [iconPath] for the item.
   final String iconPath;
 
+  /// The [icon] to use. If supplied, it overrides the [iconPath].
+  final IconData icon;
+
   final Future Function(BuildContext) onNavigate;
 
   ReturnVisitSummaryItem(
       {@required this.summary,
       @required this.count,
-      @required this.iconPath,
+      this.icon,
+      this.iconPath,
       @required this.onNavigate});
 
   @override

@@ -6,6 +6,7 @@ import 'package:jama/mixins/color_mixin.dart';
 class AppStyles {
   // Colors
   static Color get primaryColor => HexColor.fromHex("#5385E5");
+  static Color get primaryDarkColor => HexColor.fromHex("#1948A3");
   static Color get primaryBackground => HexColor.fromHex("#F7FBFB");
   static Color get secondaryBackground => HexColor.fromHex("#5385E5");
   static Color get lightGrey => HexColor.fromHex("#DBDBDB");

@@ -104,7 +104,7 @@ class _AddReturnVisitScreenState extends State<AddReturnVisitScreen> {
                                                   height: 38.0,
                                                   child: Center(
                                                       child: Icon(
-                                                    Icons.arrow_back_ios,
+                                                    Icons.close,
                                                     size: 17.0,
                                                   ))),
                                               onTap: () => Navigator.of(context).pop(),

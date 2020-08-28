@@ -20,8 +20,7 @@ class TimeReportScreen extends StatelessWidget {
   /// The [end] date for the report.
   final DateTime end;
 
-  const TimeReportScreen
-({Key key, this.start, this.end}) : super(key: key);
+  const TimeReportScreen({Key key, this.start, this.end}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,39 +29,39 @@ class TimeReportScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         title: Text(
-          DateFormat.MMMMEEEEd(Intl.defaultLocale).format(start) + " - " + DateFormat.MMMMEEEEd(Intl.defaultLocale).format(end),
-          style: AppStyles.heading2,),
-        backgroundColor: AppStyles.primaryColor,),
-      body: ChangeNotifierProvider<TimeGroupedByDateCollectionModel>(
-        create: (_) => TimeGroupedByDateCollectionModel(start:start, end:end),
-        child: Consumer<TimeGroupedByDateCollectionModel>(
-          builder: (context, model, _) => GroupedCollectionListView<TimeModificationModel>(
-            groups: model.items,
-            headerBuilder: (_, header, __, ___) => _createCollectionHeader(header),
-            itemBuilder: (_, item, isLast, __) => TimeCard(
-              item: item, 
-              isLast: isLast,
-              onItemDeleted: () => model.onItemDeleted(item),),
-          )
-        )
+          DateFormat.MMMMEEEEd(Intl.defaultLocale).format(start) +
+              " - " +
+              DateFormat.MMMMEEEEd(Intl.defaultLocale).format(end),
+          style: AppStyles.heading2,
+        ),
+        backgroundColor: AppStyles.primaryColor,
       ),
+      body: ChangeNotifierProvider<TimeGroupedByDateCollectionModel>(
+          create: (_) => TimeGroupedByDateCollectionModel(start: start, end: end),
+          child: Consumer<TimeGroupedByDateCollectionModel>(
+              builder: (context, model, _) => GroupedCollectionListView<TimeModificationModel>(
+                    groups: model.items,
+                    headerBuilder: (_, header, __, ___) => _createCollectionHeader(header),
+                    itemBuilder: (_, item, isLast, __) => TimeCard(
+                      item: item,
+                      isLast: isLast,
+                      onItemDeleted: () => model.onItemDeleted(item),
+                    ),
+                  ))),
     );
   }
 
   Widget _createCollectionHeader(String header) {
     return Container(
-      color: AppStyles.lightGrey,
-      height: 35,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: AppStyles.leftMargin),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(header)
-          ],
-        ),
-      )
-    );
+        color: AppStyles.lightGrey,
+        height: 35,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppStyles.leftMargin),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[Text(header)],
+          ),
+        ));
   }
 }
 
@@ -73,7 +72,8 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
 
   TimeService _timeService;
 
-  TimeGroupedByDateCollectionModel({@required DateTime start, @required DateTime end, TimeService timeService}) {
+  TimeGroupedByDateCollectionModel(
+      {@required DateTime start, @required DateTime end, TimeService timeService}) {
     _timeService = timeService ?? kiwi.Container().resolve<TimeService>();
     _loadData(start, end);
 
@@ -83,20 +83,19 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
   List<TimeByDateModel> get items => _items;
 
   Future _loadData(DateTime start, DateTime end) async {
-    var timeEntries = await _timeService.getTimeEntriesByDate(
-      startTime: start, 
-      endTime: end);
+    var timeEntries = await _timeService.getTimeEntriesByDate(start: start, end: end);
 
     var dates = timeEntries.map((t) => t.date.dropTime()).toList();
     dates = dates.toSet().toList();
-    
-    _items = dates.map((date) => TimeByDateModel(
-      timeEntries
-        .where((t) => t.date.dropTime() == date)
-        .map((t) => TimeModificationModel.edit(time: t))
-        .toList(),
-      date)
-    ).toList();
+
+    _items = dates
+        .map((date) => TimeByDateModel(
+            timeEntries
+                .where((t) => t.date.dropTime() == date)
+                .map((t) => TimeModificationModel.edit(time: t))
+                .toList(),
+            date))
+        .toList();
 
     notifyListeners();
   }
