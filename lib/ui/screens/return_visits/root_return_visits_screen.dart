@@ -16,9 +16,16 @@ import 'package:search_widget/search_widget.dart';
 
 import 'add_return_visit_screen.dart';
 
-class AllReturnVisitsScreen extends StatelessWidget {
-  AllReturnVisitsScreen({Key key}) : super(key: key);
+class RootReturnVisitsScreen extends StatefulWidget {
+  RootReturnVisitsScreen({Key key}) : super(key: key);
 
+  @override
+  _RootReturnVisitsScreenState createState() => _RootReturnVisitsScreenState();
+}
+
+class _RootReturnVisitsScreenState extends State<RootReturnVisitsScreen>
+    with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(

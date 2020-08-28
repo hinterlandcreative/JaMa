@@ -53,6 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return FocusWatcher(
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: AppStyles.primaryColor,
           centerTitle: false,
           title: Text("Settings", style: AppStyles.heading1),
           elevation: 0,

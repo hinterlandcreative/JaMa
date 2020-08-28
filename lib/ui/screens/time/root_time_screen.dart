@@ -21,9 +21,9 @@ class RootTimeScreen extends StatefulWidget {
   _RootTimeScreenState createState() => _RootTimeScreenState();
 }
 
-class _RootTimeScreenState extends State<RootTimeScreen> {
+class _RootTimeScreenState extends State<RootTimeScreen> with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
   CalendarController calendarController;
-
   var _currentMonth;
 
   List<TimeEntry> _entries;

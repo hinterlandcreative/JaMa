@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:jama/ui/screens/reports/reports_screen.dart';
+import 'package:jama/ui/screens/reports/root_reports_screen.dart';
 import 'package:jama/ui/screens/settings_screen.dart';
 import 'package:jama/ui/screens/time/root_time_screen.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:jama/ui/app_styles.dart';
-import 'package:jama/ui/screens/return_visits/all_return_visits_screen.dart';
+import 'package:jama/ui/screens/return_visits/root_return_visits_screen.dart';
 import 'package:jama/ui/screens/home_screen.dart';
 
 class TabbedController extends StatefulWidget {
@@ -27,8 +27,8 @@ class _TabbedControllerState extends State<TabbedController> {
   final List<Widget> _children = [
     HomeScreen(),
     RootTimeScreen(),
-    AllReturnVisitsScreen(),
-    ReportsScreen(),
+    RootReturnVisitsScreen(),
+    RootReportsScreen(),
     SettingsScreen()
   ];
 

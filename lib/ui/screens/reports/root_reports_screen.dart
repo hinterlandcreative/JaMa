@@ -14,14 +14,15 @@ import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:jama/mixins/date_mixin.dart';
 
-class ReportsScreen extends StatefulWidget {
-  const ReportsScreen({Key key}) : super(key: key);
+class RootReportsScreen extends StatefulWidget {
+  const RootReportsScreen({Key key}) : super(key: key);
 
   @override
-  _ReportsScreenState createState() => _ReportsScreenState();
+  _RootReportsScreenState createState() => _RootReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
+class _RootReportsScreenState extends State<RootReportsScreen> with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
   ItemScrollController modePickerScrollController;
 
   @override

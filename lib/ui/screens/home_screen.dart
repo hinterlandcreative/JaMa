@@ -14,7 +14,14 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:slider_button/slider_button.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
