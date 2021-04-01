@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:jama/ui/models/time/time_modification_model.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:tuple/tuple.dart';
 
 import 'package:jama/ui/models/collection_base_model.dart';
@@ -33,7 +33,7 @@ class TimeCollectionModel extends CollectionBaseModel<TimeByDateModel> {
   int get returnVisits => _returnVisits;
 
   TimeCollectionModel(this.startDate, this.endDate, [TimeService timeService]) {
-    var container = kiwi.Container();
+    var container = KiwiContainer();
 
     _timeService = timeService ?? container.resolve<TimeService>();
     _subscription = _timeService.timeUpdatedStream.listen((time) {

@@ -9,7 +9,7 @@ class DatabaseProvider {
 
   /// Creates a `DatabaseProvider2` from a [localFactory].
   factory DatabaseProvider([LocalDatabaseFactory localFactory]) {
-    return DatabaseProvider._(localFactory ?? Container().resolve<LocalDatabaseFactory>());
+    return DatabaseProvider._(localFactory ?? KiwiContainer().resolve<LocalDatabaseFactory>());
   }
 
   Future<Database> getLocalDatabase(String name) async {

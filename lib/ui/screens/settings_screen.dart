@@ -5,7 +5,7 @@ import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:jama/services/app_settings_service.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:jama/ui/widgets/spacer.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -29,7 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future getSettingsValues() async {
-    settingsService = kiwi.Container().resolve<AppSettingsService>();
+    settingsService = KiwiContainer().resolve<AppSettingsService>();
     monthlyGoals.text =
         (await settingsService.getSettingInt(AppSettingsService.goals_monthly_hours, 0)).toString();
     monthlyPlacements.text =
@@ -161,8 +161,7 @@ class _AppSettingsModel extends ChangeNotifier {
   }
 
   factory _AppSettingsModel([AppSettingsService appSettingsService]) {
-    return _AppSettingsModel._(
-        appSettingsService ?? kiwi.Container().resolve<AppSettingsService>());
+    return _AppSettingsModel._(appSettingsService ?? KiwiContainer().resolve<AppSettingsService>());
   }
 
   int get monthlyHours => _monthlyHours;

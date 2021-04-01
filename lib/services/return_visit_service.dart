@@ -26,8 +26,8 @@ class ReturnVisitService {
   const ReturnVisitService._(this._imageService, this._dbCompleter, this._returnVisitsUpdated);
 
   factory ReturnVisitService([ImageService imageService, DatabaseService databaseService]) {
-    databaseService = databaseService ?? Container().resolve<DatabaseService>();
-    imageService = imageService ?? Container().resolve<ImageService>();
+    databaseService = databaseService ?? KiwiContainer().resolve<DatabaseService>();
+    imageService = imageService ?? KiwiContainer().resolve<ImageService>();
 
     final completer = Completer<Database>()..complete(databaseService.getLocalMainStorage());
 

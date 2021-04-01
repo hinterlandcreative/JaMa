@@ -44,6 +44,7 @@ class _RootTimeScreenState extends State<RootTimeScreen> with AutomaticKeepAlive
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider(
       create: (context) => RootTimePageModel(),
       child: Consumer<RootTimePageModel>(
@@ -78,7 +79,7 @@ class _RootTimeScreenState extends State<RootTimeScreen> with AutomaticKeepAlive
                       onTap: () {
                         showBarModalBottomSheet(
                             context: context,
-                            builder: (context, _) => AddEditTimeScreen.create(
+                            builder: (context) => AddEditTimeScreen.create(
                                 calendarController != null ? calendarController.focusedDay : null));
                       }),
                   SpeedDialChild(
@@ -195,7 +196,7 @@ class _RootTimeScreenState extends State<RootTimeScreen> with AutomaticKeepAlive
         await model.loadEntries(first, last);
         _entries = model.getEntriesForDate(calendarController.focusedDay);
       },
-      onDaySelected: (date, _) => setState(() => _entries = model.getEntriesForDate(date)),
+      onDaySelected: (date, _, __) => setState(() => _entries = model.getEntriesForDate(date)),
       onVisibleDaysChanged: (first, last, format) async {
         _currentMonth = _getCurrentMonth(first, last);
         await model.loadEntries(first, last);

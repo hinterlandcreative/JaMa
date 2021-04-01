@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gradual_stepper/gradual_stepper.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:supercharged/supercharged.dart';
+import 'package:geocoding/geocoding.dart';
 
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/services/return_visit_service.dart';
@@ -40,7 +41,7 @@ Future showAddEditVisitModal(BuildContext context,
   return await showMaterialModalBottomSheet(
       expand: false,
       context: context,
-      builder: (context, scrollController) => SingleChildScrollView(
+      builder: (context) => SingleChildScrollView(
               child: _AddEditVisit(
             visit: visit,
             isDeleteable: isDeletable,
@@ -56,7 +57,7 @@ Future editNotAtHomeVisit(BuildContext context,
   return await showMaterialModalBottomSheet(
       context: context,
       expand: false,
-      builder: (context, _) => Column(
+      builder: (context) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -141,7 +142,7 @@ Future showAddSinglePlacementModal(BuildContext context,
   return await showMaterialModalBottomSheet(
       expand: false,
       context: context,
-      builder: (context, _) => Column(
+      builder: (context) => Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[

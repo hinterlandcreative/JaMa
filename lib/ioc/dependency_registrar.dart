@@ -10,7 +10,7 @@ import 'package:kiwi/kiwi.dart';
 
 class DependencyRegistrar {
   static void register() {
-    Container container = Container();
+    var container = KiwiContainer();
     container.registerSingleton((c) => LocalDatabaseFactory());
     container.registerSingleton((c) => DatabaseProvider());
     container.registerSingleton((c) => DatabaseService());

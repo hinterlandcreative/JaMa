@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:tuple/tuple.dart';
 import 'package:supercharged/supercharged.dart';
@@ -46,7 +46,7 @@ class EditReturnVisitModel extends EdittableReturnVisitBaseModel {
   }
 
   factory EditReturnVisitModel(ReturnVisit returnVisit, [ReturnVisitService rvService]) {
-    var container = kiwi.Container();
+    var container = KiwiContainer();
     return EditReturnVisitModel._(
         returnVisit, rvService ?? container.resolve<ReturnVisitService>());
   }

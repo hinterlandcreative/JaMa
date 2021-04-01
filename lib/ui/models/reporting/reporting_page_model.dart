@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/services/location_service.dart';
 import 'package:jama/services/time_service.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -64,9 +64,9 @@ class ReportingPageModel extends ChangeNotifier {
       TimeService timeService]) {
     return ReportingPageModel._(
         ReportingMode.CurrentMonth,
-        reportingService ?? kiwi.Container().resolve<ReportingService>(),
-        locationService ?? kiwi.Container().resolve<LocationService>(),
-        timeService ?? kiwi.Container().resolve<TimeService>());
+        reportingService ?? KiwiContainer().resolve<ReportingService>(),
+        locationService ?? KiwiContainer().resolve<LocationService>(),
+        timeService ?? KiwiContainer().resolve<TimeService>());
   }
 
   factory ReportingPageModel.lastMonth(
@@ -75,9 +75,9 @@ class ReportingPageModel extends ChangeNotifier {
       TimeService timeService]) {
     return ReportingPageModel._(
         ReportingMode.LastMonth,
-        reportingService ?? kiwi.Container().resolve<ReportingService>(),
-        locationService ?? kiwi.Container().resolve<LocationService>(),
-        timeService ?? kiwi.Container().resolve<TimeService>());
+        reportingService ?? KiwiContainer().resolve<ReportingService>(),
+        locationService ?? KiwiContainer().resolve<LocationService>(),
+        timeService ?? KiwiContainer().resolve<TimeService>());
   }
 
   factory ReportingPageModel.serviceYear(
@@ -86,9 +86,9 @@ class ReportingPageModel extends ChangeNotifier {
       TimeService timeService]) {
     return ReportingPageModel._(
         ReportingMode.ServiceYear,
-        reportingService ?? kiwi.Container().resolve<ReportingService>(),
-        locationService ?? kiwi.Container().resolve<LocationService>(),
-        timeService ?? kiwi.Container().resolve<TimeService>());
+        reportingService ?? KiwiContainer().resolve<ReportingService>(),
+        locationService ?? KiwiContainer().resolve<LocationService>(),
+        timeService ?? KiwiContainer().resolve<TimeService>());
   }
 
   factory ReportingPageModel.custom(DateTime start, DateTime end,
@@ -97,9 +97,9 @@ class ReportingPageModel extends ChangeNotifier {
       TimeService timeService]) {
     return ReportingPageModel._(
         ReportingMode.CurrentMonth,
-        reportingService ?? kiwi.Container().resolve<ReportingService>(),
-        locationService ?? kiwi.Container().resolve<LocationService>(),
-        timeService ?? kiwi.Container().resolve<TimeService>(),
+        reportingService ?? KiwiContainer().resolve<ReportingService>(),
+        locationService ?? KiwiContainer().resolve<LocationService>(),
+        timeService ?? KiwiContainer().resolve<TimeService>(),
         start,
         end);
   }
@@ -250,7 +250,7 @@ class ReportingPageModel extends ChangeNotifier {
           if (visitsMadeDuringPeriod.isNotEmpty) {
             await showBarModalBottomSheet(
                 context: context,
-                builder: (_, __) => GenericCollectionScreen(
+                builder: (_) => GenericCollectionScreen(
                       title: "Visits Made $currentReportingModeString",
                       itemPadding: padding,
                       items: visitsMadeDuringPeriod,
@@ -276,7 +276,7 @@ class ReportingPageModel extends ChangeNotifier {
           if (newVisitsThisPeriod.isNotEmpty) {
             await showBarModalBottomSheet(
                 context: context,
-                builder: (_, __) => GenericCollectionScreen(
+                builder: (_) => GenericCollectionScreen(
                       title: "New Return Visits $currentReportingModeString",
                       itemPadding: padding,
                       items: newVisitsThisPeriod,
@@ -301,7 +301,7 @@ class ReportingPageModel extends ChangeNotifier {
           if (noVisitsDuringPeriod.isNotEmpty) {
             await showBarModalBottomSheet(
                 context: context,
-                builder: (_, __) => GenericCollectionScreen(
+                builder: (_) => GenericCollectionScreen(
                       title: "No Visits $currentReportingModeString",
                       itemPadding: padding,
                       items: noVisitsDuringPeriod,
@@ -327,7 +327,7 @@ class ReportingPageModel extends ChangeNotifier {
           icon: Icons.library_books,
           onNavigate: (context) => showBarModalBottomSheet(
               context: context,
-              builder: (_, __) => GenericCollectionScreen(
+              builder: (_) => GenericCollectionScreen(
                     title: "Bible Studies",
                     itemPadding: padding,
                     items: bibleStudies,
@@ -377,7 +377,7 @@ class ReportingPageModel extends ChangeNotifier {
     var position = await _locationService.getCurrentOrLastKnownPosition();
     return showBarModalBottomSheet(
         context: context,
-        builder: (_, __) => GenericCollectionScreen(
+        builder: (_) => GenericCollectionScreen(
               title: "All Return Visits",
               itemPadding: EdgeInsets.symmetric(horizontal: AppStyles.leftMargin, vertical: 30.0),
               items: _results.rvEntries,

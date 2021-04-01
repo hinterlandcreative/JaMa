@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:jama/ui/app_styles.dart';
 import 'package:latlong/latlong.dart' as LatLong;
 
@@ -37,7 +38,7 @@ class AddressMapper extends StatefulWidget {
   final AddressController addressController;
 
   /// The address image controller which contains the image of the currently found address.
-  /// 
+  ///
   /// If a valid address hasn't been found the value will be [null].
   final AddressImageController addressImageController;
 
@@ -48,8 +49,6 @@ class AddressMapper extends StatefulWidget {
 
   /// this widget will only be shown if the map cannot be loaded.
   final Widget emptyState;
-
-  
 
   AddressMapper(
       {Key key,
@@ -87,22 +86,17 @@ class _AddressMapperState extends State<AddressMapper> {
     var old = _foundAddress;
     _foundAddress = address;
 
-    if((old == null || _locationServices
-      .getDistanceBetweenCoordinates(
-        old.latitude, 
-        old.longitude, 
-        address.latitude, 
-        address.longitude, 
-        LatLong.LengthUnit.Meter) > 10) && widget.addressImageController != null) {
-        _mapController.future.then((controller) => 
-          controller.takeSnapshot().then((value) => 
-            widget.addressImageController.value = value)
-        );
+    if ((old == null ||
+            _locationServices.getDistanceBetweenCoordinates(old.latitude, old.longitude,
+                    address.latitude, address.longitude, LatLong.LengthUnit.Meter) >
+                10) &&
+        widget.addressImageController != null) {
+      _mapController.future.then((controller) =>
+          controller.takeSnapshot().then((value) => widget.addressImageController.value = value));
     }
   }
 
-  bool get _showFoundAddressWidget =>
-      foundAddress != null && widget.address == null;
+  bool get _showFoundAddressWidget => foundAddress != null && widget.address == null;
 
   @override
   void initState() {
@@ -110,16 +104,14 @@ class _AddressMapperState extends State<AddressMapper> {
 
     _mapController = Completer();
     _mapPosition = widget.initialPosition != null
-        ? LatLng(
-            widget.initialPosition.latitude, widget.initialPosition.longitude)
+        ? LatLng(widget.initialPosition.latitude, widget.initialPosition.longitude)
         : LatLng(41.158961, -74.255364);
 
-    _locationServices = kiwi.Container().resolve<LocationService>();
+    _locationServices = KiwiContainer().resolve<LocationService>();
 
     if (widget.address == null) {
       if (widget.findCurrentAddress) {
-        _currentLocationSubscription =
-            _locationServices.locationStream.listen((position) async {
+        _currentLocationSubscription = _locationServices.locationStream.listen((position) async {
           if (_mapPosition.latitude != position.latitude &&
               _mapPosition.longitude != position.longitude) {
             var foundLatLng = LatLng(position.latitude, position.longitude);
@@ -135,16 +127,13 @@ class _AddressMapperState extends State<AddressMapper> {
             });
 
             var controller = await _mapController.future;
-            controller.animateCamera(CameraUpdate.newCameraPosition(
-                CameraPosition(
-                    bearing: 360.0,
-                    target: LatLng(
-                        _mapPosition.latitude -
-                            (widget.findCurrentAddress && foundAddress != null
-                                ? 0.0025
-                                : 0.0),
-                        _mapPosition.longitude),
-                    zoom: _defaultZoom)));
+            controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+                bearing: 360.0,
+                target: LatLng(
+                    _mapPosition.latitude -
+                        (widget.findCurrentAddress && foundAddress != null ? 0.0025 : 0.0),
+                    _mapPosition.longitude),
+                zoom: _defaultZoom)));
           }
         });
       }
@@ -182,37 +171,35 @@ class _AddressMapperState extends State<AddressMapper> {
             child: widget.emptyState,
           )),
           Positioned.fill(
-            child: GoogleMap(
-              rotateGesturesEnabled: false,
-              scrollGesturesEnabled: false,
-              tiltGesturesEnabled: false,
-              zoomGesturesEnabled: false,
-              myLocationButtonEnabled: false,
-              buildingsEnabled: false,
-              mapToolbarEnabled: false,
-              circles: Set.from([
-                Circle(
-                  circleId: CircleId("main location"),
-                  center: _mapPosition,
-                  radius: 25,
-                  fillColor: AppStyles.primaryColor,
-                  strokeColor: Colors.transparent,
-                )
-              ]),
-              onMapCreated: (controller) {
-                _mapController.complete(controller);
-              },
-              initialCameraPosition: CameraPosition(
-                bearing: 360.0,
-                target: _mapPosition,
-                zoom: _defaultZoom,
-              ),
-            )),
+              child: GoogleMap(
+            rotateGesturesEnabled: false,
+            scrollGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            zoomGesturesEnabled: false,
+            myLocationButtonEnabled: false,
+            buildingsEnabled: false,
+            mapToolbarEnabled: false,
+            circles: Set.from([
+              Circle(
+                circleId: CircleId("main location"),
+                center: _mapPosition,
+                radius: 25,
+                fillColor: AppStyles.primaryColor,
+                strokeColor: Colors.transparent,
+              )
+            ]),
+            onMapCreated: (controller) {
+              _mapController.complete(controller);
+            },
+            initialCameraPosition: CameraPosition(
+              bearing: 360.0,
+              target: _mapPosition,
+              zoom: _defaultZoom,
+            ),
+          )),
           AnimatedPositioned(
               duration: Duration(milliseconds: 300),
-              top: _showFoundAddressWidget
-                  ? 131 + MediaQuery.of(context).padding.top
-                  : h,
+              top: _showFoundAddressWidget ? 131 + MediaQuery.of(context).padding.top : h,
               width: MediaQuery.of(context).size.width,
               height: 115,
               child: AnimatedOpacity(
@@ -228,12 +215,10 @@ class _AddressMapperState extends State<AddressMapper> {
                       Text(
                         foundAddress == null
                             ? ""
-                            : foundAddress
-                                .toFormattedString(true, false, false)
-                                .toUpperCase(),
+                            : foundAddress.toFormattedString(true, false, false).toUpperCase(),
                         maxLines: 2,
-                        style: AppStyles.smallTextStyle.copyWith(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                        style: AppStyles.smallTextStyle
+                            .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       RawMaterialButton(
                         shape: new CircleBorder(),
@@ -261,8 +246,7 @@ class _AddressMapperState extends State<AddressMapper> {
                             offset: Offset(1.00, -10.00))
                       ],
                       borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30.0),
-                          topRight: Radius.circular(30.0))),
+                          topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0))),
                 ),
               )),
         ],
@@ -275,8 +259,7 @@ class _AddressMapperState extends State<AddressMapper> {
       LatLng newLatLng;
       if ((address.latitude == 0.0 || address.latitude == null) &&
           (address.longitude == 0.0 || address.longitude == null)) {
-        var position =
-            await _locationServices.getCoordinatesFromAddress(address);
+        var position = await _locationServices.getCoordinatesFromAddress(address);
         if (position != null) {
           newLatLng = LatLng(position.latitude, position.longitude);
         } else {

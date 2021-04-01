@@ -8,7 +8,7 @@ import 'package:jama/mixins/duration_mixin.dart';
 import 'package:jama/ui/models/navigatable.dart';
 import 'package:jama/ui/models/time/time_modification_model.dart';
 import 'package:jama/ui/screens/time/add_edit_time_screen.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class RootTimePageModel extends ChangeNotifier {
@@ -38,7 +38,7 @@ class RootTimePageModel extends ChangeNotifier {
   }
 
   factory RootTimePageModel([TimeService timeService]) =>
-      RootTimePageModel._(timeService ?? kiwi.Container().resolve<TimeService>());
+      RootTimePageModel._(timeService ?? KiwiContainer().resolve<TimeService>());
 
   /// Loads the time entries between a given [start] and [end] date.
   Future loadEntries(DateTime start, DateTime end) async {
@@ -130,7 +130,7 @@ class TimeEntry extends Navigatable {
   Future navigate(BuildContext context) {
     return showBarModalBottomSheet(
         context: context,
-        builder: (_, __) => AddEditTimeScreen.edit(TimeModificationModel.edit(time: _time)));
+        builder: (_) => AddEditTimeScreen.edit(TimeModificationModel.edit(time: _time)));
   }
 
   void delete() => onDelete(_time);

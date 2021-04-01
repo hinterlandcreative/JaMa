@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jama/data/models/dto/return_visit_dto.dart';
 import 'package:jama/ui/models/navigatable.dart';
 
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:latlong/latlong.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path/path.dart' as path;
@@ -47,7 +47,7 @@ class ReturnVisitListItemModel extends ChangeNotifier with Navigatable {
     assert(currentLatitude != null);
     assert(currentLongitude != null);
 
-    var container = kiwi.Container();
+    var container = KiwiContainer();
     locationService = locationService ?? container.resolve<LocationService>();
 
     var distance = "";
@@ -98,7 +98,9 @@ class ReturnVisitListItemModel extends ChangeNotifier with Navigatable {
 
   String get nameOrDescription => _returnVisit.name.isNotEmpty
       ? _returnVisit.name
-      : _returnVisit.gender == Gender.Male ? "Man" : "Woman";
+      : _returnVisit.gender == Gender.Male
+          ? "Man"
+          : "Woman";
 
   Gender get gender => _returnVisit.gender;
 
@@ -117,7 +119,7 @@ class ReturnVisitListItemModel extends ChangeNotifier with Navigatable {
     if (_returnVisit.isSaved) {
       await showBarModalBottomSheet(
           context: context,
-          builder: (context, _) => EditReturnVisitScreen(
+          builder: (context) => EditReturnVisitScreen(
                 returnVisit: EditReturnVisitModel(_returnVisit),
               ));
     }

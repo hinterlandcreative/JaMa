@@ -13,7 +13,7 @@ class DatabaseService {
   /// For unit testing provide a [dbProvider] otherwise
   /// the `DatabaseProvider` will be provided by the [context].
   factory DatabaseService([DatabaseProvider dbProvider]) {
-    return DatabaseService._(dbProvider ?? Container().resolve<DatabaseProvider>());
+    return DatabaseService._(dbProvider ?? KiwiContainer().resolve<DatabaseProvider>());
   }
 
   /// Gets the local SQLite `Database` for the main app storage.

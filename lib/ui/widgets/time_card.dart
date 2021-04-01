@@ -24,7 +24,7 @@ class TimeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => showBarModalBottomSheet(
-          context: context, builder: (context, _) => AddEditTimeScreen.edit(item)),
+          context: context, builder: (context) => AddEditTimeScreen.edit(item)),
       child: Slidable(
         closeOnScroll: true,
         actionPane: SlidableDrawerActionPane(),

@@ -5,7 +5,7 @@ import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/services/app_settings_service.dart';
 import 'package:jama/services/return_visit_service.dart';
 
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:quiver/time.dart';
 
 import 'package:jama/services/time_service.dart';
@@ -39,9 +39,9 @@ class TimeModificationModel extends ChangeNotifier {
       AppSettingsService appSettingsService}) {
     return TimeModificationModel._(
         time.copy(),
-        timeService ?? kiwi.Container().resolve<TimeService>(),
-        rvService ?? kiwi.Container().resolve<ReturnVisitService>(),
-        appSettingsService ?? kiwi.Container().resolve<AppSettingsService>());
+        timeService ?? KiwiContainer().resolve<TimeService>(),
+        rvService ?? KiwiContainer().resolve<ReturnVisitService>(),
+        appSettingsService ?? KiwiContainer().resolve<AppSettingsService>());
   }
 
   /// Creates a new [TimeModificationModel] that has not been saved yet.
@@ -55,9 +55,9 @@ class TimeModificationModel extends ChangeNotifier {
               date: date ?? DateTime.now().toNearestIncrement().subtract(anHour),
               totalMinutes: anHour.inMinutes,
               category: null),
-          timeService ?? kiwi.Container().resolve<TimeService>(),
-          rvService ?? kiwi.Container().resolve<ReturnVisitService>(),
-          appSettingsService ?? kiwi.Container().resolve<AppSettingsService>());
+          timeService ?? KiwiContainer().resolve<TimeService>(),
+          rvService ?? KiwiContainer().resolve<ReturnVisitService>(),
+          appSettingsService ?? KiwiContainer().resolve<AppSettingsService>());
 
   /// The [duration] of the current time entry.
   Duration get duration => _time.duration;

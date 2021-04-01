@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider<HomeModel>(
         create: (_) => HomeModel(),
         child: Consumer<HomeModel>(
@@ -36,8 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         labelStyle: AppStyles.heading4,
                         onTap: () {
                           showBarModalBottomSheet(
-                              context: context,
-                              builder: (context, _) => AddEditTimeScreen.create());
+                              context: context, builder: (context) => AddEditTimeScreen.create());
                         }),
                     SpeedDialChild(
                         child: Icon(Icons.access_alarms),
@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         labelStyle: AppStyles.heading4,
                         onTap: () {
                           showBarModalBottomSheet(
-                              context: context, builder: (context, _) => AddReturnVisitScreen());
+                              context: context, builder: (context) => AddReturnVisitScreen());
                         }),
                   ],
                   headerWidget: PreferredSize(

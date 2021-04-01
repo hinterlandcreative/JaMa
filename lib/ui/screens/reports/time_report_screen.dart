@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:provider/provider.dart';
 
 import 'package:jama/services/time_service.dart';
@@ -74,7 +74,7 @@ class TimeGroupedByDateCollectionModel extends ChangeNotifier {
 
   TimeGroupedByDateCollectionModel(
       {@required DateTime start, @required DateTime end, TimeService timeService}) {
-    _timeService = timeService ?? kiwi.Container().resolve<TimeService>();
+    _timeService = timeService ?? KiwiContainer().resolve<TimeService>();
     _loadData(start, end);
 
     _subscription = _timeService.timeUpdatedStream.listen((_) => _loadData(start, end));

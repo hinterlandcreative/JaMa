@@ -28,6 +28,7 @@ class _RootReturnVisitsScreenState extends State<RootReturnVisitsScreen>
   bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider(
       create: (_) => AllReturnVisitsListModel(),
       child: Consumer<AllReturnVisitsListModel>(
@@ -40,7 +41,7 @@ class _RootReturnVisitsScreenState extends State<RootReturnVisitsScreen>
                 labelStyle: AppStyles.heading4,
                 onTap: () {
                   showBarModalBottomSheet(
-                      context: context, builder: (context, _) => AddReturnVisitScreen());
+                      context: context, builder: (context) => AddReturnVisitScreen());
                 }),
           ],
           headerWidget: _buildHeaderWidget(),

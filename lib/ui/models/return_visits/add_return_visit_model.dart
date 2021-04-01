@@ -2,7 +2,7 @@ import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:jama/data/models/dto/visit_dto.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 
 import 'package:jama/data/models/address_model.dart';
 import 'package:jama/data/models/dto/return_visit_dto.dart';
@@ -191,7 +191,7 @@ class AddReturnVisitModel extends EdittableReturnVisitBaseModel {
 
   AddReturnVisitModel(
       [LocationService locationService, ReturnVisitService rvService, ImageService imageService]) {
-    var container = kiwi.Container();
+    var container = KiwiContainer();
 
     _locationService = locationService ?? container.resolve<LocationService>();
     _returnVisitService = rvService ?? container.resolve<ReturnVisitService>();

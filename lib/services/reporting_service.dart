@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sms/flutter_sms.dart';
 import 'package:intl/intl.dart';
 import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/ui/models/reporting/time_by_category.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi.dart';
 
 import 'package:jama/services/app_settings_service.dart';
 import 'package:jama/services/return_visit_service.dart';
@@ -35,9 +34,9 @@ class ReportingService {
       ReturnVisitService returnVisitService,
       TimeService timeService]) {
     return ReportingService._(
-        appSettingsService ?? kiwi.Container().resolve<AppSettingsService>(),
-        returnVisitService ?? kiwi.Container().resolve<ReturnVisitService>(),
-        timeService ?? kiwi.Container().resolve<TimeService>());
+        appSettingsService ?? KiwiContainer().resolve<AppSettingsService>(),
+        returnVisitService ?? KiwiContainer().resolve<ReturnVisitService>(),
+        timeService ?? KiwiContainer().resolve<TimeService>());
   }
 
   /// Sends the text message report to the stored default recipient for the given [year] and [month].

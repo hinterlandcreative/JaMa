@@ -8,7 +8,7 @@ import 'package:quiver/core.dart';
 import 'package:quiver/time.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supercharged/supercharged.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 
 import 'package:jama/data/models/dto/time_category_dto.dart';
 import 'package:jama/data/models/dto/time_dto.dart';
@@ -30,7 +30,7 @@ class TimeService {
   /// For unit testing provide the [dbService]. Otherwise,
   /// the [context] will provide the `DatabaseService`.
   factory TimeService([DatabaseService dbService]) {
-    dbService = dbService ?? kiwi.Container().resolve<DatabaseService>();
+    dbService = dbService ?? KiwiContainer().resolve<DatabaseService>();
 
     var getTimeDb = () async {
       return await dbService.getLocalMainStorage();

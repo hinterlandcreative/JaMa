@@ -9,7 +9,7 @@ import 'package:jama/services/time_service.dart';
 import 'package:jama/ui/models/goal_model.dart';
 import 'package:jama/ui/screens/reports/time_report_screen.dart';
 import 'package:jama/mixins/date_mixin.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 import 'package:quiver/time.dart';
 import 'package:tuple/tuple.dart';
 
@@ -47,9 +47,9 @@ class HomeModel extends ChangeNotifier {
       ReportingService reportingService,
       AppSettingsService appSettingsService]) {
     return HomeModel._(
-        timeService ?? kiwi.Container().resolve<TimeService>(),
-        reportingService ?? kiwi.Container().resolve<ReportingService>(),
-        appSettingsService ?? kiwi.Container().resolve<AppSettingsService>());
+        timeService ?? KiwiContainer().resolve<TimeService>(),
+        reportingService ?? KiwiContainer().resolve<ReportingService>(),
+        appSettingsService ?? KiwiContainer().resolve<AppSettingsService>());
   }
 
   Future _loadData() async {

@@ -1,11 +1,11 @@
 import '../../../mixins/duration_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sms/flutter_sms.dart';
+//import 'package:flutter_sms/flutter_sms.dart';
 import 'package:intl/intl.dart';
 import 'package:jama/services/app_settings_service.dart';
 import 'package:jama/services/time_service.dart';
-import 'package:kiwi/kiwi.dart' as kiwi;
+import 'package:kiwi/kiwi\.dart';
 
 class SendCurrentReportModel extends ChangeNotifier {
   final TimeService _timeService;
@@ -20,7 +20,7 @@ class SendCurrentReportModel extends ChangeNotifier {
   }
 
   factory SendCurrentReportModel([TimeService timeService, AppSettingsService appSettings]) {
-    var container = kiwi.Container();
+    var container = KiwiContainer();
     return SendCurrentReportModel._(timeService ?? container.resolve<TimeService>(),
         appSettings ?? container.resolve<AppSettingsService>());
   }
@@ -55,13 +55,13 @@ class SendCurrentReportModel extends ChangeNotifier {
     var placementsTotal = timeEntries.fold(0, (i, t) => i + t.placements);
     var videosTotal = timeEntries.fold(0, (i, t) => i + t.videos);
 
-    await sendSMS(message: """$_lastReportMonth Field Service Activity:
+//     await sendSMS(message: """$_lastReportMonth Field Service Activity:
 
-Total Time: ${Duration(minutes: totalMinutes).toShortString()}
-$timeTotalString
-${placementsTotal == 0 ? "" : "Placements: $placementsTotal"}
-${videosTotal == 0 ? "" : "Videos: $videosTotal"}
-""", recipients: []);
+// Total Time: ${Duration(minutes: totalMinutes).toShortString()}
+// $timeTotalString
+// ${placementsTotal == 0 ? "" : "Placements: $placementsTotal"}
+// ${videosTotal == 0 ? "" : "Videos: $videosTotal"}
+// """, recipients: []);
 
     _appsettings.setSettingInt(AppSettingsService.last_report_sent, _lastReportMonthInt + 1);
     notifyListeners();

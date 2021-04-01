@@ -282,7 +282,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                                 onTap: () => showMaterialModalBottomSheet(
                                     expand: false,
                                     context: context,
-                                    builder: (context, _) => Padding(
+                                    builder: (context) => Padding(
                                           padding: const EdgeInsets.all(22.0),
                                           child: _EditGoalModal(
                                             title: "Placements",
@@ -304,7 +304,7 @@ class _AddEditTimeScreenState extends State<AddEditTimeScreen> {
                               onTap: () => showMaterialModalBottomSheet(
                                   expand: false,
                                   context: context,
-                                  builder: (context, _) => Padding(
+                                  builder: (context) => Padding(
                                         padding: const EdgeInsets.all(22.0),
                                         child: _EditGoalModal(
                                           title: "Videos",

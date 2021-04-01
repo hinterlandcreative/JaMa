@@ -38,6 +38,7 @@ class _RootReportsScreenState extends State<RootReportsScreen> with AutomaticKee
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider(
       create: (_) => ReportingPageModel.currentMonth(),
       child: Consumer<ReportingPageModel>(
@@ -62,53 +63,51 @@ class _RootReportsScreenState extends State<RootReportsScreen> with AutomaticKee
           ),
           body: model.isLoading
               ? _buildLoading()
-              : !model.hasReport
-                  ? _buildEmptyState(context)
-                  : SingleChildScrollView(
-                      child: Column(
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildModePicker(context, model),
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildModePicker(context, model),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: AppStyles.leftMargin),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    VerticalSpace(23.0),
-                                    Text(model.entryMessage,
-                                        style: AppStyles.paragraph
-                                            .copyWith(color: AppStyles.captionText)),
-                                    VerticalSpace(16.0),
-                                    _buildTotalTime(context, model),
-                                    if (model.timeGoalsByCategory.length > 1) VerticalSpace(16.0),
-                                    if (model.timeGoalsByCategory.length > 1)
-                                      _buildTimeByCategory(context, model),
-                                    VerticalSpace(30.0),
-                                    Text("PLACEMENTS", style: AppStyles.heading3),
-                                    VerticalSpace(20.0),
-                                    _buildPlacementsCharts(context, model),
-                                    VerticalSpace(30.0),
-                                    Text("RETURN VISITS", style: AppStyles.heading3),
-                                    VerticalSpace(20.0),
-                                    _buildReturnVisitSummaries(context, model),
-                                    VerticalSpace(30.0),
-                                    Text("ENTRIES", style: AppStyles.heading3),
-                                    VerticalSpace(20.0),
-                                    _buildEntriesByDayChart(context, model),
-                                    VerticalSpace(30.0),
-                                  ],
-                                ),
-                              ),
-                              _buildTimeEntriesList(context, model),
-                              VerticalSpace(100.0)
-                            ],
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: AppStyles.leftMargin),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                VerticalSpace(23.0),
+                                Text(model.entryMessage,
+                                    style:
+                                        AppStyles.paragraph.copyWith(color: AppStyles.captionText)),
+                                VerticalSpace(16.0),
+                                _buildTotalTime(context, model),
+                                if (model.timeGoalsByCategory.length > 1) VerticalSpace(16.0),
+                                if (model.timeGoalsByCategory.length > 1)
+                                  _buildTimeByCategory(context, model),
+                                VerticalSpace(30.0),
+                                Text("PLACEMENTS", style: AppStyles.heading3),
+                                VerticalSpace(20.0),
+                                _buildPlacementsCharts(context, model),
+                                VerticalSpace(30.0),
+                                Text("RETURN VISITS", style: AppStyles.heading3),
+                                VerticalSpace(20.0),
+                                _buildReturnVisitSummaries(context, model),
+                                VerticalSpace(30.0),
+                                Text("ENTRIES", style: AppStyles.heading3),
+                                VerticalSpace(20.0),
+                                _buildEntriesByDayChart(context, model),
+                                VerticalSpace(30.0),
+                              ],
+                            ),
                           ),
+                          _buildTimeEntriesList(context, model),
+                          VerticalSpace(100.0)
                         ],
                       ),
-                    ),
+                    ],
+                  ),
+                ),
         ),
       ),
     );
