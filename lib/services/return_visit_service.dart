@@ -38,7 +38,6 @@ class ReturnVisitService {
 
   /// Gets all the available return visits.
   /// If [shallow] is true then the visits and placements are not retrieved.
-  /// [shallow] = false is not currently supported.
   Future<List<ReturnVisit>> getAllReturnVisits({bool shallow = true}) async {
     final db = await _dbCompleter.future;
 

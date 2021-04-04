@@ -1,3 +1,5 @@
+import 'package:flutter_sms/flutter_sms.dart';
+
 import '../../../mixins/duration_mixin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -55,13 +57,13 @@ class SendCurrentReportModel extends ChangeNotifier {
     var placementsTotal = timeEntries.fold(0, (i, t) => i + t.placements);
     var videosTotal = timeEntries.fold(0, (i, t) => i + t.videos);
 
-//     await sendSMS(message: """$_lastReportMonth Field Service Activity:
+    await sendSMS(message: """$_lastReportMonth Field Service Activity:
 
-// Total Time: ${Duration(minutes: totalMinutes).toShortString()}
-// $timeTotalString
-// ${placementsTotal == 0 ? "" : "Placements: $placementsTotal"}
-// ${videosTotal == 0 ? "" : "Videos: $videosTotal"}
-// """, recipients: []);
+Total Time: ${Duration(minutes: totalMinutes).toShortString()}
+$timeTotalString
+${placementsTotal == 0 ? "" : "Placements: $placementsTotal"}
+${videosTotal == 0 ? "" : "Videos: $videosTotal"}
+""", recipients: []);
 
     _appsettings.setSettingInt(AppSettingsService.last_report_sent, _lastReportMonthInt + 1);
     notifyListeners();

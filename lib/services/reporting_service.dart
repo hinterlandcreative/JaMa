@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:commons/commons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sms/flutter_sms.dart';
 import 'package:intl/intl.dart';
 import 'package:jama/data/models/dto/visit_dto.dart';
 import 'package:jama/ui/models/reporting/time_by_category.dart';
@@ -66,7 +67,7 @@ class ReportingService {
             if (failedCategories.isNotEmpty) {
               await infoDialog(
                   context,
-                  "Could not update the follow categories because they did not have enough time:\n" +
+                  "Could not update the following categories because they did not have enough time:\n" +
                       failedCategories.fold("", (p, e) => p + "${e.name}") +
                       "\n");
             }
@@ -93,8 +94,8 @@ class ReportingService {
   }
 
   Future sendExistingReport(ReportResult report) async {
-    var includeDetails = true;
-    // await _appSettings.getSettingBool(AppSettingsService.include_details_in_report);
+    var includeDetails =
+        await _appSettings.getSettingBool(AppSettingsService.include_details_in_report);
     Map<TimeCategory, String> details = {};
     for (var entry in report.timeEntries.entries) {
       entry.value.forEach((element) {
@@ -134,7 +135,7 @@ class ReportingService {
             (includeSignature ? "\n\n$signature" : "");
 
     print(reportMessage);
-    //sendSMS(message: reportMessage, recipients: []);
+    sendSMS(message: reportMessage, recipients: []);
   }
 
   /// Gets a value indicating whether this month's report has been sent.
@@ -212,7 +213,7 @@ class ReportingService {
                 ? await _appSettings.getSettingInt(AppSettingsService.goals_monthly_videos)
                 : null),
         returnVisits: Tuple2(
-            returnVisits.where((rv) => rv.visits.length > 1).fold(0, (p, rv) => p + rv.visits.where((v) => v.date.isAfter(start) || v.date.isBefore(end)).length), null),
+            returnVisits.where((rv) => rv.visits.length > 1).fold(0, (p, rv) => p + rv.visits.where((v) => v.date.isSameDayAs(start) || (v.date.isAfter(start) && v.date.isBefore(end)) || v.date.isSameDayAs(end)).length), null),
         bibleStudies: returnVisits.fold(0, (p, rv) => p + (rv.visits.any((visit) => visit.type == VisitType.Study && visit.date.isAfter(start) && visit.date.isBefore(end)) ? 1 : 0)),
         timeEntries: timeEntries,
         rvEntries: returnVisits);
