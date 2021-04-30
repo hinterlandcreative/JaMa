@@ -65,6 +65,7 @@ dependencies:
     git: https://github.com/hinterlandsupplyco/DatePickerTimelineFlutter.git
 dev_dependencies: 
   mockito: ^4.1.1
+  sqflite_common_ffi:
   flutter_test: 
     sdk: flutter
 flutter: 

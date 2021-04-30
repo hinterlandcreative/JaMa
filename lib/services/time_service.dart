@@ -228,15 +228,54 @@ SELECT * FROM TimeEntries
     entries.forEach((e) => timeByCategory[e.category].add(e));
     List<TimeCategory> failedCategories = [];
     for (var category in categories) {
+      // If the user only has 1 entry for the category and it's less than 1 hour, move it to the next month.
+      if (timeByCategory[category].length == 1 &&
+          timeByCategory[category].first.totalMinutes < 60) {
+        var entry = timeByCategory[category].first;
+        var oldDate = entry.date;
+        entry.date = entry.date.toLastDayOfMonth().add(1.days).dropTime();
+        entry.notes =
+            "Moved from ${DateFormat.yMMMM(Intl.systemLocale).format(oldDate)}\n\n${entry.notes}";
+
+        await saveOrAddTime(entry);
+        continue;
+      }
+
       var totalForCategory = timeByCategory[category].fold(0, (p, e) => p + e.totalMinutes);
       var amountNeeded = totalForCategory % 60;
-      if (timeByCategory[category].isNotEmpty && amountNeeded > 0) {
+
+      if (totalForCategory % 60 == 0) {
+        continue;
+      }
+
+      // If the total for the category is less than 1 hour, merge all entries and move to the next month.
+      if (totalForCategory < 60) {
+        var notes = timeByCategory[category].fold(
+            "Merged Entries from last month",
+            (previousValue, element) =>
+                "$previousValue\n${DateFormat.yMMMM(Intl.systemLocale).format(element.date)}: ${element}");
+
+        var mergedEntry = Time.create(
+            date: end.add(1.days).dropTime(),
+            totalMinutes: totalForCategory,
+            category: category,
+            notes: notes,
+            placements: timeByCategory[category].fold(0, (p, e) => p + e.placements),
+            videos: timeByCategory[category].fold(0, (p, e) => p + e.videos));
+
+        saveOrAddTime(mergedEntry);
+        timeByCategory[category].forEach((time) => deleteTime(time));
+      } else if (timeByCategory[category].isNotEmpty && amountNeeded > 0) {
         bool didDoUpdate = false;
-        for (var entry in entries) {
-          if (entry.totalMinutes > amountNeeded + 15) {
+        for (var entry in entries.reversed) {
+          if (entry.totalMinutes >= amountNeeded + 15) {
             entry.totalMinutes -= amountNeeded;
             entry.notes = "Moved $amountNeeded minutes to the next month.\n${entry.notes}";
-            await saveOrAddTime(entry);
+            if (entry.totalMinutes == 0) {
+              await deleteTime(entry);
+            } else {
+              await saveOrAddTime(entry);
+            }
             var date = startDate.toLastDayOfMonth().add(aDay).dropTime();
             var newTime = Time.create(
                 date: date,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -33,13 +34,14 @@ class LocalDatabaseFactory {
     var path = join(databasesPath, name);
 
     return await openDatabase(path, version: 1, onCreate: (Database db, int version) async {
-      for (var exec in _version1Create) {
+      for (var exec in version1Create) {
         await db.execute(exec);
       }
     });
   }
 
-  static const List<String> _version1Create = [
+  @visibleForTesting
+  static const List<String> version1Create = [
     """CREATE TABLE TimeEntries (
 	TimeEntryId integer PRIMARY KEY AUTOINCREMENT,
 	Date integer,
