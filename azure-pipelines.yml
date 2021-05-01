@@ -51,7 +51,7 @@ jobs:
       displayName: Increment build number.
     - script: |
         export PATH=$PATH:$(FlutterToolPath):$(FlutterToolPath)/cache/dart-sdk/bin:$(FlutterToolPath)/../.pub-cache/bin/
-        flutter build ios
+        flutter build ios --release
       displayName: Build Android & iOS App.
     - task: FlutterTest@0
       inputs:
