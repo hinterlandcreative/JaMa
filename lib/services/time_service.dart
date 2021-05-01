@@ -8,7 +8,7 @@ import 'package:quiver/core.dart';
 import 'package:quiver/time.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supercharged/supercharged.dart';
-import 'package:kiwi/kiwi\.dart';
+import 'package:kiwi/kiwi.dart';
 
 import 'package:jama/data/models/dto/time_category_dto.dart';
 import 'package:jama/data/models/dto/time_dto.dart';
