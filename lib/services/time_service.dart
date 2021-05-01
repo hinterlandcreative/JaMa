@@ -14,6 +14,7 @@ import 'package:jama/data/models/dto/time_category_dto.dart';
 import 'package:jama/data/models/dto/time_dto.dart';
 import 'package:jama/mixins/color_mixin.dart';
 import 'package:jama/mixins/date_mixin.dart';
+import 'package:jama/mixins/duration_mixin.dart';
 import 'package:jama/services/database_service.dart';
 import 'package:jama/ui/app_styles.dart';
 
@@ -253,7 +254,7 @@ SELECT * FROM TimeEntries
         var notes = timeByCategory[category].fold(
             "Merged Entries from last month",
             (previousValue, element) =>
-                "$previousValue\n${DateFormat.yMMMM(Intl.systemLocale).format(element.date)}: ${element}");
+                "$previousValue\n${DateFormat.yMd(Intl.systemLocale).format(element.date)}: ${element.duration.toShortString()} ");
 
         var mergedEntry = Time.create(
             date: end.add(1.days).dropTime(),
