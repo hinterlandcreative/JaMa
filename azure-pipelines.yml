@@ -38,7 +38,7 @@ jobs:
     - task: InstallAppleProvisioningProfile@1
       inputs:
         provisioningProfileLocation: 'secureFiles'
-        provProfileSecureFile: 'HSCO_Wildcard_Distribution_ios.mobileprovision'
+        provProfileSecureFile: 'HSCOjamadistribution.mobileprovision'
       displayName: Installing iOS Dist Mobile Provisioning Profile
     - task: FlutterInstall@0
     - script: |
